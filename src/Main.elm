@@ -1,10 +1,12 @@
 import Html exposing (..)
-import Html.App as Html
+import Html.App as App
 import Html.Attributes exposing (..)
+
+import RunTypeSummary exposing(view)
 
 main : Program Never
 main =
-  Html.program
+  App.program
     { init = init
     , view = view
     , update = update
@@ -13,14 +15,23 @@ main =
 
 
 type alias Model = 
-  { name : String }
+  { 
+    name                  : String 
+  , compileRunTypeSummary : RunTypeSummary.Model
+  }
 
 init : (Model, Cmd Msg)
 init =
-  (Model "world", Cmd.none)
+  (
+    { name                  = "world",
+      compileRunTypeSummary = RunTypeSummary.init "compiles" 0 0 0
+    },
+    Cmd.none
+  )
 
 type Msg 
   = NoOp
+  | CompileSummary RunTypeSummary.Msg
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -28,10 +39,16 @@ update msg model =
     NoOp ->
       (model, Cmd.none)
 
-view : Model ->  Html Msg
+    CompileSummary compileMsg ->
+      (model, Cmd.none)
+
+view : Model -> Html Msg
 view model =
   div []
-    [ text ("Hello " ++ model.name)]
+    [ 
+      h1 [] [ text ("Hello " ++ model.name) ],
+      App.map CompileSummary (RunTypeSummary.view model.compileRunTypeSummary)
+    ]
 
 
 subscriptions : Model -> Sub Msg
