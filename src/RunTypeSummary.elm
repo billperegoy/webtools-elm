@@ -3,11 +3,12 @@ module RunTypeSummary exposing (..)
 import Html exposing (..)
 import Html.App as Html
 import Html.Attributes exposing (..)
+import Html.Events exposing (..)
 
 type alias Model =
   { label : String
   , total : Int
-  , runnng : Int
+  , running : Int
   , failed : Int
   }
 
@@ -17,11 +18,40 @@ init label total running failed =
  
 type Msg
   = NoOp
+  | Update Int Int Int
+
+update : Msg -> Model -> (Model, Cmd Msg)
+update msg model =
+  case msg of
+    NoOp ->
+      -- (model, Cmd.none)
+      model ! []
+
+    Update total running failed ->
+      { label = "foo", total = 3, running = 2, failed = 1 } ! []
+      --{ model | total = total } ! []
+      --({model | total = total, running = running, failed = failed} , 
+      -- Cmd.none)
 
 view : Model -> Html Msg
 view model =
-  div []
+  div 
+    []
     [
-      h2 [] [ text "ViewTypeSummary" ]
+      div
+        []
+        [ text model.label ]
+    , div
+        []
+        [ text (toString model.total) ]
+    , div
+        []
+        [ text (toString model.running) ]
+    , div
+        []
+        [ text (toString model.failed) ]
+    , button 
+        [ onClick (Update 1 2 3) ] 
+        [ text "push me" ]
     ]
 

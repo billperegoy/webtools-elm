@@ -1,6 +1,7 @@
 import Html exposing (..)
 import Html.App as App
 import Html.Attributes exposing (..)
+import Html.Events exposing (..)
 
 import RunTypeSummary exposing(view)
 
@@ -16,15 +17,17 @@ main =
 
 type alias Model = 
   { 
-    name                  : String 
-  , compileRunTypeSummary : RunTypeSummary.Model
+    compileRunTypeSummary : RunTypeSummary.Model
+  , lintRunTypeSummary : RunTypeSummary.Model
+  , simRunTypeSummary : RunTypeSummary.Model
   }
 
 init : (Model, Cmd Msg)
 init =
   (
-    { name                  = "world",
-      compileRunTypeSummary = RunTypeSummary.init "compiles" 0 0 0
+    { compileRunTypeSummary = RunTypeSummary.init "compiles" 0 0 0
+    , lintRunTypeSummary = RunTypeSummary.init "lints" 0 0 0
+    , simRunTypeSummary = RunTypeSummary.init "sims" 0 0 0
     },
     Cmd.none
   )
@@ -32,6 +35,8 @@ init =
 type Msg 
   = NoOp
   | CompileSummary RunTypeSummary.Msg
+  | LintSummary RunTypeSummary.Msg
+  | SimSummary RunTypeSummary.Msg
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -42,12 +47,20 @@ update msg model =
     CompileSummary compileMsg ->
       (model, Cmd.none)
 
+    LintSummary lintMsg ->
+      (model, Cmd.none)
+
+    SimSummary simMsg ->
+      (model, Cmd.none)
+
 view : Model -> Html Msg
 view model =
   div []
     [ 
-      h1 [] [ text ("Hello " ++ model.name) ],
       App.map CompileSummary (RunTypeSummary.view model.compileRunTypeSummary)
+    , App.map LintSummary (RunTypeSummary.view model.lintRunTypeSummary)
+    , App.map SimSummary (RunTypeSummary.view model.simRunTypeSummary)
+    , button [onClick (CompileSummary (RunTypeSummary.Update 4 5 6)) ] [ text "Top Button" ]
     ]
 
 
