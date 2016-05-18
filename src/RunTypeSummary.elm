@@ -24,14 +24,10 @@ update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
     NoOp ->
-      -- (model, Cmd.none)
       model ! []
 
     Update total running failed ->
-      { label = "foo", total = 3, running = 2, failed = 1 } ! []
-      --{ model | total = total } ! []
-      --({model | total = total, running = running, failed = failed} , 
-      -- Cmd.none)
+      {model | total = total, running = running, failed = failed} ! [] 
 
 view : Model -> Html Msg
 view model =

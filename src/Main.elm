@@ -17,17 +17,18 @@ main =
 
 type alias Model = 
   { 
-    compileRunTypeSummary : RunTypeSummary.Model
-  , lintRunTypeSummary : RunTypeSummary.Model
-  , simRunTypeSummary : RunTypeSummary.Model
+    compileSummary : RunTypeSummary.Model
+  , lintSummary : RunTypeSummary.Model
+  , simSummary : RunTypeSummary.Model
   }
 
 init : (Model, Cmd Msg)
 init =
   (
-    { compileRunTypeSummary = RunTypeSummary.init "compiles" 0 0 0
-    , lintRunTypeSummary = RunTypeSummary.init "lints" 0 0 0
-    , simRunTypeSummary = RunTypeSummary.init "sims" 0 0 0
+    { 
+      compileSummary = RunTypeSummary.init "compiles" 0 0 0
+    , lintSummary = RunTypeSummary.init "lints" 0 0 0
+    , simSummary = RunTypeSummary.init "sims" 5 0 0
     },
     Cmd.none
   )
@@ -42,25 +43,25 @@ update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
     NoOp ->
-      (model, Cmd.none)
+      model ! []
 
-    CompileSummary compileMsg ->
-      (model, Cmd.none)
+    CompileSummary msg ->
+      { model | compileSummary = fst(RunTypeSummary.update msg model.compileSummary) } ! []
 
-    LintSummary lintMsg ->
-      (model, Cmd.none)
+    LintSummary msg ->
+      { model | lintSummary = fst(RunTypeSummary.update msg model.lintSummary) } ! []
 
-    SimSummary simMsg ->
-      (model, Cmd.none)
+    SimSummary msg ->
+      { model | simSummary = fst(RunTypeSummary.update msg model.simSummary) } ! []
 
 view : Model -> Html Msg
 view model =
   div []
     [ 
-      App.map CompileSummary (RunTypeSummary.view model.compileRunTypeSummary)
-    , App.map LintSummary (RunTypeSummary.view model.lintRunTypeSummary)
-    , App.map SimSummary (RunTypeSummary.view model.simRunTypeSummary)
-    , button [onClick (CompileSummary (RunTypeSummary.Update 4 5 6)) ] [ text "Top Button" ]
+      App.map CompileSummary (RunTypeSummary.view model.compileSummary)
+    , App.map LintSummary (RunTypeSummary.view model.lintSummary)
+    , App.map SimSummary (RunTypeSummary.view model.simSummary)
+    , button [onClick (LintSummary (RunTypeSummary.Update 7 8 9))] [ text "Top Button" ]
     ]
 
 
