@@ -28,7 +28,7 @@ init =
     { 
       compileSummary = RunTypeSummary.init "compiles" 0 0 0
     , lintSummary = RunTypeSummary.init "lints" 0 0 0
-    , simSummary = RunTypeSummary.init "sims" 5 0 0
+    , simSummary = RunTypeSummary.init "sims" 0 0 0
     },
     Cmd.none
   )
@@ -56,12 +56,23 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-  div []
-    [ 
-      App.map CompileSummary (RunTypeSummary.view model.compileSummary)
-    , App.map LintSummary (RunTypeSummary.view model.lintSummary)
-    , App.map SimSummary (RunTypeSummary.view model.simSummary)
-    , button [onClick (LintSummary (RunTypeSummary.Update 7 8 9))] [ text "Top Button" ]
+  div 
+    []
+    [
+      div 
+        [ class "all-summaries" ]
+        [ 
+          div 
+            [ class "summary-container" ] 
+            [ App.map CompileSummary (RunTypeSummary.view model.compileSummary) ]
+        , div 
+            [ class "summary-container" ] 
+            [ App.map LintSummary (RunTypeSummary.view model.lintSummary) ]
+        , div 
+            [ class "summary-container" ] 
+            [ App.map SimSummary (RunTypeSummary.view model.simSummary) ]
+        ],
+      button [onClick (LintSummary (RunTypeSummary.Update 7 8 9))] [ text "Top Button" ]
     ]
 
 

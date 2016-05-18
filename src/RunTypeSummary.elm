@@ -35,16 +35,16 @@ view model =
     []
     [
       div
-        []
+        [ class "summary-label" ]
         [ text model.label ]
     , div
-        []
+        [ class "summary-total" ]
         [ text (toString model.total) ]
     , div
-        []
+        [ class "summary-running" ]
         [ text (toString model.running) ]
     , div
-        []
+        [ class "summary-failed" ]
         [ text (toString model.failed) ]
     , button 
         [ onClick (Update 1 2 3) ] 

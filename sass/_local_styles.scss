@@ -1,0 +1,9 @@
+.all-summaries {
+  @include display(flex);
+  @include flex-direction(row);
+}
+
+.summary-container {
+  border: solid 1px;
+  @include flex-grow(1);
+}
