@@ -32,20 +32,24 @@ update msg model =
 view : Model -> Html Msg
 view model =
   div 
-    []
+    [ class "run-type-summary" ]
     [
       div
         [ class "summary-label" ]
         [ text model.label ]
-    , div
-        [ class "summary-total" ]
-        [ text (toString model.total) ]
-    , div
-        [ class "summary-running" ]
-        [ text (toString model.running) ]
-    , div
-        [ class "summary-failed" ]
-        [ text (toString model.failed) ]
+    , div 
+        [ class "summary-results" ]
+        [
+          div
+            [ class "summary-total" ]
+            [ text ("total: " ++ toString model.total) ]
+        , div
+            [ class "summary-running" ]
+            [ text ("running: " ++ toString model.running) ]
+        , div
+            [ class "summary-failed" ]
+            [ text ("failed: " ++ toString model.failed) ]
+      ]
     , button 
         [ onClick (Update 1 2 3) ] 
         [ text "push me" ]

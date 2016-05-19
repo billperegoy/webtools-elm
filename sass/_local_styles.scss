@@ -1,3 +1,5 @@
+// Styles for all three summary boxes
+//
 .all-summaries {
   @include display(flex);
   @include flex-direction(row);
@@ -6,4 +8,26 @@
 .summary-container {
   border: solid 1px;
   @include flex-grow(1);
+  margin: 0 20px 0 20px;
 }
+
+
+// Styles for an individual summary box
+//
+
+.run-type-summary {
+}
+
+.summary-label {
+  border: dashed 1px;
+}
+
+.summary-results {
+  @include display(flex);
+  @include flex-direction(row);
+}
+
+.summary-total, .summary-running, .summary-failed {
+  @include flex-grow(1);
+}
+

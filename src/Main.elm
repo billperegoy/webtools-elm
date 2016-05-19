@@ -38,6 +38,7 @@ type Msg
   | CompileSummary RunTypeSummary.Msg
   | LintSummary RunTypeSummary.Msg
   | SimSummary RunTypeSummary.Msg
+  | AllSummary RunTypeSummary.Msg RunTypeSummary.Msg RunTypeSummary.Msg
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -54,8 +55,21 @@ update msg model =
     SimSummary msg ->
       { model | simSummary = fst(RunTypeSummary.update msg model.simSummary) } ! []
 
+    AllSummary compileMsg lintMsg simMsg ->
+      { model 
+         | compileSummary = fst(RunTypeSummary.update compileMsg model.compileSummary) 
+         , lintSummary = fst(RunTypeSummary.update lintMsg model.lintSummary) 
+         , simSummary = fst(RunTypeSummary.update simMsg model.simSummary) 
+      } ! []
+
 view : Model -> Html Msg
 view model =
+  let
+    -- FIXME - eventually get this data from HTTP
+    compileMsg = RunTypeSummary.Update 7 8 9
+    lintMsg = RunTypeSummary.Update 10 11 12 
+    simMsg = RunTypeSummary.Update 13 14 15 
+  in
   div 
     []
     [
@@ -72,7 +86,8 @@ view model =
             [ class "summary-container" ] 
             [ App.map SimSummary (RunTypeSummary.view model.simSummary) ]
         ],
-      button [onClick (LintSummary (RunTypeSummary.Update 7 8 9))] [ text "Top Button" ]
+      button [onClick (AllSummary compileMsg lintMsg simMsg 
+       )] [ text "Top Button" ]
     ]
 
 
