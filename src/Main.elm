@@ -2,6 +2,7 @@ import Html exposing (..)
 import Html.App as App
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Http exposing (..)
 
 import RunTypeSummary exposing(view)
 
@@ -39,6 +40,8 @@ type Msg
   | LintSummary RunTypeSummary.Msg
   | SimSummary RunTypeSummary.Msg
   | AllSummary RunTypeSummary.Msg RunTypeSummary.Msg RunTypeSummary.Msg
+  | FetchSucceed
+  | FetchFail Http.Error
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -61,6 +64,12 @@ update msg model =
          , lintSummary = fst(RunTypeSummary.update lintMsg model.lintSummary) 
          , simSummary = fst(RunTypeSummary.update simMsg model.simSummary) 
       } ! []
+
+    FetchSucceed ->
+      model ! []
+
+    FetchFail _ ->
+      model ! []
 
 view : Model -> Html Msg
 view model =
