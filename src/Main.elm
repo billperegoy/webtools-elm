@@ -49,7 +49,7 @@ decodeUrl =
 getHttpData : Cmd Msg
 getHttpData =
   let 
-    url = "localhost:4567/api/results"
+    url = "http://localhost:4567/api/results"
 
   in
     Task.perform FetchFail FetchSucceed (Http.get decodeUrl url)
@@ -61,6 +61,7 @@ type Msg
   | LintSummary RunTypeSummary.Msg
   | SimSummary RunTypeSummary.Msg
   | AllSummary RunTypeSummary.Msg RunTypeSummary.Msg RunTypeSummary.Msg
+  | GetApiData
   | FetchSucceed Results 
   | FetchFail Http.Error
 
@@ -81,13 +82,20 @@ update msg model =
 
     AllSummary compileMsg lintMsg simMsg ->
       { model 
-         | compileSummary = fst(RunTypeSummary.update compileMsg model.compileSummary) 
+         | compileSummary = fst(RunTypeSummary.update compileMsg  model.compileSummary) 
          , lintSummary = fst(RunTypeSummary.update lintMsg model.lintSummary) 
          , simSummary = fst(RunTypeSummary.update simMsg model.simSummary) 
       } ! []
 
+    GetApiData ->
+      (model, getHttpData)
+
     FetchSucceed value ->
-      model ! []
+      { model 
+         | compileSummary = fst(RunTypeSummary.update ( RunTypeSummary.Update value.total value.complete value.fail) model.compileSummary)
+         , lintSummary = fst(RunTypeSummary.update ( RunTypeSummary.Update value.total value.complete value.fail) model.lintSummary)
+         , simSummary = fst(RunTypeSummary.update ( RunTypeSummary.Update value.total value.complete value.fail) model.simSummary)
+      } ! []
 
     FetchFail _ ->
       model ! []
@@ -116,8 +124,8 @@ view model =
             [ class "summary-container" ] 
             [ App.map SimSummary (RunTypeSummary.view model.simSummary) ]
         ],
-      button [onClick (AllSummary compileMsg lintMsg simMsg 
-       )] [ text "Top Button" ]
+      button [onClick GetApiData] [ text "Top Button" ]
+      --button [onClick (AllSummary compileMsg lintMsg simMsg )] [ text "Top Button" ]
     ]
 
 

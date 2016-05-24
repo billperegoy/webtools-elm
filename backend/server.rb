@@ -3,6 +3,7 @@ require 'sinatra'
 
 
 get '/api/results' do
+  headers 'Access-Control-Allow-Origin' => '*'
   random_regression_result.to_json
 end
 
