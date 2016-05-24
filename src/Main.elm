@@ -38,20 +38,28 @@ init =
 
 
 type alias Results = { total : Int, complete : Int, fail : Int }
+type alias All = {compiles : Results, lints : Results, sims : Results}
 
-decodeUrl : Json.Decoder Results
-decodeUrl =
+decodeSingle : Json.Decoder Results
+decodeSingle =
   Json.object3 Results
     ("total" := Json.int)
     ("complete" := Json.int)
     ("fail" := Json.int)
+
+decodeAll : Json.Decoder All
+decodeAll =
+  Json.object3 All
+    ("compiles" := decodeSingle)
+    ("lints" := decodeSingle)
+    ("sims" := decodeSingle)
 
 getHttpData : Cmd Msg
 getHttpData =
   let 
     url = "http://localhost:4567/api/results"
   in
-    Task.perform FetchFail FetchSucceed (Http.get decodeUrl url)
+    Task.perform FetchFail FetchSucceed (Http.get decodeSingle url)
 
 
 type Msg 
@@ -115,7 +123,7 @@ view model =
             [ class "summary-container" ] 
             [ App.map SimSummary (RunTypeSummary.view model.simSummary) ]
         ],
-      button [onClick GetApiData] [ text "Top Button" ]
+      button [onClick GetApiData] [ text "Get http data" ]
     ]
 
 
