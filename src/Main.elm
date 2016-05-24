@@ -3,6 +3,8 @@ import Html.App as App
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http exposing (..)
+import Task exposing (..)
+import Json.Decode as Json exposing (..)
 
 import RunTypeSummary exposing(view)
 
@@ -34,13 +36,32 @@ init =
     Cmd.none
   )
 
+
+type alias Results = { total : Int, complete : Int, fail : Int }
+
+decodeUrl : Json.Decoder Results
+decodeUrl =
+  Json.object3 Results
+    ("total" := Json.int)
+    ("complete" := Json.int)
+    ("fail" := Json.int)
+
+getHttpData : Cmd Msg
+getHttpData =
+  let 
+    url = "localhost:4567/api/results"
+
+  in
+    Task.perform FetchFail FetchSucceed (Http.get decodeUrl url)
+
+
 type Msg 
   = NoOp
   | CompileSummary RunTypeSummary.Msg
   | LintSummary RunTypeSummary.Msg
   | SimSummary RunTypeSummary.Msg
   | AllSummary RunTypeSummary.Msg RunTypeSummary.Msg RunTypeSummary.Msg
-  | FetchSucceed
+  | FetchSucceed Results 
   | FetchFail Http.Error
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -65,7 +86,7 @@ update msg model =
          , simSummary = fst(RunTypeSummary.update simMsg model.simSummary) 
       } ! []
 
-    FetchSucceed ->
+    FetchSucceed value ->
       model ! []
 
     FetchFail _ ->

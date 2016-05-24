@@ -8,6 +8,7 @@ end
 
 def random_regression_result
   { compiles: random_triplet, lints: random_triplet, sims: random_triplet}
+  random_triplet
 end
 
 def random_triplet
