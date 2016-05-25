@@ -2,7 +2,7 @@ module RegressionData exposing (..)
 
 import Json.Decode as Json exposing (..)
 
-type alias SingleResult = { total : Int, complete : Int, fail : Int }
+type alias SingleResult = { total : Int, complete : Int, failed : Int }
 
 type alias ResultsTriad = 
   { compiles : SingleResult

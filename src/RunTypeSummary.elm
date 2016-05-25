@@ -9,18 +9,16 @@ import RegressionData exposing (..)
 
 type alias Model =
   { label : String
-  , total : Int
-  , complete : Int
-  , failed : Int
+  , result : SingleResult
   }
 
-init : String -> Int -> Int -> Int -> Model
-init label total complete failed =
-  Model label total complete failed
+init : String -> SingleResult -> Model
+init label result =
+  Model label result
  
 type Msg
   = NoOp
-  | Update Int Int Int
+  | Update SingleResult
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -28,8 +26,8 @@ update msg model =
     NoOp ->
       model ! []
 
-    Update total complete failed ->
-      {model | total = total, complete = complete, failed = failed} ! [] 
+    Update result ->
+      {model | result = result} ! [] 
 
 view : Model -> Html Msg
 view model =
@@ -44,13 +42,13 @@ view model =
         [
           div
             [ class "summary-total" ]
-            [ text ("total: " ++ toString model.total) ]
+            [ text ("total: " ++ toString model.result.total) ]
         , div
             [ class "summary-complete" ]
-            [ text ("complete: " ++ toString model.complete) ]
+            [ text ("complete: " ++ toString model.result.complete) ]
         , div
             [ class "summary-failed" ]
-            [ text ("failed: " ++ toString model.failed) ]
+            [ text ("failed: " ++ toString model.result.failed) ]
       ]
     ]
 

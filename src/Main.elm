@@ -27,13 +27,17 @@ type alias Model =
   , simSummary : RunTypeSummary.Model
   }
 
+emptyResult : SingleResult
+emptyResult =
+  SingleResult 0 0 0
+
 init : (Model, Cmd Msg)
 init =
   (
     {
-      compileSummary = RunTypeSummary.init "compiles" 0 0 0
-    , lintSummary = RunTypeSummary.init "lints" 0 0 0
-    , simSummary = RunTypeSummary.init "sims" 0 0 0
+      compileSummary = RunTypeSummary.init "compiles" emptyResult
+    , lintSummary = RunTypeSummary.init "lints" emptyResult
+    , simSummary = RunTypeSummary.init "sims" emptyResult
     },
     Cmd.none
   )
@@ -45,6 +49,18 @@ getHttpData =
   in
     Task.perform FetchFail FetchSucceed (Http.get decodeAll url)
 
+
+lintResult : ResultsTriad -> SingleResult
+lintResult triad = 
+  SingleResult triad.lints.total triad.lints.complete triad.lints.failed
+
+compileResult : ResultsTriad -> SingleResult
+compileResult triad = 
+  SingleResult triad.compiles.total triad.compiles.complete triad.compiles.failed
+
+simResult : ResultsTriad -> SingleResult
+simResult triad = 
+  SingleResult triad.sims.total triad.sims.complete triad.sims.failed
 
 type Msg
   = NoOp
@@ -74,17 +90,17 @@ update msg model =
     GetApiData ->
       (model, getHttpData)
 
-    FetchSucceed value ->
+    FetchSucceed triad ->
       { model
          | compileSummary =
            fst(RunTypeSummary.update
-           (RunTypeSummary.Update value.compiles.total value.compiles.complete value.compiles.fail) model.compileSummary)
+           (RunTypeSummary.Update (compileResult triad)) model.compileSummary)
          , lintSummary =
            fst(RunTypeSummary.update
-           (RunTypeSummary.Update value.lints.total value.lints.complete value.lints.fail) model.lintSummary)
+           (RunTypeSummary.Update (lintResult triad)) model.compileSummary)
          , simSummary =
            fst(RunTypeSummary.update
-           (RunTypeSummary.Update value.sims.total value.sims.complete value.sims.fail) model.simSummary)
+           (RunTypeSummary.Update (simResult triad)) model.simSummary)
       } ! []
 
     FetchFail _ ->
