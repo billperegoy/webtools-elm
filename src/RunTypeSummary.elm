@@ -8,13 +8,13 @@ import Html.Events exposing (..)
 type alias Model =
   { label : String
   , total : Int
-  , running : Int
+  , complete : Int
   , failed : Int
   }
 
 init : String -> Int -> Int -> Int -> Model
-init label total running failed =
-  Model label total running failed
+init label total complete failed =
+  Model label total complete failed
  
 type Msg
   = NoOp
@@ -26,8 +26,8 @@ update msg model =
     NoOp ->
       model ! []
 
-    Update total running failed ->
-      {model | total = total, running = running, failed = failed} ! [] 
+    Update total complete failed ->
+      {model | total = total, complete = complete, failed = failed} ! [] 
 
 view : Model -> Html Msg
 view model =
@@ -44,14 +44,11 @@ view model =
             [ class "summary-total" ]
             [ text ("total: " ++ toString model.total) ]
         , div
-            [ class "summary-running" ]
-            [ text ("running: " ++ toString model.running) ]
+            [ class "summary-complete" ]
+            [ text ("complete: " ++ toString model.complete) ]
         , div
             [ class "summary-failed" ]
             [ text ("failed: " ++ toString model.failed) ]
       ]
-    , button 
-        [ onClick (Update 1 2 3) ] 
-        [ text "push me" ]
     ]
 

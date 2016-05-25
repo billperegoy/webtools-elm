@@ -59,7 +59,7 @@ getHttpData =
   let 
     url = "http://localhost:4567/api/results"
   in
-    Task.perform FetchFail FetchSucceed (Http.get decodeSingle url)
+    Task.perform FetchFail FetchSucceed (Http.get decodeAll url)
 
 
 type Msg 
@@ -68,7 +68,7 @@ type Msg
   | LintSummary RunTypeSummary.Msg
   | SimSummary RunTypeSummary.Msg
   | GetApiData
-  | FetchSucceed Results 
+  | FetchSucceed All 
   | FetchFail Http.Error
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -93,13 +93,13 @@ update msg model =
       { model 
          | compileSummary = 
            fst(RunTypeSummary.update 
-           (RunTypeSummary.Update value.total value.complete value.fail) model.compileSummary)
+           (RunTypeSummary.Update value.compiles.total value.compiles.complete value.compiles.fail) model.compileSummary)
          , lintSummary = 
            fst(RunTypeSummary.update 
-           (RunTypeSummary.Update value.total value.complete value.fail) model.lintSummary)
+           (RunTypeSummary.Update value.lints.total value.lints.complete value.lints.fail) model.lintSummary)
          , simSummary = 
            fst(RunTypeSummary.update 
-           (RunTypeSummary.Update value.total value.complete value.fail) model.simSummary)
+           (RunTypeSummary.Update value.sims.total value.sims.complete value.sims.fail) model.simSummary)
       } ! []
 
     FetchFail _ ->

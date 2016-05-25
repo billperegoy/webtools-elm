@@ -27,7 +27,7 @@
   @include flex-direction(row);
 }
 
-.summary-total, .summary-running, .summary-failed {
+.summary-total, .summary-complete, .summary-failed {
   @include flex-grow(1);
 }
 
