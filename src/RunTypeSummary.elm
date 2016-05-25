@@ -5,6 +5,8 @@ import Html.App as Html
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 
+import RegressionData exposing (..)
+
 type alias Model =
   { label : String
   , total : Int

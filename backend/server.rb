@@ -12,7 +12,7 @@ def random_regression_result
 end
 
 def random_triplet
-  total = rand(20)
+  total = rand(500)
 
   complete = rand(total)
   complete = complete < 1 ? 0 : complete

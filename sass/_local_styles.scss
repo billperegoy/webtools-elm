@@ -29,5 +29,6 @@
 
 .summary-total, .summary-complete, .summary-failed {
   @include flex-grow(1);
+  width: 50px;
 }
 
