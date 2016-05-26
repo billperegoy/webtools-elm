@@ -20,6 +20,10 @@ type Msg
   = NoOp
   | Update SingleResult
 
+updateNoCmd : Msg -> Model  -> Model
+updateNoCmd msg model =
+  fst(update msg model)
+
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of

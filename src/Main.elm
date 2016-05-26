@@ -32,11 +32,11 @@ emptyResult : SingleResult
 emptyResult =
   SingleResult 0 0 0
 
---
--- We return a tuple consisting of an initailized model and a Cmd
--- In this case the Cmd is empty.
--- Note that ({...}, Cmd.none) is the same as {...} ! []
---
+{-
+   We return a tuple consisting of an initailized model and a Cmd
+   In this case the Cmd is empty.
+   Note that ({...}, Cmd.none) is the same as {...} ! []
+-}
 init : (Model, Cmd Msg)
 init =
   {
@@ -51,13 +51,13 @@ getHttpData =
   let
     url = "http://localhost:4567/api/results"
   in
-    Task.perform FetchFail FetchSucceed (Http.get decodeAll url)
+    Task.perform HttpFail HttpSucceed (Http.get decodeAll url)
 
 type Msg
   = NoOp
   | GetApiData
-  | FetchSucceed ResultsTriad
-  | FetchFail Http.Error
+  | HttpSucceed ResultsTriad
+  | HttpFail Http.Error
   | PollHttp Time
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -69,22 +69,26 @@ update msg model =
     GetApiData ->
       (model, getHttpData)
 
-    FetchSucceed triad ->
+    {-
+       Here I call upadte on each of the nested components using the triad
+       values I got from the Http calls
+    -}
+    HttpSucceed triad ->
       { model
          | compileSummary =
-           fst(RunTypeSummary.update
-           (RunTypeSummary.Update triad.compiles) model.compileSummary)
+           RunTypeSummary.updateNoCmd
+             (RunTypeSummary.Update triad.compiles) model.compileSummary
          , lintSummary =
-           fst(RunTypeSummary.update
-           (RunTypeSummary.Update triad.lints) model.lintSummary)
+           RunTypeSummary.updateNoCmd
+             (RunTypeSummary.Update triad.lints) model.lintSummary
          , simSummary =
-           fst(RunTypeSummary.update
-           (RunTypeSummary.Update triad.sims) model.simSummary)
+           RunTypeSummary.updateNoCmd
+             (RunTypeSummary.Update triad.sims) model.simSummary
          , errors = ""
       } ! []
 
-    FetchFail _ ->
-      { model 
+    HttpFail _ ->
+      { model
          | errors = "HTTP error detected"
       } ! []
 
@@ -92,7 +96,7 @@ update msg model =
       (model, getHttpData)
 
 
-msgToNoOp : RunTypeSummary.Msg -> Msg 
+msgToNoOp : RunTypeSummary.Msg -> Msg
 msgToNoOp cmd =
   NoOp
 
@@ -104,11 +108,11 @@ view model =
       div
         [ class "all-summaries" ]
         [
-          --
-          -- Note that to instantiate a nested view, you have to deal with any
-          -- transform any Msg produced by the subtree. In this case since I
-          -- know nothing travels in that direction, I just map to a NoOp
-          -- 
+          {-
+             Note that to instantiate a nested view, you have to deal with and
+             transform any Msg produced by the subtree. In this case since I
+             know nothing travels in that direction, I just map to a NoOp
+          -}
           div
             [ class "summary-container" ]
             [ App.map msgToNoOp (RunTypeSummary.view model.compileSummary) ]
