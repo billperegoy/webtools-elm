@@ -29,6 +29,28 @@ update msg model =
     Update result ->
       {model | result = result} ! [] 
 
+totalClass : SingleResult -> List (Attribute a) 
+totalClass result =
+  if result.total == result.complete then
+    [ class "summary-total pass-color" ]
+  else
+    [ class "summary-total run-color" ]
+
+failedClass : SingleResult -> List (Attribute a) 
+failedClass result =
+  if result.failed == 0 then
+    [ class "summary-complete pass-color" ]
+  else
+    [ class "summary-complete fail-color" ]
+
+completeClass : SingleResult -> List (Attribute a) 
+completeClass result =
+  if result.complete == result.total then
+    [ class "summary-failed pass-color" ]
+  else
+    [ class "summary-failed run-color" ]
+
+
 view : Model -> Html Msg
 view model =
   div 
@@ -38,16 +60,16 @@ view model =
         [ class "summary-label" ]
         [ text model.label ]
     , div 
-        [ class "summary-results" ]
+        [ class "summary-results pass-color" ]
         [
           div
-            [ class "summary-total" ]
+            (totalClass model.result)
             [ text ("total: " ++ toString model.result.total) ]
         , div
-            [ class "summary-complete" ]
+            (completeClass model.result)
             [ text ("complete: " ++ toString model.result.complete) ]
         , div
-            [ class "summary-failed" ]
+            (failedClass model.result)
             [ text ("failed: " ++ toString model.result.failed) ]
       ]
     ]

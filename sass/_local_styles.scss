@@ -1,3 +1,7 @@
+$pass-color: #ccffcc;
+$run-color: #ffffcc;
+$fail-color: #ff9999;
+
 // Styles for all three summary boxes
 //
 .all-summaries {
@@ -32,3 +36,14 @@
   width: 50px;
 }
 
+.pass-color {
+  background-color: $pass-color;
+}
+
+.run-color {
+  background-color: $run-color;
+}
+
+.fail-color {
+  background-color: $fail-color;
+}
