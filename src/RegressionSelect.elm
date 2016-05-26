@@ -4,6 +4,7 @@ import Html exposing (..)
 import Html.App as Html
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import List exposing (..)
 
 import RegressionData exposing (..)
 
@@ -45,9 +46,13 @@ update msg model =
       model ! []
 
 
+toSelectOption : Regression -> Html Msg
+toSelectOption elem =
+  option [] [text elem.name]
+
 view : Model -> Html Msg
 view model =
-  div 
+  select 
     []
-    [ text "selector" ]
+    (map toSelectOption model.regressions)
 

@@ -8,6 +8,7 @@ import Json.Decode as Json exposing (..)
 import Time exposing (..)
 
 import RegressionData exposing(..)
+import RegressionSelect exposing(view)
 import RunTypeSummary exposing(view)
 
 main : Program Never
@@ -22,7 +23,8 @@ main =
 
 type alias Model =
   {
-    compileSummary : RunTypeSummary.Model
+    regressionSelect : RegressionSelect.Model
+  , compileSummary : RunTypeSummary.Model
   , lintSummary : RunTypeSummary.Model
   , simSummary : RunTypeSummary.Model
   , errors : String
@@ -40,7 +42,8 @@ emptyResult =
 init : (Model, Cmd Msg)
 init =
   {
-    compileSummary = RunTypeSummary.init "compiles" emptyResult
+     regressionSelect = RegressionSelect.init
+  ,  compileSummary = RunTypeSummary.init "compiles" emptyResult
   , lintSummary = RunTypeSummary.init "lints" emptyResult
   , simSummary = RunTypeSummary.init "sims" emptyResult
   , errors = ""
@@ -100,6 +103,10 @@ msgToNoOp : RunTypeSummary.Msg -> Msg
 msgToNoOp cmd =
   NoOp
 
+regressionSelectMsgToNoOp : RegressionSelect.Msg -> Msg
+regressionSelectMsgToNoOp cmd =
+  NoOp
+
 view : Model -> Html Msg
 view model =
   div
@@ -114,6 +121,9 @@ view model =
              know nothing travels in that direction, I just map to a NoOp
           -}
           div
+            [ ]
+            [ App.map regressionSelectMsgToNoOp (RegressionSelect.view model.regressionSelect) ]
+        , div
             [ class "summary-container" ]
             [ App.map msgToNoOp (RunTypeSummary.view model.compileSummary) ]
         , div
