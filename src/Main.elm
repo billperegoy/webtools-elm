@@ -51,19 +51,6 @@ getHttpData =
   in
     Task.perform FetchFail FetchSucceed (Http.get decodeAll url)
 
-
-lintResult : ResultsTriad -> SingleResult
-lintResult triad = 
-  SingleResult triad.lints.total triad.lints.complete triad.lints.failed
-
-compileResult : ResultsTriad -> SingleResult
-compileResult triad = 
-  SingleResult triad.compiles.total triad.compiles.complete triad.compiles.failed
-
-simResult : ResultsTriad -> SingleResult
-simResult triad = 
-  SingleResult triad.sims.total triad.sims.complete triad.sims.failed
-
 type Msg
   = NoOp
   | CompileSummary RunTypeSummary.Msg
@@ -96,13 +83,13 @@ update msg model =
       { model
          | compileSummary =
            fst(RunTypeSummary.update
-           (RunTypeSummary.Update (compileResult triad)) model.compileSummary)
+           (RunTypeSummary.Update triad.compiles) model.compileSummary)
          , lintSummary =
            fst(RunTypeSummary.update
-           (RunTypeSummary.Update (lintResult triad)) model.compileSummary)
+           (RunTypeSummary.Update triad.lints) model.lintSummary)
          , simSummary =
            fst(RunTypeSummary.update
-           (RunTypeSummary.Update (simResult triad)) model.simSummary)
+           (RunTypeSummary.Update triad.sims) model.simSummary)
          , errors = ""
       } ! []
 

@@ -4,6 +4,14 @@ import Json.Decode as Json exposing (..)
 
 type alias SingleResult = { total : Int, complete : Int, failed : Int }
 
+type alias Regression =
+  {
+    name : String
+  , project : String
+  , runType : String
+  , user : String
+  }
+
 type alias ResultsTriad = 
   { compiles : SingleResult
   , lints : SingleResult
