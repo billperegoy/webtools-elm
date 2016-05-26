@@ -25,6 +25,7 @@ type alias Model =
     compileSummary : RunTypeSummary.Model
   , lintSummary : RunTypeSummary.Model
   , simSummary : RunTypeSummary.Model
+  , errors : String
   }
 
 emptyResult : SingleResult
@@ -38,6 +39,7 @@ init =
       compileSummary = RunTypeSummary.init "compiles" emptyResult
     , lintSummary = RunTypeSummary.init "lints" emptyResult
     , simSummary = RunTypeSummary.init "sims" emptyResult
+    , errors = ""
     },
     Cmd.none
   )
@@ -101,10 +103,13 @@ update msg model =
          , simSummary =
            fst(RunTypeSummary.update
            (RunTypeSummary.Update (simResult triad)) model.simSummary)
+         , errors = ""
       } ! []
 
     FetchFail _ ->
-      model ! []
+      { model 
+         | errors = "HTTP error detected"
+      } ! []
 
     PollHttp time ->
       (model, getHttpData)
@@ -127,6 +132,9 @@ view model =
             [ class "summary-container" ]
             [ App.map SimSummary (RunTypeSummary.view model.simSummary) ]
         ]
+        , div
+            [ class "error-box" ]
+            [ text model.errors ]
     ]
 
 
