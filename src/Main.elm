@@ -32,17 +32,19 @@ emptyResult : SingleResult
 emptyResult =
   SingleResult 0 0 0
 
+--
+-- We return a tuple consisting of an initailized model and a Cmd
+-- In this case the Cmd is empty.
+-- Note that ({...}, Cmd.none) is the same as {...} ! []
+--
 init : (Model, Cmd Msg)
 init =
-  (
-    {
-      compileSummary = RunTypeSummary.init "compiles" emptyResult
-    , lintSummary = RunTypeSummary.init "lints" emptyResult
-    , simSummary = RunTypeSummary.init "sims" emptyResult
-    , errors = ""
-    },
-    Cmd.none
-  )
+  {
+    compileSummary = RunTypeSummary.init "compiles" emptyResult
+  , lintSummary = RunTypeSummary.init "lints" emptyResult
+  , simSummary = RunTypeSummary.init "sims" emptyResult
+  , errors = ""
+  } ! []
 
 getHttpData : Cmd Msg
 getHttpData =
@@ -53,9 +55,6 @@ getHttpData =
 
 type Msg
   = NoOp
-  | CompileSummary RunTypeSummary.Msg
-  | LintSummary RunTypeSummary.Msg
-  | SimSummary RunTypeSummary.Msg
   | GetApiData
   | FetchSucceed ResultsTriad
   | FetchFail Http.Error
@@ -66,15 +65,6 @@ update msg model =
   case msg of
     NoOp ->
       model ! []
-
-    CompileSummary msg ->
-      { model | compileSummary = fst(RunTypeSummary.update msg model.compileSummary) } ! []
-
-    LintSummary msg ->
-      { model | lintSummary = fst(RunTypeSummary.update msg model.lintSummary) } ! []
-
-    SimSummary msg ->
-      { model | simSummary = fst(RunTypeSummary.update msg model.simSummary) } ! []
 
     GetApiData ->
       (model, getHttpData)
@@ -101,6 +91,11 @@ update msg model =
     PollHttp time ->
       (model, getHttpData)
 
+
+msgToNoOp : RunTypeSummary.Msg -> Msg 
+msgToNoOp cmd =
+  NoOp
+
 view : Model -> Html Msg
 view model =
   div
@@ -109,15 +104,20 @@ view model =
       div
         [ class "all-summaries" ]
         [
+          --
+          -- Note that to instantiate a nested view, you have to deal with any
+          -- transform any Msg produced by the subtree. In this case since I
+          -- know nothing travels in that direction, I just map to a NoOp
+          -- 
           div
             [ class "summary-container" ]
-            [ App.map CompileSummary (RunTypeSummary.view model.compileSummary) ]
+            [ App.map msgToNoOp (RunTypeSummary.view model.compileSummary) ]
         , div
             [ class "summary-container" ]
-            [ App.map LintSummary (RunTypeSummary.view model.lintSummary) ]
+            [ App.map msgToNoOp (RunTypeSummary.view model.lintSummary) ]
         , div
             [ class "summary-container" ]
-            [ App.map SimSummary (RunTypeSummary.view model.simSummary) ]
+            [ App.map msgToNoOp (RunTypeSummary.view model.simSummary) ]
         ]
         , div
             [ class "error-box" ]
