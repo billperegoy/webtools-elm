@@ -33,7 +33,7 @@ initialRegressions =
 
 init : Model
 init  =
-  Model initialRegressions []
+  Model initialRegressions initialRegressions
 
 type Msg
   = NoOp
@@ -52,9 +52,35 @@ toSelectOption : String -> Html Msg
 toSelectOption elem =
   option [] [text elem]
 
+filterByProject : List Regression -> List Regression
+filterByProject unfiltered =
+  unfiltered
+
+filterByUser : List Regression -> List Regression
+filterByUser unfiltered =
+  unfiltered
+
+filterByRunType : List Regression -> List Regression
+filterByRunType unfiltered =
+  unfiltered
+
+{-
+  This is where we add the code to actually do the 
+  filtering based on the selects that were 
+  chosen. Currently it just rturns an idential
+  list
+-}
+filterIt : List Regression -> List Regression
+filterIt unfiltered =
+  filterByProject unfiltered 
+    |> filterByUser
+    |> filterByRunType
+
 filteredRegressionList : Model -> List (Html Msg) 
 filteredRegressionList model =
-  List.map .name model.regressions |> List.map toSelectOption
+  filterIt model.regressions
+  |> List.map .name 
+  |> List.map toSelectOption
 
 uniquify : List String -> List String
 uniquify list =
@@ -78,22 +104,67 @@ uniqueUsers model =
     |> uniquify 
     |> List.map toSelectOption
 
-view : Model -> Html Msg
-view model =
+projectFilter : Model -> Html Msg 
+projectFilter model =
+      div 
+        [ class "select-field" ]
+        [
+          label 
+            []
+            [ text "Projects" ]
+        , select
+            []
+            (uniqueProjects model)
+        ]
+
+runTypeFilter : Model -> Html Msg 
+runTypeFilter model =
+      div 
+        [ class "select-field" ]
+        [
+          label 
+            []
+            [ text "Run Types" ]
+        , select
+            []
+            (uniqueRunTypes model)
+        ]
+
+userFilter : Model -> Html Msg 
+userFilter model =
+      div 
+        [ class "select-field" ]
+        [
+          label 
+            []
+            [ text "Users" ]
+        , select
+            []
+            (uniqueUsers model)
+        ]
+
+filterRegressions : Model -> Html Msg 
+filterRegressions model =
   div
     []
     [
-      select
-        []
-        (filteredRegressionList model)
-    , select
-        []
-        (uniqueProjects model)
-    , select
-        []
-        (uniqueRunTypes model)
-    , select
-        []
-        (uniqueUsers model)
+      label 
+         []
+         [ text "Filtered List" ]
+     , select
+         []
+         (filteredRegressionList model)
+    ]
+
+
+view : Model -> Html Msg
+view model =
+  div
+    [ class "regression-select" ]
+    [
+      (projectFilter model)
+    , (runTypeFilter model)
+    , (userFilter model)
+    , (filterRegressions model)
     ]
 
