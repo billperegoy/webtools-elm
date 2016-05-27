@@ -4,12 +4,52 @@ import Json.Decode as Json exposing (..)
 
 type alias SingleResult = { total : Int, complete : Int, failed : Int }
 
+type RunType = Validate | Publish | GenericRegression | Other
+
+runTypeToString : RunType -> String
+runTypeToString runType = 
+  case runType of
+    Validate -> "validate"
+    Publish -> "publish"
+    GenericRegression -> "regress"
+    Other -> "other"
+
 type alias Regression =
   {
     name : String
   , project : String
-  , runType : String
+  , runType : RunType 
   , user : String
+  }
+
+type RunStatus = Unknown | Pass | Fail | Error 
+
+runStatusToString : RunStatus -> String
+runStatusToString runStatus = 
+  case runStatus of
+    Pass -> "Pass"
+    Fail -> "Fail"
+    Error -> "Error"
+    _ -> "-"
+
+type LsfStatus = Unqueued | Pend | Run | Exit | Done
+
+lsfStatusToString : LsfStatus -> String
+lsfStatusToString lsfStatus = 
+  case lsfStatus of
+    Unqueued -> "Unqueued"
+    Pend -> "Pend"
+    Run -> "Run"
+    Exit -> "Exit"
+    Done -> "Done"
+
+type alias Simulation =
+  {
+    name : String
+  , config : String
+  , status : RunStatus 
+  , lsfStatus : LsfStatus 
+  , runTime : Int
   }
 
 type alias ResultsTriad = 

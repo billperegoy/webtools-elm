@@ -17,18 +17,18 @@ type alias Model =
 
 initialRegressions : List Regression
 initialRegressions =
-  [  (Regression "regression1" "project1" "validate" "user1")
-  ,  (Regression "regression2" "project1" "publish" "user2")
-  ,  (Regression "regression3" "project1" "validate" "user2")
-  ,  (Regression "regression4" "project1" "validate" "user1")
-  ,  (Regression "regression5" "project1" "validate" "user1")
-  ,  (Regression "regression6" "project1" "publish" "user1")
-  ,  (Regression "regression7" "project2" "publish" "user2")
-  ,  (Regression "regression8" "project2" "validate" "user2")
-  ,  (Regression "regression9" "project2" "validate" "user1")
-  ,  (Regression "regression10" "project2" "validate" "user1")
-  ,  (Regression "regression11" "project2" "publish" "user1")
-  ,  (Regression "regression12" "project2" "regress" "user3")
+  [  (Regression "regression1" "project1" Validate "user1")
+  ,  (Regression "regression2" "project1" Publish "user2")
+  ,  (Regression "regression3" "project1" Validate "user2")
+  ,  (Regression "regression4" "project1" Validate "user1")
+  ,  (Regression "regression5" "project1" Validate "user1")
+  ,  (Regression "regression6" "project1" Publish "user1")
+  ,  (Regression "regression7" "project2" Publish "user2")
+  ,  (Regression "regression8" "project2" Validate "user2")
+  ,  (Regression "regression9" "project2" Validate "user1")
+  ,  (Regression "regression10" "project2" Validate "user1")
+  ,  (Regression "regression11" "project2" Publish "user1")
+  ,  (Regression "regression12" "project2" GenericRegression "user3")
   ]
 
 init : Model
@@ -94,7 +94,7 @@ uniqueProjects model =
 
 uniqueRunTypes : Model -> List (Html Msg)
 uniqueRunTypes model =
-  "<all>" :: List.map .runType (model.regressions)
+  "<all>" :: List.map (\r -> runTypeToString r.runType) (model.regressions)
     |> uniquify 
     |> List.map toSelectOption
 

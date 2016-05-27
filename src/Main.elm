@@ -10,6 +10,7 @@ import Time exposing (..)
 import RegressionData exposing(..)
 import RegressionSelect exposing(view)
 import RunTypeSummary exposing(view)
+import SimulationResults exposing(view)
 
 main : Program Never
 main =
@@ -27,6 +28,7 @@ type alias Model =
   , compileSummary : RunTypeSummary.Model
   , lintSummary : RunTypeSummary.Model
   , simSummary : RunTypeSummary.Model
+  , simulationResults : SimulationResults.Model
   , errors : String
   }
 
@@ -46,6 +48,7 @@ init =
   ,  compileSummary = RunTypeSummary.init "compiles" emptyResult
   , lintSummary = RunTypeSummary.init "lints" emptyResult
   , simSummary = RunTypeSummary.init "sims" emptyResult
+  , simulationResults = SimulationResults.init
   , errors = ""
   } ! []
 
@@ -107,6 +110,10 @@ regressionSelectMsgToNoOp : RegressionSelect.Msg -> Msg
 regressionSelectMsgToNoOp cmd =
   NoOp
 
+simulationResultsMsgToNoOp : SimulationResults.Msg -> Msg
+simulationResultsMsgToNoOp cmd =
+  NoOp
+
 view : Model -> Html Msg
 view model =
   div
@@ -137,6 +144,10 @@ view model =
         , div
             [ class "error-box" ]
             [ text model.errors ]
+    , div
+        []
+        [ App.map simulationResultsMsgToNoOp (SimulationResults.view model.simulationResults) ] 
+
     ]
 
 
