@@ -113,6 +113,10 @@ view model =
     []
     [
       div
+        [ class "regression-select_container" ]
+        [ App.map regressionSelectMsgToNoOp (RegressionSelect.view model.regressionSelect) ] 
+
+    , div
         [ class "all-summaries" ]
         [
           {-
@@ -121,9 +125,6 @@ view model =
              know nothing travels in that direction, I just map to a NoOp
           -}
           div
-            [ ]
-            [ App.map regressionSelectMsgToNoOp (RegressionSelect.view model.regressionSelect) ]
-        , div
             [ class "summary-container" ]
             [ App.map msgToNoOp (RunTypeSummary.view model.compileSummary) ]
         , div

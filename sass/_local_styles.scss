@@ -2,6 +2,25 @@ $pass-color: #ccffcc;
 $run-color: #ffffcc;
 $fail-color: #ff9999;
 
+// Styles for RegressionSelect
+.regression-select {
+  @include display(flex);
+  @include flex-direction(column);
+  width: 400px;
+  border: 1px solid;
+  margin-bottom: 20px;
+  padding: 5px;
+}
+
+.selectors {
+  @include display(flex);
+  @include flex-direction(row);
+}
+
+.select-field {
+  @include flex-grow(1);
+}
+
 // Styles for all three summary boxes
 //
 .all-summaries {

@@ -146,7 +146,7 @@ userFilter model =
 filterRegressions : Model -> Html Msg 
 filterRegressions model =
   div
-    []
+    [ class "filtered-select-field" ]
     [
       label 
          []
@@ -162,9 +162,13 @@ view model =
   div
     [ class "regression-select" ]
     [
-      (projectFilter model)
-    , (runTypeFilter model)
-    , (userFilter model)
+      div 
+        [ class "selectors" ]
+        [
+          (projectFilter model)
+        , (runTypeFilter model)
+        , (userFilter model)
+        ]
     , (filterRegressions model)
     ]
 
