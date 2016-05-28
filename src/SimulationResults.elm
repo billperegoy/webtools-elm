@@ -31,12 +31,25 @@ init  =
 
 type Msg
   = NoOp
+  | SortByRunTime
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
     NoOp ->
       model ! []
+
+    SortByRunTime ->
+      { model | simulations = List.reverse (List.sortBy .runTime model.simulations) } ! []
+
+imageSpan : Html Msg
+imageSpan =
+  span
+    []
+    [
+      img [src "images/glyphicons-405-sort-by-alphabet.png"] []
+    ]
+
 
 tableHeader : Html Msg
 tableHeader =
@@ -66,7 +79,8 @@ view model =
   div
     [ class "simulation-results" ]
     [ 
-      table 
+      button [ onClick SortByRunTime ] [text "sort"]
+    , table 
         []
         (tableHeader :: (List.map tableRow model.simulations))
     ]

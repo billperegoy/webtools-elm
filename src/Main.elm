@@ -65,6 +65,7 @@ type Msg
   | HttpSucceed ResultsTriad
   | HttpFail Http.Error
   | PollHttp Time
+  | SimulationResults SimulationResults.Msg
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -101,6 +102,12 @@ update msg model =
     PollHttp time ->
       (model, getHttpData)
 
+    SimulationResults msg ->
+      { model 
+          | simulationResults = fst(SimulationResults.update msg model.simulationResults) 
+      } ! []
+
+
 
 msgToNoOp : RunTypeSummary.Msg -> Msg
 msgToNoOp cmd =
@@ -121,7 +128,7 @@ view model =
     [
       div
         [ class "regression-select_container" ]
-        [ App.map regressionSelectMsgToNoOp (RegressionSelect.view model.regressionSelect) ] 
+        [ App.map  regressionSelectMsgToNoOp (RegressionSelect.view model.regressionSelect) ] 
 
     , div
         [ class "all-summaries" ]
@@ -146,7 +153,11 @@ view model =
             [ text model.errors ]
     , div
         []
-        [ App.map simulationResultsMsgToNoOp (SimulationResults.view model.simulationResults) ] 
+        {-
+           Note that instead of passing a NoOp as the map function,
+           I actually send the command to the child module
+        -}
+        [ App.map SimulationResults (SimulationResults.view model.simulationResults) ] 
 
     ]
 
