@@ -45,7 +45,8 @@ lsfStatusToString lsfStatus =
 
 type alias Simulation =
   {
-    name : String
+    runNum : Int
+  , name : String
   , config : String
   , status : RunStatus 
   , lsfStatus : LsfStatus 
