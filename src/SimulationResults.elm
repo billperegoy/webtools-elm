@@ -72,7 +72,7 @@ tableRow simulation =
     , td [] [text simulation.name]
     , td [] [text simulation.config]
     , td [] [text (runStatusToString simulation.status)]
-    , td [] [text simulation.config]
+    , td [] [text (lsfStatusToString simulation.lsfStatus)]
     , td [] [text (toString simulation.runTime)]
     ]
 
