@@ -32,17 +32,8 @@ type alias Model =
   , errors : String
   }
 
-summaryData label result =
-  {
-    label = label
-  , result = result
-  }
-
 emptySummaryData label =
-  {
-    label = label
-  , result = SingleResult 0 0 0
-  }
+  RunTypeSummaryData label (SingleResult 0 0 0)
 
 {-
    We return a tuple consisting of an initailized model and a Cmd
@@ -52,8 +43,8 @@ emptySummaryData label =
 init : (Model, Cmd Msg)
 init =
   {
-     regressionSelect = RegressionSelect.init
-  ,  compileSummary = emptySummaryData "compiles"
+    regressionSelect = RegressionSelect.init
+  , compileSummary = emptySummaryData "compiles"
   , lintSummary = emptySummaryData "lints"
   , simSummary = emptySummaryData "sims"
   , simulationResults = SimulationResults.init
@@ -86,9 +77,9 @@ update msg model =
 
     HttpSucceed triad ->
       { model
-         | compileSummary = summaryData "compiles" triad.compiles
-         , lintSummary = summaryData "lints" triad.lints
-         , simSummary = summaryData "simulations" triad.sims
+         | compileSummary = RunTypeSummaryData "compiles" triad.compiles
+         , lintSummary = RunTypeSummaryData "lints" triad.lints
+         , simSummary = RunTypeSummaryData "simulations" triad.sims
          , errors = ""
       } ! []
 
@@ -108,11 +99,7 @@ update msg model =
 
 
 regressionSelectMsgToNoOp : RegressionSelect.Msg -> Msg
-regressionSelectMsgToNoOp cmd =
-  NoOp
-
-simulationResultsMsgToNoOp : SimulationResults.Msg -> Msg
-simulationResultsMsgToNoOp cmd =
+regressionSelectMsgToNoOp _ =
   NoOp
 
 view : Model -> Html Msg
@@ -127,7 +114,7 @@ view model =
            transform any Msg produced by the subtree. In this case since I
            know nothing travels in that direction, I just map to a NoOp
         -}
-        [ App.map  regressionSelectMsgToNoOp (RegressionSelect.view model.regressionSelect) ]
+        [ App.map regressionSelectMsgToNoOp (RegressionSelect.view model.regressionSelect) ]
 
     , div
         [ class "all-summaries" ]
