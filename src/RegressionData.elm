@@ -34,21 +34,11 @@ decodeAll =
     ("lints" := decodeSingle)
     ("sims" := decodeSingle)
 
-type RunType = Validate | Publish | GenericRegression | Other
-
-runTypeToString : RunType -> String
-runTypeToString runType =
-  case runType of
-    Validate -> "validate"
-    Publish -> "publish"
-    GenericRegression -> "regress"
-    Other -> "other"
-
 type alias Regression =
   {
     name : String
   , project : String
-  , runType : RunType
+  , runType : String 
   , user : String
   }
 
