@@ -25,16 +25,24 @@ main =
 type alias Model =
   {
     regressionSelect : RegressionSelect.Model
-  , compileSummary : RunTypeSummary.Model
-  , lintSummary : RunTypeSummary.Model
-  , simSummary : RunTypeSummary.Model
+  , compileSummary : RunTypeSummaryData
+  , lintSummary : RunTypeSummaryData
+  , simSummary : RunTypeSummaryData
   , simulationResults : SimulationResults.Model
   , errors : String
   }
 
-emptyResult : SingleResult
-emptyResult =
-  SingleResult 0 0 0
+summaryData label result =
+  {
+    label = label
+  , result = result
+  }
+
+emptySummaryData label =
+  {
+    label = label
+  , result = SingleResult 0 0 0
+  }
 
 {-
    We return a tuple consisting of an initailized model and a Cmd
@@ -45,9 +53,9 @@ init : (Model, Cmd Msg)
 init =
   {
      regressionSelect = RegressionSelect.init
-  ,  compileSummary = RunTypeSummary.init "compiles" emptyResult
-  , lintSummary = RunTypeSummary.init "lints" emptyResult
-  , simSummary = RunTypeSummary.init "sims" emptyResult
+  ,  compileSummary = emptySummaryData "compiles"
+  , lintSummary = emptySummaryData "lints"
+  , simSummary = emptySummaryData "sims"
   , simulationResults = SimulationResults.init
   , errors = ""
   } ! []
@@ -76,21 +84,11 @@ update msg model =
     GetApiData ->
       (model, getHttpData)
 
-    {-
-       Here I call upadte on each of the nested components using the triad
-       values I got from the Http calls
-    -}
     HttpSucceed triad ->
       { model
-         | compileSummary =
-           RunTypeSummary.updateNoCmd
-             (RunTypeSummary.Update triad.compiles) model.compileSummary
-         , lintSummary =
-           RunTypeSummary.updateNoCmd
-             (RunTypeSummary.Update triad.lints) model.lintSummary
-         , simSummary =
-           RunTypeSummary.updateNoCmd
-             (RunTypeSummary.Update triad.sims) model.simSummary
+         | compileSummary = summaryData "compiles" triad.compiles
+         , lintSummary = summaryData "lints" triad.lints
+         , simSummary = summaryData "simulations" triad.sims
          , errors = ""
       } ! []
 
@@ -103,15 +101,11 @@ update msg model =
       (model, getHttpData)
 
     SimulationResults msg ->
-      { model 
-          | simulationResults = fst(SimulationResults.update msg model.simulationResults) 
+      { model
+          | simulationResults = fst(SimulationResults.update msg model.simulationResults)
       } ! []
 
 
-
-msgToNoOp : RunTypeSummary.Msg -> Msg
-msgToNoOp cmd =
-  NoOp
 
 regressionSelectMsgToNoOp : RegressionSelect.Msg -> Msg
 regressionSelectMsgToNoOp cmd =
@@ -128,25 +122,25 @@ view model =
     [
       div
         [ class "regression-select_container" ]
-        [ App.map  regressionSelectMsgToNoOp (RegressionSelect.view model.regressionSelect) ] 
+        {-
+           Note that to instantiate a nested view, you have to deal with and
+           transform any Msg produced by the subtree. In this case since I
+           know nothing travels in that direction, I just map to a NoOp
+        -}
+        [ App.map  regressionSelectMsgToNoOp (RegressionSelect.view model.regressionSelect) ]
 
     , div
         [ class "all-summaries" ]
         [
-          {-
-             Note that to instantiate a nested view, you have to deal with and
-             transform any Msg produced by the subtree. In this case since I
-             know nothing travels in that direction, I just map to a NoOp
-          -}
           div
             [ class "summary-container" ]
-            [ App.map msgToNoOp (RunTypeSummary.view model.compileSummary) ]
+            [ (RunTypeSummary.view model.compileSummary) ]
         , div
             [ class "summary-container" ]
-            [ App.map msgToNoOp (RunTypeSummary.view model.lintSummary) ]
+            [ (RunTypeSummary.view model.lintSummary) ]
         , div
             [ class "summary-container" ]
-            [ App.map msgToNoOp (RunTypeSummary.view model.simSummary) ]
+            [ (RunTypeSummary.view model.simSummary) ]
         ]
         , div
             [ class "error-box" ]
@@ -157,7 +151,7 @@ view model =
            Note that instead of passing a NoOp as the map function,
            I actually send the command to the child module
         -}
-        [ App.map SimulationResults (SimulationResults.view model.simulationResults) ] 
+        [ App.map SimulationResults (SimulationResults.view model.simulationResults) ]
 
     ]
 

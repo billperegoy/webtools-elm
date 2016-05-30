@@ -2,12 +2,22 @@ module RegressionData exposing (..)
 
 import Json.Decode as Json exposing (..)
 
-type alias SingleResult = { total : Int, complete : Int, failed : Int }
+type alias SingleResult =
+  {
+    total : Int
+  , complete : Int
+  , failed : Int
+  }
+
+type alias RunTypeSummaryData =
+  { label : String
+  , result : SingleResult
+  }
 
 type RunType = Validate | Publish | GenericRegression | Other
 
 runTypeToString : RunType -> String
-runTypeToString runType = 
+runTypeToString runType =
   case runType of
     Validate -> "validate"
     Publish -> "publish"
@@ -18,14 +28,14 @@ type alias Regression =
   {
     name : String
   , project : String
-  , runType : RunType 
+  , runType : RunType
   , user : String
   }
 
-type RunStatus = Unknown | Pass | Fail | Error 
+type RunStatus = Unknown | Pass | Fail | Error
 
 runStatusToString : RunStatus -> String
-runStatusToString runStatus = 
+runStatusToString runStatus =
   case runStatus of
     Pass -> "Pass"
     Fail -> "Fail"
@@ -35,7 +45,7 @@ runStatusToString runStatus =
 type LsfStatus = Unqueued | Pend | Run | Exit | Done
 
 lsfStatusToString : LsfStatus -> String
-lsfStatusToString lsfStatus = 
+lsfStatusToString lsfStatus =
   case lsfStatus of
     Unqueued -> "Unqueued"
     Pend -> "Pend"
@@ -48,12 +58,12 @@ type alias Simulation =
     runNum : Int
   , name : String
   , config : String
-  , status : RunStatus 
-  , lsfStatus : LsfStatus 
+  , status : RunStatus
+  , lsfStatus : LsfStatus
   , runTime : Int
   }
 
-type alias ResultsTriad = 
+type alias ResultsTriad =
   { compiles : SingleResult
   , lints : SingleResult
   , sims : SingleResult
