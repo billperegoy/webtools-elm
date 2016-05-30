@@ -12,7 +12,9 @@ import RegressionData exposing (..)
 type alias Model =
   {
     regressions : List Regression
-  , filteredRegressions : List Regression
+  , userFilter : String
+  , projectFilter : String
+  , runTypeFilter : String
   }
 
 initialRegressions : List Regression
@@ -33,11 +35,13 @@ initialRegressions =
 
 init : Model
 init  =
-  Model initialRegressions initialRegressions
+  Model initialRegressions "" "" ""
 
 type Msg
   = NoOp
-  | Update
+  | UpdateUserFilter String
+  | UpdateProjectFilter String
+  | UpdateRunTypeFilter String
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -45,8 +49,14 @@ update msg model =
     NoOp ->
       model ! []
 
-    Update ->
-      model ! []
+    UpdateUserFilter data ->
+      { model | userFilter = data } ! []
+
+    UpdateProjectFilter data ->
+      { model | projectFilter = data } ! []
+
+    UpdateRunTypeFilter data ->
+      { model | runTypeFilter = data } ! []
 
 toSelectOption : String -> Html Msg
 toSelectOption elem =
@@ -77,16 +87,16 @@ filterByRunType runType unfiltered =
   FIXME - Note that I've hardcoded the select values in this function.
           It should really be getting that from the select form elements.
 -}
-filterIt : List Regression -> List Regression
-filterIt unfiltered =
-  unfiltered
-    |> filterByProject ""
-    |> filterByUser ""
-    |> filterByRunType "publish"
+filterIt : Model ->  List Regression
+filterIt model =
+  model.regressions 
+    |> filterByProject model.projectFilter
+    |> filterByUser model.userFilter
+    |> filterByRunType model.runTypeFilter 
 
 filteredRegressionList : Model -> List (Html Msg) 
 filteredRegressionList model =
-  filterIt model.regressions
+  filterIt model
   |> List.map .name 
   |> List.map toSelectOption
 
@@ -146,9 +156,12 @@ userFilter model =
           label 
             []
             [ text "Users" ]
+        , input [onInput UpdateUserFilter] []
+        {-
         , select
             []
             (uniqueUsers model)
+        -}
         ]
 
 filterRegressions : Model -> Html Msg 
