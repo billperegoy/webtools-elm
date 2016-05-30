@@ -32,6 +32,7 @@ type alias Model =
   , errors : String
   }
 
+emptySummaryData : String -> RunTypeSummaryData
 emptySummaryData label =
   RunTypeSummaryData label (SingleResult 0 0 0)
 
@@ -65,6 +66,7 @@ type Msg
   | HttpFail Http.Error
   | PollHttp Time
   | SimulationResults SimulationResults.Msg
+  | RegressionSelect RegressionSelect.Msg
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -96,11 +98,11 @@ update msg model =
           | simulationResults = fst(SimulationResults.update msg model.simulationResults)
       } ! []
 
+    RegressionSelect msg ->
+      { model
+          | regressionSelect = fst(RegressionSelect.update msg model.regressionSelect)
+      } ! []
 
-
-regressionSelectMsgToNoOp : RegressionSelect.Msg -> Msg
-regressionSelectMsgToNoOp _ =
-  NoOp
 
 view : Model -> Html Msg
 view model =
@@ -109,12 +111,7 @@ view model =
     [
       div
         [ class "regression-select_container" ]
-        {-
-           Note that to instantiate a nested view, you have to deal with and
-           transform any Msg produced by the subtree. In this case since I
-           know nothing travels in that direction, I just map to a NoOp
-        -}
-        [ App.map regressionSelectMsgToNoOp (RegressionSelect.view model.regressionSelect) ]
+        [ App.map RegressionSelect (RegressionSelect.view model.regressionSelect) ]
 
     , div
         [ class "all-summaries" ]
@@ -144,5 +141,5 @@ view model =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions _ =
   Time.every (200 * millisecond) PollHttp

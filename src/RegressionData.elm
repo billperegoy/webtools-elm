@@ -14,6 +14,26 @@ type alias RunTypeSummaryData =
   , result : SingleResult
   }
 
+type alias ResultsTriad =
+  { compiles : SingleResult
+  , lints : SingleResult
+  , sims : SingleResult
+  }
+
+decodeSingle : Json.Decoder SingleResult
+decodeSingle =
+  Json.object3 SingleResult
+    ("total" := Json.int)
+    ("complete" := Json.int)
+    ("fail" := Json.int)
+
+decodeAll : Json.Decoder ResultsTriad
+decodeAll =
+  Json.object3 ResultsTriad
+    ("compiles" := decodeSingle)
+    ("lints" := decodeSingle)
+    ("sims" := decodeSingle)
+
 type RunType = Validate | Publish | GenericRegression | Other
 
 runTypeToString : RunType -> String
@@ -62,24 +82,3 @@ type alias Simulation =
   , lsfStatus : LsfStatus
   , runTime : Int
   }
-
-type alias ResultsTriad =
-  { compiles : SingleResult
-  , lints : SingleResult
-  , sims : SingleResult
-  }
-
-
-decodeSingle : Json.Decoder SingleResult
-decodeSingle =
-  Json.object3 SingleResult
-    ("total" := Json.int)
-    ("complete" := Json.int)
-    ("fail" := Json.int)
-
-decodeAll : Json.Decoder ResultsTriad
-decodeAll =
-  Json.object3 ResultsTriad
-    ("compiles" := decodeSingle)
-    ("lints" := decodeSingle)
-    ("sims" := decodeSingle)
