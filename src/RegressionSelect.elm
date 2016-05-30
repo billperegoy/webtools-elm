@@ -54,15 +54,24 @@ toSelectOption elem =
 
 filterByProject : String -> List Regression -> List Regression
 filterByProject project unfiltered =
-  List.filter (\e -> e.project == project) unfiltered
+  if project == "" then
+    unfiltered
+  else
+    List.filter (\e -> e.project == project) unfiltered
 
 filterByUser : String -> List Regression -> List Regression
 filterByUser user unfiltered =
-  List.filter (\e -> e.user == user) unfiltered
+  if user == "" then
+    unfiltered
+  else
+    List.filter (\e -> e.user == user) unfiltered
 
 filterByRunType : String -> List Regression -> List Regression
 filterByRunType runType unfiltered =
-  List.filter (\e -> e.runType == runType) unfiltered
+  if runType == "" then
+    unfiltered
+  else
+    List.filter (\e -> e.runType == runType) unfiltered
 
 {-
   FIXME - Note that I've hardcoded the select values in this function.
@@ -71,8 +80,8 @@ filterByRunType runType unfiltered =
 filterIt : List Regression -> List Regression
 filterIt unfiltered =
   unfiltered
-    |> filterByProject "project2"
-    |> filterByUser "user1"
+    |> filterByProject ""
+    |> filterByUser ""
     |> filterByRunType "publish"
 
 filteredRegressionList : Model -> List (Html Msg) 
@@ -87,19 +96,19 @@ uniquify list =
 
 uniqueProjects : Model -> List (Html Msg)
 uniqueProjects model =
-  "<all>" :: List.map .project (model.regressions)
+  "" :: List.map .project (model.regressions)
     |> uniquify 
     |> List.map toSelectOption
 
 uniqueRunTypes : Model -> List (Html Msg)
 uniqueRunTypes model =
-  "<all>" :: List.map .runType (model.regressions)
+  "" :: List.map .runType (model.regressions)
     |> uniquify 
     |> List.map toSelectOption
 
 uniqueUsers : Model -> List (Html Msg)
 uniqueUsers model =
-  "<all>" :: List.map .user (model.regressions)
+  "" :: List.map .user (model.regressions)
     |> uniquify 
     |> List.map toSelectOption
 
