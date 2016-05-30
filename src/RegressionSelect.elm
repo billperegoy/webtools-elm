@@ -52,29 +52,28 @@ toSelectOption : String -> Html Msg
 toSelectOption elem =
   option [] [text elem]
 
-filterByProject : List Regression -> List Regression
-filterByProject unfiltered =
-  unfiltered
+filterByProject : String -> List Regression -> List Regression
+filterByProject project unfiltered =
+  List.filter (\e -> e.project == project) unfiltered
 
-filterByUser : List Regression -> List Regression
-filterByUser unfiltered =
-  unfiltered
+filterByUser : String -> List Regression -> List Regression
+filterByUser user unfiltered =
+  List.filter (\e -> e.user == user) unfiltered
 
-filterByRunType : List Regression -> List Regression
-filterByRunType unfiltered =
-  unfiltered
+filterByRunType : RunType -> List Regression -> List Regression
+filterByRunType runType unfiltered =
+  List.filter (\e -> e.runType == runType) unfiltered
 
 {-
-  This is where we add the code to actually do the 
-  filtering based on the selects that were 
-  chosen. Currently it just rturns an idential
-  list
+  FIXME - Note that I've hardcoded the select values in this function.
+          It should really be getting that from the select form elements.
 -}
 filterIt : List Regression -> List Regression
 filterIt unfiltered =
-  filterByProject unfiltered 
-    |> filterByUser
-    |> filterByRunType
+  unfiltered
+    |> filterByProject "project2"
+    |> filterByUser "user1"
+    |> filterByRunType Publish
 
 filteredRegressionList : Model -> List (Html Msg) 
 filteredRegressionList model =
