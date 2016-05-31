@@ -12,6 +12,7 @@ import RegressionData exposing (..)
 type alias Model =
   {
     regressions : List Regression
+  , filteredRegressions : List Regression
   , userFilter : String
   , projectFilter : String
   , runTypeFilter : String
@@ -35,7 +36,7 @@ initialRegressions =
 
 init : Model
 init  =
-  Model initialRegressions "" "" ""
+  Model initialRegressions initialRegressions "" "" ""
 
 type Msg
   = NoOp
@@ -49,8 +50,13 @@ update msg model =
     NoOp ->
       model ! []
 
-    UpdateUserFilter data ->
-      { model | userFilter = data } ! []
+    UpdateUserFilter newUserFilter ->
+      {
+        model | 
+          userFilter = newUserFilter
+        , filteredRegressions = 
+            (filterIt model.regressions model.projectFilter newUserFilter model.runTypeFilter)
+      } ! []
 
     UpdateProjectFilter data ->
       { model | projectFilter = data } ! []
@@ -87,17 +93,17 @@ filterByRunType runType unfiltered =
   FIXME - Note that I've hardcoded the select values in this function.
           It should really be getting that from the select form elements.
 -}
-filterIt : Model ->  List Regression
-filterIt model =
-  model.regressions 
-    |> filterByProject model.projectFilter
-    |> filterByUser model.userFilter
-    |> filterByRunType model.runTypeFilter 
+filterIt : List Regression -> String -> String -> String ->  List Regression
+filterIt regressions projectFilter userFilter runTypeFilter =
+  regressions
+    |> filterByProject projectFilter
+    |> filterByUser userFilter
+    |> filterByRunType runTypeFilter
 
-filteredRegressionList : Model -> List (Html Msg) 
+filteredRegressionList : Model -> List (Html Msg)
 filteredRegressionList model =
-  filterIt model
-  |> List.map .name 
+  model.filteredRegressions
+  |> List.map .name
   |> List.map toSelectOption
 
 uniquify : List String -> List String
@@ -107,27 +113,27 @@ uniquify list =
 uniqueProjects : Model -> List (Html Msg)
 uniqueProjects model =
   "" :: List.map .project (model.regressions)
-    |> uniquify 
+    |> uniquify
     |> List.map toSelectOption
 
 uniqueRunTypes : Model -> List (Html Msg)
 uniqueRunTypes model =
   "" :: List.map .runType (model.regressions)
-    |> uniquify 
+    |> uniquify
     |> List.map toSelectOption
 
 uniqueUsers : Model -> List (Html Msg)
 uniqueUsers model =
   "" :: List.map .user (model.regressions)
-    |> uniquify 
+    |> uniquify
     |> List.map toSelectOption
 
-projectFilter : Model -> Html Msg 
+projectFilter : Model -> Html Msg
 projectFilter model =
-      div 
+      div
         [ class "select-field" ]
         [
-          label 
+          label
             []
             [ text "Projects" ]
         , select
@@ -135,12 +141,12 @@ projectFilter model =
             (uniqueProjects model)
         ]
 
-runTypeFilter : Model -> Html Msg 
+runTypeFilter : Model -> Html Msg
 runTypeFilter model =
-      div 
+      div
         [ class "select-field" ]
         [
-          label 
+          label
             []
             [ text "Run Types" ]
         , select
@@ -148,12 +154,12 @@ runTypeFilter model =
             (uniqueRunTypes model)
         ]
 
-userFilter : Model -> Html Msg 
+userFilter : Model -> Html Msg
 userFilter model =
-      div 
+      div
         [ class "select-field" ]
         [
-          label 
+          label
             []
             [ text "Users" ]
         , input [onInput UpdateUserFilter] []
@@ -164,12 +170,12 @@ userFilter model =
         -}
         ]
 
-filterRegressions : Model -> Html Msg 
+filterRegressions : Model -> Html Msg
 filterRegressions model =
   div
     [ class "filtered-select-field" ]
     [
-      label 
+       label
          []
          [ text "Filtered List" ]
      , select
@@ -183,7 +189,7 @@ view model =
   div
     [ class "regression-select" ]
     [
-      div 
+      div
         [ class "selectors" ]
         [
           (projectFilter model)
