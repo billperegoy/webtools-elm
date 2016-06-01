@@ -75,17 +75,15 @@ update msg model =
     NoOp ->
       model ! []
 
+    -- FIXME - The sort is hard-coded to one field. How can I select what
+    --         to sort by. I could use a case statement or make a
+    --         separate Msg type for each field.
+    --
     Sort ->
       { model | data = List.sortBy .runTime model.data } ! []
 
     Filter ->
       model ! []
-
-
--- FIXME - Not sure if these are really things
-type alias DataRow =
- {
- }
 
 tableIconAttributes : Msg -> String -> List (Attribute Msg)
 tableIconAttributes msg file =
@@ -149,8 +147,8 @@ singleDataRowColumns columns simulation =
 
 singleDataTableRow : List Column -> Simulation -> Html Msg
 singleDataTableRow columns simulation =
-  tr 
-    [] 
+  tr
+    []
     (singleDataRowColumns columns simulation)
 
 dataToTableRows :  Model -> List (Html Msg)

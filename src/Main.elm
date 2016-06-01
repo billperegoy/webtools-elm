@@ -108,7 +108,9 @@ update msg model =
       } ! []
 
     LintResults msg ->
-      model ! []
+      { model
+          | lintResults = fst(ResultsTable.update msg model.lintResults)
+      } ! []
 
 
 view : Model -> Html Msg
