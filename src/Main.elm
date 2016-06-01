@@ -138,10 +138,10 @@ view model =
             [ text model.errors ]
     , div
         []
-        [ App.map SimulationResults (SimulationResults.view model.simulationResults) ]
+        [ App.map LintResults (ResultsTable.view model.lintResults) ]
     , div
         []
-        [ App.map LintResults (ResultsTable.view model.lintResults) ]
+        [ App.map SimulationResults (SimulationResults.view model.simulationResults) ]
 
     ]
 
