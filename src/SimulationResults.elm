@@ -14,14 +14,14 @@ type alias Model =
 
 initialSimulations : List Simulation 
 initialSimulations =
-  [  (Simulation 1 "test1" "default" Pass Done 1154)
-  ,  (Simulation 2 "test2" "pcie"    Pass Done 912)
-  ,  (Simulation 3 "test3" "default" Pass Done 654)
-  ,  (Simulation 4 "test4" "ddr"     Fail Exit 543)
-  ,  (Simulation 5 "test5" "default" Pass Done 812)
-  ,  (Simulation 6 "test6" "default" Pass Done 83)
-  ,  (Simulation 7 "test7" "pcie"    Fail Exit 112)
-  ,  (Simulation 8 "test8" "default" Fail Exit 352)
+  [  (Simulation 1 "test1" "default" "Pass" "Done" 1154)
+  ,  (Simulation 2 "test2" "pcie"    "Pass" "Done" 912)
+  ,  (Simulation 3 "test3" "default" "Pass" "Done" 654)
+  ,  (Simulation 4 "test4" "ddr"    "Fail" "Exit" 543)
+  ,  (Simulation 5 "test5" "default" "Pass" "Done" 812)
+  ,  (Simulation 6 "test6" "default" "Pass" "Done" 83)
+  ,  (Simulation 7 "test7" "pcie"   "Fail" "Exit" 112)
+  ,  (Simulation 8 "test8" "default""Fail" "Exit" 352)
   ]
 
 init : Model
@@ -70,8 +70,8 @@ tableRow simulation =
       td [] [text (toString simulation.runNum)]
     , td [] [text simulation.name]
     , td [] [text simulation.config]
-    , td [] [text (runStatusToString simulation.status)]
-    , td [] [text (lsfStatusToString simulation.lsfStatus)]
+    , td [] [text (simulation.status)]
+    , td [] [text (simulation.lsfStatus)]
     , td [] [text (toString simulation.runTime)]
     ]
 

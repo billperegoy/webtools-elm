@@ -42,33 +42,12 @@ type alias Regression =
   , user : String
   }
 
-type RunStatus = Unknown | Pass | Fail | Error
-
-runStatusToString : RunStatus -> String
-runStatusToString runStatus =
-  case runStatus of
-    Pass -> "Pass"
-    Fail -> "Fail"
-    Error -> "Error"
-    _ -> "-"
-
-type LsfStatus = Unqueued | Pend | Run | Exit | Done
-
-lsfStatusToString : LsfStatus -> String
-lsfStatusToString lsfStatus =
-  case lsfStatus of
-    Unqueued -> "Unqueued"
-    Pend -> "Pend"
-    Run -> "Run"
-    Exit -> "Exit"
-    Done -> "Done"
-
 type alias Simulation =
   {
     runNum : Int
   , name : String
   , config : String
-  , status : RunStatus
-  , lsfStatus : LsfStatus
+  , status : String 
+  , lsfStatus : String 
   , runTime : Int
   }

@@ -55,18 +55,18 @@ initColumns =
 
 initialSimulations : List Simulation
 initialSimulations =
-  [  (Simulation 1 "test1" "default" Pass Done 1154)
-  ,  (Simulation 2 "test2" "pcie"    Pass Done 912)
-  ,  (Simulation 3 "test3" "default" Pass Done 654)
-  ,  (Simulation 4 "test4" "ddr"     Fail Exit 543)
-  ,  (Simulation 5 "test5" "default" Pass Done 812)
-  ,  (Simulation 6 "test6" "default" Pass Done 83)
-  ,  (Simulation 7 "test7" "pcie"    Fail Exit 112)
-  ,  (Simulation 8 "test8" "default" Fail Exit 352)
+  [  (Simulation 1 "test1" "default" "Pass" "Done" 1154)
+  ,  (Simulation 2 "test2" "pcie"    "Pass" "Done" 912)
+  ,  (Simulation 3 "test3" "default" "Pass" "Done" 654)
+  ,  (Simulation 4 "test4" "ddr"     "Fail" "Exit" 543)
+  ,  (Simulation 5 "test5" "default" "Pass" "Done" 812)
+  ,  (Simulation 6 "test6" "default" "Pass" "Done" 83)
+  ,  (Simulation 7 "test7" "pcie"    "Fail" "Exit" 112)
+  ,  (Simulation 8 "test8" "default" "Fail" "Exit" 352)
   ]
 
 type Msg = NoOp
-         | Sort
+         | Sort String
          | Filter
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -79,8 +79,28 @@ update msg model =
     --         to sort by. I could use a case statement or make a
     --         separate Msg type for each field.
     --
-    Sort ->
-      { model | data = List.sortBy .runTime model.data } ! []
+    Sort field ->
+      case field of
+        "Status" -> 
+          { model | data = List.sortBy .status model.data } ! []
+
+        "Lsf Status" -> 
+          { model | data = List.sortBy .lsfStatus model.data } ! []
+
+        "#" -> 
+          { model | data = List.sortBy .runNum model.data } ! []
+
+        "Config" -> 
+          { model | data = List.sortBy .config model.data } ! []
+
+        "Name" -> 
+          { model | data = List.sortBy .name model.data } ! []
+
+        "Run Time" -> 
+          { model | data = List.sortBy .runTime model.data } ! []
+
+        _ ->
+          model ! []
 
     Filter ->
       model ! []
@@ -92,7 +112,7 @@ tableIconAttributes msg file =
 sortIcon : Column -> Html Msg
 sortIcon column =
   if column.sortable then
-    img (tableIconAttributes Sort "images/glyphicons-405-sort-by-alphabet.png") []
+    img (tableIconAttributes (Sort column.name) "images/glyphicons-405-sort-by-alphabet.png") []
   else
     span [] []
 
@@ -136,8 +156,8 @@ lookupDataValue simulation name =
     "#" -> toString simulation.runNum
     "Name" -> simulation.name
     "Config" -> simulation.config
-    "Status" -> runStatusToString simulation.status
-    "Lsf Status" -> lsfStatusToString simulation.lsfStatus
+    "Status" -> simulation.status
+    "Lsf Status" -> simulation.lsfStatus
     "Run Time" -> toString simulation.runTime
     _ -> "-"
 
