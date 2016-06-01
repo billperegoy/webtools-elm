@@ -11,6 +11,7 @@ import RegressionData exposing(..)
 import RegressionSelect exposing(view)
 import RunTypeSummary exposing(view)
 import SimulationResults exposing(view)
+import ResultsTable exposing(view)
 
 main : Program Never
 main =
@@ -29,6 +30,7 @@ type alias Model =
   , lintSummary : RunTypeSummaryData
   , simSummary : RunTypeSummaryData
   , simulationResults : SimulationResults.Model
+  , lintResults : ResultsTable.Model
   , errors : String
   }
 
@@ -49,6 +51,7 @@ init =
   , lintSummary = emptySummaryData "lints"
   , simSummary = emptySummaryData "sims"
   , simulationResults = SimulationResults.init
+  , lintResults = ResultsTable.init
   , errors = ""
   } ! []
 
@@ -66,6 +69,7 @@ type Msg
   | HttpFail Http.Error
   | PollHttp Time
   | SimulationResults SimulationResults.Msg
+  | LintResults ResultsTable.Msg
   | RegressionSelect RegressionSelect.Msg
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -103,6 +107,9 @@ update msg model =
           | regressionSelect = fst(RegressionSelect.update msg model.regressionSelect)
       } ! []
 
+    LintResults msg ->
+      model ! []
+
 
 view : Model -> Html Msg
 view model =
@@ -131,11 +138,10 @@ view model =
             [ text model.errors ]
     , div
         []
-        {-
-           Note that instead of passing a NoOp as the map function,
-           I actually send the command to the child module
-        -}
         [ App.map SimulationResults (SimulationResults.view model.simulationResults) ]
+    , div
+        []
+        [ App.map LintResults (ResultsTable.view model.lintResults) ]
 
     ]
 
