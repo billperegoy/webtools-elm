@@ -76,7 +76,7 @@ update msg model =
       model ! []
 
     Sort ->
-      model ! []
+      { model | data = List.sortBy .runTime model.data } ! []
 
     Filter ->
       model ! []
@@ -87,21 +87,21 @@ type alias DataRow =
  {
  }
 
-tableIconAttributes : String -> List (Attribute Msg)
-tableIconAttributes file =
-  [ class "table-header-icon", width 12, height 16, onClick Sort, src file ]
+tableIconAttributes : Msg -> String -> List (Attribute Msg)
+tableIconAttributes msg file =
+  [ class "table-header-icon", width 12, height 16, onClick msg, src file ]
 
 sortIcon : Column -> Html Msg
 sortIcon column =
   if column.sortable then
-    img (tableIconAttributes "images/glyphicons-405-sort-by-alphabet.png") []
+    img (tableIconAttributes Sort "images/glyphicons-405-sort-by-alphabet.png") []
   else
     span [] []
 
 filterIcon : Column -> Html Msg
 filterIcon column =
   if column.filterable then
-    img (tableIconAttributes "images/glyphicons-321-filter.png") []
+    img (tableIconAttributes Filter "images/glyphicons-321-filter.png") []
   else
     span [] []
 
@@ -130,15 +130,28 @@ tableHeader model =
     []
     (columnsToTableHeader model.columns)
 
-singleDataRowColumns : List Column -> List (Html Msg)
-singleDataRowColumns columns =
-  List.map (\c -> td [] [ text "xxx"]) columns
+-- FIXME - can we do this in a less brute force way?
+--
+lookupDataValue : Simulation -> String -> String
+lookupDataValue simulation name =
+  case name of
+    "#" -> toString simulation.runNum
+    "Name" -> simulation.name
+    "Config" -> simulation.config
+    "Status" -> runStatusToString simulation.status
+    "Lsf Status" -> lsfStatusToString simulation.lsfStatus
+    "Run Time" -> toString simulation.runTime
+    _ -> "-"
+
+singleDataRowColumns : List Column -> Simulation -> List (Html Msg)
+singleDataRowColumns columns simulation =
+  List.map (\c -> td [] [ text (lookupDataValue simulation c.name) ]) columns
 
 singleDataTableRow : List Column -> Simulation -> Html Msg
 singleDataTableRow columns simulation =
   tr 
     [] 
-    (singleDataRowColumns columns)
+    (singleDataRowColumns columns simulation)
 
 dataToTableRows :  Model -> List (Html Msg)
 dataToTableRows model =
