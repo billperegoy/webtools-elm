@@ -91,14 +91,28 @@ tableIconAttributes : String -> List (Attribute Msg)
 tableIconAttributes file =
   [ class "table-header-icon", width 12, height 16, onClick Sort, src file ]
 
+sortIcon : Column -> Html Msg
+sortIcon column =
+  if column.sortable then
+    img (tableIconAttributes "images/glyphicons-405-sort-by-alphabet.png") []
+  else
+    span [] []
+
+filterIcon : Column -> Html Msg
+filterIcon column =
+  if column.filterable then
+    img (tableIconAttributes "images/glyphicons-321-filter.png") []
+  else
+    span [] []
+
 singleTableHeader : Column -> Html Msg
 singleTableHeader column =
   th
     []
     [
       text column.name
-    , img (tableIconAttributes "images/glyphicons-405-sort-by-alphabet.png") []
-    , img (tableIconAttributes "images/glyphicons-321-filter.png") []
+    , (sortIcon column)
+    , (filterIcon column)
     ]
 
 columnsToTableHeader : List Column -> List (Html Msg)
@@ -116,13 +130,19 @@ tableHeader model =
     []
     (columnsToTableHeader model.columns)
 
-singleDataTableRow : Simulation -> Html Msg
-singleDataTableRow simulation =
-  tr [] [ td [] [ text "xxx"] ]
+singleDataRowColumns : List Column -> List (Html Msg)
+singleDataRowColumns columns =
+  List.map (\c -> td [] [ text "xxx"]) columns
+
+singleDataTableRow : List Column -> Simulation -> Html Msg
+singleDataTableRow columns simulation =
+  tr 
+    [] 
+    (singleDataRowColumns columns)
 
 dataToTableRows :  Model -> List (Html Msg)
 dataToTableRows model =
-  List.map singleDataTableRow model.data
+  List.map (singleDataTableRow model.columns) model.data
 
 view : Model -> Html Msg
 view model =
