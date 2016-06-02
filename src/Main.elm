@@ -10,7 +10,6 @@ import Time exposing (..)
 import RegressionData exposing(..)
 import RegressionSelect exposing(view)
 import RunTypeSummary exposing(view)
-import SimulationResults exposing(view)
 import ResultsTable exposing(view)
 
 main : Program Never
@@ -29,7 +28,6 @@ type alias Model =
   , compileSummary : RunTypeSummaryData
   , lintSummary : RunTypeSummaryData
   , simSummary : RunTypeSummaryData
-  , simulationResults : SimulationResults.Model
   , lintResults : ResultsTable.Model
   , errors : String
   }
@@ -50,7 +48,6 @@ init =
   , compileSummary = emptySummaryData "compiles"
   , lintSummary = emptySummaryData "lints"
   , simSummary = emptySummaryData "sims"
-  , simulationResults = SimulationResults.init
   , lintResults = ResultsTable.init
   , errors = ""
   } ! []
@@ -68,7 +65,6 @@ type Msg
   | HttpSucceed ResultsTriad
   | HttpFail Http.Error
   | PollHttp Time
-  | SimulationResults SimulationResults.Msg
   | LintResults ResultsTable.Msg
   | RegressionSelect RegressionSelect.Msg
 
@@ -96,11 +92,6 @@ update msg model =
 
     PollHttp time ->
       (model, getHttpData)
-
-    SimulationResults msg ->
-      { model
-          | simulationResults = fst(SimulationResults.update msg model.simulationResults)
-      } ! []
 
     RegressionSelect msg ->
       { model
@@ -141,10 +132,6 @@ view model =
     , div
         []
         [ App.map LintResults (ResultsTable.view model.lintResults) ]
-    , div
-        []
-        [ App.map SimulationResults (SimulationResults.view model.simulationResults) ]
-
     ]
 
 
