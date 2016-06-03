@@ -37,8 +37,8 @@ initColumns =
   [
     Column "#" True False Ascending Dict.empty
   , Column "Name" True False Unsorted Dict.empty
-  , Column "Config" True True Unsorted Dict.empty
-  , Column "Status" True True Unsorted Dict.empty
+  , Column "Config" True True Unsorted (Dict.insert "ddr" False Dict.empty)
+  , Column "Status" True True Unsorted (Dict.insert "Pass" False Dict.empty)
   , Column "Lsf Status" True True Unsorted Dict.empty
   , Column "Run Time" True False Unsorted Dict.empty
   ]
@@ -167,34 +167,29 @@ singleDataTableRow columns simulation =
     (singleDataRowColumns columns simulation)
 
 
-{--
 -- Look up a value in the filter dictionary. If it's not there,
 -- return True (visible)
 --
+-- FIXME - not sure why I need to use this more general type 
+--         definition. I don't see any way this can be anything 
+--         but Dict String
 --findFilterBoolean : Dict String -> String -> Bool
+findFilterBoolean : Dict comparable Bool -> comparable -> Bool
 findFilterBoolean filters value =
-    case Dict.get value filters of
-      Just result -> result
-      Nothing -> True
-
-filterSingleColumn : Column -> Simulation -> Bool
-filterSingleColumn column simulation =
-  let
-    columnName = 
-  findFilterBoolean column.filters column.name
---}
-
+  case Dict.get value filters of
+    Just result -> result
+    Nothing -> True
 
 columnFilterContainsValue : Column -> Simulation -> Bool
 columnFilterContainsValue column simulation =
-  True
+  let value =
+    lookupDataValue simulation column.name
+  in
+    findFilterBoolean column.filters value
 
--- FIXME - Compare the Column value to the list of ColumnFilters
---         If the ColumnFilters are empty or this value is in
---         the list of filters, return a True
 singleColumnToBoolean : Simulation -> Column -> Bool
 singleColumnToBoolean simulation column =
-  Dict.isEmpty column.filters || columnFilterContainsValue column simulation
+  Dict.isEmpty column.filters || (columnFilterContainsValue column simulation)
 
 columnsToBooleanList : List Column -> Simulation -> List Bool
 columnsToBooleanList columns simulation=
