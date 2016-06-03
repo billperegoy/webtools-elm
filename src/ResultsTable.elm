@@ -4,6 +4,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import List exposing (..)
+import Dict exposing (..)
 
 import RegressionData exposing (..)
 
@@ -12,21 +13,10 @@ type SortStatus = Unsorted | Ascending | Descending
 type alias Column =
   {
     name : String
-    -- FIXME - this should be some sort of a function that is used to map
-    --         from the Json data to a real value.
-    --
-    --, access : (? -> ?)
   , sortable : Bool
   , filterable : Bool
   , sortStatus : SortStatus
-  , filters : List ColumnFilter
-  }
-
--- Here an empty list will mean all visible
-type alias ColumnFilter =
-  {
-    columnValue : String
-  , visible : Bool
+  , filters : Dict String Bool
   }
 
 type alias Model =
@@ -45,12 +35,12 @@ init =
 initColumns : List Column
 initColumns =
   [
-    Column "#" True False Ascending []
-  , Column "Name" True False Unsorted []
-  , Column "Config" True True Unsorted []
-  , Column "Status" True True Unsorted []
-  , Column "Lsf Status" True True Unsorted []
-  , Column "Run Time" True False Unsorted []
+    Column "#" True False Ascending Dict.empty
+  , Column "Name" True False Unsorted Dict.empty
+  , Column "Config" True True Unsorted Dict.empty
+  , Column "Status" True True Unsorted Dict.empty
+  , Column "Lsf Status" True True Unsorted Dict.empty
+  , Column "Run Time" True False Unsorted Dict.empty
   ]
 
 initialSimulations : List Simulation
@@ -67,19 +57,12 @@ initialSimulations =
 
 type Msg = NoOp
          | Sort String
+         | ShowFilterPane String
          | Filter
 
-update : Msg -> Model -> (Model, Cmd Msg)
-update msg model =
-  case msg of
-    NoOp ->
-      model ! []
 
-    -- FIXME - The sort is hard-coded to one field. How can I select what
-    --         to sort by. I could use a case statement or make a
-    --         separate Msg type for each field.
-    --
-    Sort field ->
+sortByField : Model -> String -> (Model, Cmd Msg) 
+sortByField model field =
       case field of
         "Status" -> 
           { model | data = List.sortBy .status model.data } ! []
@@ -102,7 +85,19 @@ update msg model =
         _ ->
           model ! []
 
+update : Msg -> Model -> (Model, Cmd Msg)
+update msg model =
+  case msg of
+    NoOp ->
+      model ! []
+
+    Sort field ->
+      sortByField model field
+
     Filter ->
+      model ! []
+
+    ShowFilterPane field ->
       model ! []
 
 tableIconAttributes : Msg -> String -> List (Attribute Msg)
@@ -171,9 +166,53 @@ singleDataTableRow columns simulation =
     []
     (singleDataRowColumns columns simulation)
 
+
+{--
+-- Look up a value in the filter dictionary. If it's not there,
+-- return True (visible)
+--
+--findFilterBoolean : Dict String -> String -> Bool
+findFilterBoolean filters value =
+    case Dict.get value filters of
+      Just result -> result
+      Nothing -> True
+
+filterSingleColumn : Column -> Simulation -> Bool
+filterSingleColumn column simulation =
+  let
+    columnName = 
+  findFilterBoolean column.filters column.name
+--}
+
+
+columnFilterContainsValue : Column -> Simulation -> Bool
+columnFilterContainsValue column simulation =
+  True
+
+-- FIXME - Compare the Column value to the list of ColumnFilters
+--         If the ColumnFilters are empty or this value is in
+--         the list of filters, return a True
+singleColumnToBoolean : Simulation -> Column -> Bool
+singleColumnToBoolean simulation column =
+  Dict.isEmpty column.filters || columnFilterContainsValue column simulation
+
+columnsToBooleanList : List Column -> Simulation -> List Bool
+columnsToBooleanList columns simulation=
+  List.map (singleColumnToBoolean simulation) columns
+
+columnFiltersReduce : List Bool -> Bool
+columnFiltersReduce list =
+  List.foldr (&&) True list
+
+filterDataTableRow : List Column -> Simulation -> Bool
+filterDataTableRow columns simulation =
+  columnsToBooleanList columns simulation
+  |> columnFiltersReduce
+
 dataToTableRows :  Model -> List (Html Msg)
 dataToTableRows model =
-  List.map (singleDataTableRow model.columns) model.data
+  List.filter (filterDataTableRow model.columns) model.data
+  |> List.map (singleDataTableRow model.columns)
 
 view : Model -> Html Msg
 view model =
