@@ -71,3 +71,17 @@ $fail-color: #ff9999;
 .table-header-icon {
   margin: 0 4px 0 4px;
 }
+
+
+.filter-modal {
+  border: 1px solid;
+  margin: 5px;
+  padding: 10px;
+  display: none;
+  height: 200px;
+  width: 100px;
+}
+
+.filter-visible {
+  display: block;
+}

@@ -23,6 +23,7 @@ type alias Model =
   {
     data : List Simulation
   , columns : List Column
+  , showFilterPane : Bool
   }
 
 init : Model
@@ -30,6 +31,7 @@ init =
   {
     data = initialSimulations
   , columns = initColumns
+  , showFilterPane = False
   }
 
 initColumns : List Column
@@ -95,10 +97,10 @@ update msg model =
       sortByField model field
 
     Filter ->
-      model ! []
+      { model | showFilterPane = False }! []
 
     ShowFilterPane field ->
-      model ! []
+      { model | showFilterPane = True }! []
 
 tableIconAttributes : Msg -> String -> List (Attribute Msg)
 tableIconAttributes msg file =
@@ -114,7 +116,7 @@ sortIcon column =
 filterIcon : Column -> Html Msg
 filterIcon column =
   if column.filterable then
-    img (tableIconAttributes Filter "images/glyphicons-321-filter.png") []
+    img (tableIconAttributes (ShowFilterPane column.name) "images/glyphicons-321-filter.png") []
   else
     span [] []
 
@@ -209,12 +211,30 @@ dataToTableRows model =
   List.filter (filterDataTableRow model.columns) model.data
   |> List.map (singleDataTableRow model.columns)
 
+modalAttributes : Model -> List (Html.Attribute Msg)
+modalAttributes model =
+  if model.showFilterPane then
+    [ class "filter-modal filter-visible" ]
+  else
+    [ class "filter-modal" ]
+
+filterPane : Model -> Html Msg
+filterPane model =
+  div 
+    (modalAttributes model)
+    [ text "Put text modal here" 
+    , button
+        [ onClick Filter ]
+        [ text "Filter" ]
+    ]
+
 view : Model -> Html Msg
 view model =
   div
     []
     [
-      table
+      (filterPane model)
+    , table
         []
         (tableRows model)
     ]

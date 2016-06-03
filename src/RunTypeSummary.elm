@@ -7,21 +7,21 @@ import Html.Events exposing (..)
 
 import RegressionData exposing (..)
 
-totalClass : SingleResult -> List (Attribute a) 
+totalClass : SingleResult -> List (Html.Attribute a) 
 totalClass result =
   if result.total == result.complete then
     [ class "summary-total pass-color" ]
   else
     [ class "summary-total run-color" ]
 
-failedClass : SingleResult -> List (Attribute a) 
+failedClass : SingleResult -> List (Html.Attribute a) 
 failedClass result =
   if result.failed == 0 then
     [ class "summary-complete pass-color" ]
   else
     [ class "summary-complete fail-color" ]
 
-completeClass : SingleResult -> List (Attribute a) 
+completeClass : SingleResult -> List (Html.Attribute a) 
 completeClass result =
   if result.complete == result.total then
     [ class "summary-failed pass-color" ]
