@@ -172,15 +172,9 @@ singleDataTableRow columns simulation =
 -- Look up a value in the filter dictionary. If it's not there,
 -- return True (visible)
 --
--- FIXME - not sure why I need to use this more general type 
---         definition. I don't see any way this can be anything 
---         but Dict String
---findFilterBoolean : Dict String -> String -> Bool
 findFilterBoolean : Dict comparable Bool -> comparable -> Bool
 findFilterBoolean filters value =
-  case Dict.get value filters of
-    Just result -> result
-    Nothing -> True
+  Maybe.withDefault True (Dict.get value filters)
 
 columnFilterContainsValue : Column -> Simulation -> Bool
 columnFilterContainsValue column simulation =
@@ -218,13 +212,13 @@ modalAttributes model =
   else
     [ class "filter-modal" ]
 
-filterCheckBox : String -> Html Msg
-filterCheckBox name =
+filterCheckBox : String -> Bool -> Html Msg
+filterCheckBox name active =
   label 
     []
     [
       input 
-      [ type' "checkbox" ]
+      [ type' "checkbox", checked active ]
       []
     , text name 
     ]
@@ -237,9 +231,9 @@ filterPane model =
       div 
       []
       [
-        (filterCheckBox "Done")
-      , (filterCheckBox "Exit")
-      , (filterCheckBox "Run")
+        (filterCheckBox "Done" True)
+      , (filterCheckBox "Exit" False)
+      , (filterCheckBox "Run" False)
       ]
     , button
         [ onClick Filter ]
