@@ -218,11 +218,29 @@ modalAttributes model =
   else
     [ class "filter-modal" ]
 
+filterCheckBox : String -> Html Msg
+filterCheckBox name =
+  label 
+    []
+    [
+      input 
+      [ type' "checkbox" ]
+      []
+    , text name 
+    ]
+
 filterPane : Model -> Html Msg
 filterPane model =
   div 
     (modalAttributes model)
-    [ text "Put text modal here" 
+    [ 
+      div 
+      []
+      [
+        (filterCheckBox "Done")
+      , (filterCheckBox "Exit")
+      , (filterCheckBox "Run")
+      ]
     , button
         [ onClick Filter ]
         [ text "Filter" ]
