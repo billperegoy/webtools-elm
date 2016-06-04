@@ -4,6 +4,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import List exposing (..)
+import Set exposing (..)
 import Dict exposing (..)
 
 import RegressionData exposing (..)
@@ -24,6 +25,7 @@ type alias Model =
     data : List Simulation
   , columns : List Column
   , showFilterPane : Bool
+  , checkBoxItems : List String
   }
 
 init : Model
@@ -32,6 +34,7 @@ init =
     data = initialSimulations
   , columns = initColumns
   , showFilterPane = False
+  , checkBoxItems = ["Done", "Exit", "Run"]
   }
 
 initColumns : List Column
@@ -99,8 +102,14 @@ update msg model =
     Filter ->
       { model | showFilterPane = False }! []
 
+    -- FIXME - derive the list of items from the field name.
+    --         need access to the whole set of data so I can
+    --         get all unique elements.
     ShowFilterPane field ->
-      { model | showFilterPane = True }! []
+      { model 
+          | showFilterPane = True,
+            checkBoxItems = (List.map .config model.data) |> Set.fromList |> Set.toList
+      }! []
 
 tableIconAttributes : Msg -> String -> List (Attribute Msg)
 tableIconAttributes msg file =
@@ -230,11 +239,7 @@ filterPane model =
     [ 
       div 
       []
-      [
-        (filterCheckBox "Done" True)
-      , (filterCheckBox "Exit" False)
-      , (filterCheckBox "Run" False)
-      ]
+      (List.map (\e -> (filterCheckBox e True)) model.checkBoxItems)
     , button
         [ onClick Filter ]
         [ text "Filter" ]
