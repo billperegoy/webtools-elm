@@ -102,14 +102,20 @@ update msg model =
     Filter ->
       { model | showFilterPane = False }! []
 
-    -- FIXME - derive the list of items from the field name.
-    --         need access to the whole set of data so I can
-    --         get all unique elements.
+    -- FIXME   Need to replace model.columns with a new definition.
     ShowFilterPane field ->
       { model 
           | showFilterPane = True,
-            checkBoxItems = (List.map .config model.data) |> Set.fromList |> Set.toList
+            checkBoxItems = filterListElems model field
       }! []
+
+filterListElems : Model -> String -> List String
+filterListElems model field =
+  case field of
+    "Config" -> (List.map .config model.data) |> Set.fromList |> Set.toList
+    "Status" -> (List.map .status model.data) |> Set.fromList |> Set.toList
+    "Lsf Status" -> (List.map .lsfStatus model.data) |> Set.fromList |> Set.toList
+    _ -> []
 
 tableIconAttributes : Msg -> String -> List (Attribute Msg)
 tableIconAttributes msg file =
