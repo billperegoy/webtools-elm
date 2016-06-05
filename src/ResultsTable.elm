@@ -25,7 +25,7 @@ type alias Model =
     data : List Simulation
   , columns : List Column
   , showFilterPane : Bool
-  , checkBoxItems : List String
+  , checkBoxItems : Dict String Bool
   }
 
 init : Model
@@ -34,7 +34,7 @@ init =
     data = initialSimulations
   , columns = initColumns
   , showFilterPane = False
-  , checkBoxItems = ["Done", "Exit", "Run"]
+  , checkBoxItems = Dict.empty
   }
 
 initColumns : List Column
@@ -42,8 +42,9 @@ initColumns =
   [
     Column "#" True False Ascending Dict.empty
   , Column "Name" True False Unsorted Dict.empty
-  , Column "Config" True True Unsorted (Dict.insert "ddr" False Dict.empty)
-  , Column "Status" True True Unsorted (Dict.insert "Pass" False Dict.empty)
+  --, Column "Config" True True Unsorted (Dict.insert "ddr" False Dict.empty)
+  , Column "Config" True True Unsorted Dict.empty
+  , Column "Status" True True Unsorted Dict.empty
   , Column "Lsf Status" True True Unsorted Dict.empty
   , Column "Run Time" True False Unsorted Dict.empty
   ]
@@ -106,32 +107,45 @@ update msg model =
     ShowFilterPane field ->
       { model 
           | showFilterPane = True,
-            checkBoxItems = filterListElems model field
+            checkBoxItems = filterListElems model field |> listToDict
       }! []
+
+uniquify : List comparable -> List comparable
+uniquify list =
+  list |> Set.fromList |> Set.toList 
+
+listToDict items =
+  List.foldl (\e -> Dict.insert e True) Dict.empty items
 
 filterListElems : Model -> String -> List String
 filterListElems model field =
   case field of
-    "Config" -> (List.map .config model.data) |> Set.fromList |> Set.toList
-    "Status" -> (List.map .status model.data) |> Set.fromList |> Set.toList
-    "Lsf Status" -> (List.map .lsfStatus model.data) |> Set.fromList |> Set.toList
+    "Config" -> (List.map .config model.data) |> uniquify
+    "Status" -> (List.map .status model.data) |> uniquify
+    "Lsf Status" -> (List.map .lsfStatus model.data) |> uniquify
     _ -> []
 
 tableIconAttributes : Msg -> String -> List (Attribute Msg)
 tableIconAttributes msg file =
   [ class "table-header-icon", width 12, height 16, onClick msg, src file ]
 
+sortPng : String
+sortPng = "images/glyphicons-404-sorting.png"
+
+filterPng : String
+filterPng = "images/glyphicons-321-filter.png"
+
 sortIcon : Column -> Html Msg
 sortIcon column =
   if column.sortable then
-    img (tableIconAttributes (Sort column.name) "images/glyphicons-404-sorting.png") []
+    img (tableIconAttributes (Sort column.name) sortPng) []
   else
     span [] []
 
 filterIcon : Column -> Html Msg
 filterIcon column =
   if column.filterable then
-    img (tableIconAttributes (ShowFilterPane column.name) "images/glyphicons-321-filter.png") []
+    img (tableIconAttributes (ShowFilterPane column.name) filterPng) []
   else
     span [] []
 
@@ -238,6 +252,10 @@ filterCheckBox name active =
     , text name 
     ]
 
+checkBoxToHtml : Dict String Bool -> List (Html Msg)
+checkBoxToHtml items =
+  Dict.keys items |> List.map (\e -> (filterCheckBox e True))
+
 filterPane : Model -> Html Msg
 filterPane model =
   div 
@@ -245,7 +263,7 @@ filterPane model =
     [ 
       div 
       []
-      (List.map (\e -> (filterCheckBox e True)) model.checkBoxItems)
+      (checkBoxToHtml model.checkBoxItems)
     , button
         [ onClick Filter ]
         [ text "Filter" ]
