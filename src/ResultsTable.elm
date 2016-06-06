@@ -6,6 +6,7 @@ import Html.Events exposing (..)
 import List exposing (..)
 import Set exposing (..)
 import Dict exposing (..)
+import Json.Decode as Json exposing (..)
 
 import RegressionData exposing (..)
 
@@ -25,6 +26,7 @@ type alias Model =
     data : List Simulation
   , columns : List Column
   , showFilterPane : Bool
+  , itemBeingFiltered : String
   , checkBoxItems : Dict String Bool
   }
 
@@ -34,6 +36,7 @@ init =
     data = initialSimulations
   , columns = initColumns
   , showFilterPane = False
+  , itemBeingFiltered = ""
   , checkBoxItems = Dict.empty
   }
 
@@ -62,10 +65,36 @@ initialSimulations =
   ]
 
 type Msg = NoOp
+         | ProcessCheckBox Bool 
          | Sort String
          | ShowFilterPane String
          | Filter
 
+update : Msg -> Model -> (Model, Cmd Msg)
+update msg model =
+  case msg of
+    NoOp ->
+      model ! []
+
+    ProcessCheckBox value ->
+      model ! []
+
+    Sort field ->
+      sortByField model field
+
+    -- FIXME   Need to replace model.columns with a new definition.
+    Filter ->
+      { model | 
+          showFilterPane = False,
+          columns = model.columns
+      }! []
+
+    ShowFilterPane field ->
+      { model 
+          | showFilterPane = True,
+            itemBeingFiltered = field,
+            checkBoxItems = filterListElems model field |> listToDict
+      }! []
 
 sortByField : Model -> String -> (Model, Cmd Msg) 
 sortByField model field =
@@ -91,24 +120,6 @@ sortByField model field =
         _ ->
           model ! []
 
-update : Msg -> Model -> (Model, Cmd Msg)
-update msg model =
-  case msg of
-    NoOp ->
-      model ! []
-
-    Sort field ->
-      sortByField model field
-
-    Filter ->
-      { model | showFilterPane = False }! []
-
-    -- FIXME   Need to replace model.columns with a new definition.
-    ShowFilterPane field ->
-      { model 
-          | showFilterPane = True,
-            checkBoxItems = filterListElems model field |> listToDict
-      }! []
 
 uniquify : List comparable -> List comparable
 uniquify list =
@@ -247,11 +258,26 @@ filterCheckBox name active =
     []
     [
       input 
-      [ type' "checkbox", checked active ]
+      -- FIXME - how do I also get the name passed in to the action?
+      [ type' "checkbox", checked active, onCheck2 ProcessCheckBox name ]
       []
     , text name 
     ]
 
+-- FIXME - onCheck is defined this way...
+--         I need to modify this to accept a string and boolean
+--         Undersatnding this is likely the key to this and my 
+--         select issues.
+onCheck2 : (Bool -> msg) -> String -> Attribute msg
+onCheck2 tagger name =
+  on "change" (Json.map tagger targetChecked2)
+
+targetChecked2 : Json.Decoder Bool
+targetChecked2 =
+  Json.at ["target", "checked"] Json.bool
+
+-- FIXME - I need to add the real check box value instead of always tue here
+--
 checkBoxToHtml : Dict String Bool -> List (Html Msg)
 checkBoxToHtml items =
   Dict.keys items |> List.map (\e -> (filterCheckBox e True))
@@ -262,6 +288,9 @@ filterPane model =
     (modalAttributes model)
     [ 
       div 
+        [] 
+        [ text ("Filtering: " ++ model.itemBeingFiltered) ]
+    , div 
       []
       (checkBoxToHtml model.checkBoxItems)
     , button
