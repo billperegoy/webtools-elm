@@ -7,6 +7,7 @@ import List exposing (..)
 import Set exposing (..)
 import Dict exposing (..)
 import Json.Decode as Json exposing (..)
+import Debug exposing (..)
 
 import RegressionData exposing (..)
 
@@ -65,7 +66,7 @@ initialSimulations =
   ]
 
 type Msg = NoOp
-         | ProcessCheckBox Bool 
+         | ProcessCheckBox Bool
          | Sort String
          | ShowFilterPane String
          | Filter
@@ -77,6 +78,7 @@ update msg model =
       model ! []
 
     ProcessCheckBox value ->
+      Debug.log (toString value)
       model ! []
 
     Sort field ->
@@ -259,22 +261,39 @@ filterCheckBox name active =
     [
       input 
       -- FIXME - how do I also get the name passed in to the action?
-      [ type' "checkbox", checked active, onCheck2 ProcessCheckBox name ]
+      [ type' "checkbox", checked active, onCheck2 ProcessCheckBox ]
       []
     , text name 
     ]
 
--- FIXME - onCheck is defined this way...
---         I need to modify this to accept a string and boolean
---         Undersatnding this is likely the key to this and my 
---         select issues.
-onCheck2 : (Bool -> msg) -> String -> Attribute msg
-onCheck2 tagger name =
+{- FIXME - onCheck is defined this way...
+           I need to modify this to accept a string and boolean
+           Undersatnding this is likely the key to this and my 
+           select issues.
+
+           I'm attempting to have this onCheck2 function return a tuple of the 
+           Bool and the name. It feels like a bit of a hack but may teach me 
+           something.
+-}
+onCheck2 : (Bool -> msg) -> Attribute msg
+onCheck2 tagger =
   on "change" (Json.map tagger targetChecked2)
 
 targetChecked2 : Json.Decoder Bool
 targetChecked2 =
-  Json.at ["target", "checked"] Json.bool
+  -- Slowly transform this to more primitive items with fewer shortcuts
+  --Json.at ["target", "checked"] Json.bool
+  List.foldr (:=) Json.bool ["target", "checked"]
+
+  {-
+    This is decoding something like:
+      "target" : {
+        "checked" : true,
+        "name" : "string"
+      }
+
+    I want to pull out the name value as well as the checked value.
+  -}
 
 -- FIXME - I need to add the real check box value instead of always tue here
 --
