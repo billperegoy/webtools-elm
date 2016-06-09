@@ -1,7 +1,7 @@
 module ResultsTable exposing (..)
 
 import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html.Attributes as Attr exposing (..)
 import Html.Events exposing (..)
 import List exposing (..)
 import Set exposing (..)
@@ -66,7 +66,7 @@ initialSimulations =
   ]
 
 type Msg = NoOp
-         | ProcessCheckBox Bool
+         | ProcessCheckBox AllCheckBoxData
          | Sort String
          | ShowFilterPane String
          | Filter
@@ -260,30 +260,45 @@ filterCheckBox name active =
     []
     [
       input 
-      -- FIXME - how do I also get the name passed in to the action?
-      [ type' "checkbox", checked active, onCheck2 ProcessCheckBox ]
+      [ type' "checkbox", Attr.name name, checked active, onCheck2 ProcessCheckBox ]
       []
     , text name 
     ]
 
-{- FIXME - onCheck is defined this way...
-           I need to modify this to accept a string and boolean
-           Undersatnding this is likely the key to this and my 
-           select issues.
-
-           I'm attempting to have this onCheck2 function return a tuple of the 
-           Bool and the name. It feels like a bit of a hack but may teach me 
-           something.
--}
-onCheck2 : (Bool -> msg) -> Attribute msg
+onCheck2 : (AllCheckBoxData -> msg) -> Attribute msg
 onCheck2 tagger =
   on "change" (Json.map tagger targetChecked2)
 
-targetChecked2 : Json.Decoder Bool
+-- FIXME - decode the chckbox into this instead of a single Bool
+type alias AllCheckBoxData =
+  {
+    target : CheckBoxValue
+  }
+
+type alias CheckBoxValue =
+  {
+    name : String
+  , checked : Bool
+  }
+
+overallDecoder : Json.Decoder AllCheckBoxData
+overallDecoder =
+  object1 AllCheckBoxData
+    ("target" := checkBoxDecoder) 
+
+checkBoxDecoder : Json.Decoder CheckBoxValue
+checkBoxDecoder =
+  object2 CheckBoxValue
+    ("name" := string)
+    ("checked" := bool)
+
+targetChecked2 : Json.Decoder AllCheckBoxData
 targetChecked2 =
   -- Slowly transform this to more primitive items with fewer shortcuts
   --Json.at ["target", "checked"] Json.bool
-  List.foldr (:=) Json.bool ["target", "checked"]
+  --List.foldr (:=) Json.bool ["target", "checked"]
+  overallDecoder
+  
 
   {-
     This is decoding something like:
