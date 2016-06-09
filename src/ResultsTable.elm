@@ -46,9 +46,10 @@ initColumns =
   [
     Column "#" True False Ascending Dict.empty
   , Column "Name" True False Unsorted Dict.empty
-  , Column "Config" True True Unsorted (Dict.insert "ddr" False Dict.empty)
-  --, Column "Config" True True Unsorted Dict.empty
-  , Column "Status" True True Unsorted Dict.empty
+  --, Column "Config" True True Unsorted (Dict.insert "ddr" False Dict.empty)
+  , Column "Config" True True Unsorted Dict.empty
+  --, Column "Status" True True Unsorted Dict.empty
+  , Column "Status" True True Unsorted (Dict.insert "Pass" False Dict.empty)
   , Column "Lsf Status" True True Unsorted Dict.empty
   , Column "Run Time" True False Unsorted Dict.empty
   ]
@@ -63,6 +64,7 @@ initialSimulations =
   ,  (Simulation 6 "random_test_2" "default" "Pass" "Done" 83)
   ,  (Simulation 7 "pcie_advanced" "pcie"    "Fail" "Exit" 112)
   ,  (Simulation 8 "long_test" "default" "Fail" "Exit" 352)
+  ,  (Simulation 8 "error_test" "default" "Error" "Exit" 352)
   ]
 
 type Msg = NoOp
@@ -85,6 +87,7 @@ update msg model =
       sortByField model field
 
     -- FIXME   Need to replace model.columns with a new definition.
+    --         (which is in checkBoxItems)
     Filter ->
       { model | 
           showFilterPane = False,
@@ -95,7 +98,10 @@ update msg model =
       { model 
           | showFilterPane = True,
             itemBeingFiltered = field,
-            checkBoxItems = filterListElems model field |> listToDict
+            -- Merge the column filters with defaults
+            checkBoxItems = Dict.union
+              (columnFiltersFor model.columns field)
+              (filterListElems model.data field)
       }! []
 
 sortByField : Model -> String -> (Model, Cmd Msg) 
@@ -127,37 +133,32 @@ uniquify : List comparable -> List comparable
 uniquify list =
   list |> Set.fromList |> Set.toList 
 
-{-
-   FIXME - merge column values to get currently set filter value here
-           Instead of just returning true, I want to find the column
-           correspeonding to this name and see if that field is 
-           set. Clearly I am missing a parameter here.
--}
-
-getColumnFilterValue : Bool
-getColumnFilterValue =
-  True
-
 listToDict : List String -> Dict String Bool
 listToDict items =
-  List.foldl (\e -> Dict.insert e (getColumnFilterValue)) Dict.empty items
+  items
+   |> uniquify
+   |> List.foldl (\item -> Dict.insert item True) Dict.empty
 
-{-
-   FIXME - This function needs to be smarter. It now just goes out and 
-           gets a uniquified list of all possible values in a column.
-           It now unconditionally uses that but it should go out 
-           to the column entry for this field and merge those elems.
-           So if something is set in the column filters, it will use
-           that value instead of just marking it True.
--}
+columnFiltersFor : List Column -> String -> Dict String Bool
+columnFiltersFor columns columnName =
+  let 
+    filteredColumns = List.filter (\column -> (column.name == columnName)) columns
+  in
+    case length filteredColumns of
+      1 -> 
+        case head filteredColumns of
+          Just a -> a.filters
+          Nothing -> Dict.empty
+      _ -> Dict.empty
 
-filterListElems : Model -> String -> List String
-filterListElems model field =
-  case field of
-    "Config" -> (List.map .config model.data) |> uniquify
-    "Status" -> (List.map .status model.data) |> uniquify
-    "Lsf Status" -> (List.map .lsfStatus model.data) |> uniquify
-    _ -> []
+
+filterListElems : List Simulation -> String -> Dict String Bool
+filterListElems data filterColumnName =
+  case filterColumnName of
+    "Config" -> (List.map .config data) |> listToDict
+    "Status" -> (List.map .status data) |> listToDict
+    "Lsf Status" -> (List.map .lsfStatus data) |> listToDict
+    _ -> Dict.empty 
 
 tableIconAttributes : Msg -> String -> List (Attribute Msg)
 tableIconAttributes msg file =
@@ -311,9 +312,6 @@ checkBoxDecoder =
   object2 CheckBoxValue
     ("name" := string)
     ("checked" := bool)
-
--- FIXME - I need to add the real check box value instead of always true here
---
 
 -- Return True if item is not in Dict (default to visible)
 lookupMenuItem : Dict String Bool -> String -> Bool
