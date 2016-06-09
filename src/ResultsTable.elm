@@ -46,8 +46,8 @@ initColumns =
   [
     Column "#" True False Ascending Dict.empty
   , Column "Name" True False Unsorted Dict.empty
-  --, Column "Config" True True Unsorted (Dict.insert "ddr" False Dict.empty)
-  , Column "Config" True True Unsorted Dict.empty
+  , Column "Config" True True Unsorted (Dict.insert "ddr" False Dict.empty)
+  --, Column "Config" True True Unsorted Dict.empty
   , Column "Status" True True Unsorted Dict.empty
   , Column "Lsf Status" True True Unsorted Dict.empty
   , Column "Run Time" True False Unsorted Dict.empty
@@ -127,8 +127,29 @@ uniquify : List comparable -> List comparable
 uniquify list =
   list |> Set.fromList |> Set.toList 
 
+{-
+   FIXME - merge column values to get currently set filter value here
+           Instead of just returning true, I want to find the column
+           correspeonding to this name and see if that field is 
+           set. Clearly I am missing a parameter here.
+-}
+
+getColumnFilterValue : Bool
+getColumnFilterValue =
+  True
+
+listToDict : List String -> Dict String Bool
 listToDict items =
-  List.foldl (\e -> Dict.insert e True) Dict.empty items
+  List.foldl (\e -> Dict.insert e (getColumnFilterValue)) Dict.empty items
+
+{-
+   FIXME - This function needs to be smarter. It now just goes out and 
+           gets a uniquified list of all possible values in a column.
+           It now unconditionally uses that but it should go out 
+           to the column entry for this field and merge those elems.
+           So if something is set in the column filters, it will use
+           that value instead of just marking it True.
+-}
 
 filterListElems : Model -> String -> List String
 filterListElems model field =
@@ -260,16 +281,15 @@ filterCheckBox name active =
     []
     [
       input 
-      [ type' "checkbox", Attr.name name, checked active, onCheck2 ProcessCheckBox ]
+      [ type' "checkbox", Attr.name name, Attr.checked active, onCheckboxChange ProcessCheckBox ]
       []
     , text name 
     ]
 
-onCheck2 : (AllCheckBoxData -> msg) -> Attribute msg
-onCheck2 tagger =
-  on "change" (Json.map tagger targetChecked2)
+onCheckboxChange : (AllCheckBoxData -> msg) -> Attribute msg
+onCheckboxChange tagger =
+  on "change" (Json.map tagger overallDecoder)
 
--- FIXME - decode the chckbox into this instead of a single Bool
 type alias AllCheckBoxData =
   {
     target : CheckBoxValue
@@ -292,29 +312,19 @@ checkBoxDecoder =
     ("name" := string)
     ("checked" := bool)
 
-targetChecked2 : Json.Decoder AllCheckBoxData
-targetChecked2 =
-  -- Slowly transform this to more primitive items with fewer shortcuts
-  --Json.at ["target", "checked"] Json.bool
-  --List.foldr (:=) Json.bool ["target", "checked"]
-  overallDecoder
-  
-
-  {-
-    This is decoding something like:
-      "target" : {
-        "checked" : true,
-        "name" : "string"
-      }
-
-    I want to pull out the name value as well as the checked value.
-  -}
-
--- FIXME - I need to add the real check box value instead of always tue here
+-- FIXME - I need to add the real check box value instead of always true here
 --
+
+-- Return True if item is not in Dict (default to visible)
+lookupMenuItem : Dict String Bool -> String -> Bool
+lookupMenuItem items key =
+  case Dict.get key items of
+    Just a -> a
+    Nothing -> True
+
 checkBoxToHtml : Dict String Bool -> List (Html Msg)
 checkBoxToHtml items =
-  Dict.keys items |> List.map (\e -> (filterCheckBox e True))
+  Dict.keys items |> List.map (\e -> (filterCheckBox e (lookupMenuItem items e)))
 
 filterPane : Model -> Html Msg
 filterPane model =
