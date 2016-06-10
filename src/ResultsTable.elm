@@ -92,6 +92,9 @@ update msg model =
       { model | 
           showFilterPane = False,
           columns = model.columns
+          -- FIXME - start here and build a new column we want to replace with
+          --columns = modifyColumnList model.columns
+          --  (Column "Config" True True Unsorted Dict.empty)
       }! []
 
     ShowFilterPane field ->
@@ -339,6 +342,25 @@ filterPane model =
         [ onClick Filter ]
         [ text "Filter" ]
     ]
+
+------------------------------------------
+-- These functions modify the filters 
+-- for a particulatr column
+modifyColumnList : List Column -> Column -> List Column
+modifyColumnList columns newColumn =
+  List.map (swapColumn newColumn) columns
+
+swapColumn : Column -> Column -> Column
+swapColumn column newColumn =
+  if column.name == newColumn.name then
+    newColumn
+  else
+    column
+
+modifyColumnFilters : Column -> Dict String Bool -> Column
+modifyColumnFilters column newFilters =
+ { column | filters = newFilters }
+------------------------------------------
 
 view : Model -> Html Msg
 view model =
