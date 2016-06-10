@@ -46,10 +46,8 @@ initColumns =
   [
     Column "#" True False Ascending Dict.empty
   , Column "Name" True False Unsorted Dict.empty
-  --, Column "Config" True True Unsorted (Dict.insert "ddr" False Dict.empty)
   , Column "Config" True True Unsorted Dict.empty
-  --, Column "Status" True True Unsorted Dict.empty
-  , Column "Status" True True Unsorted (Dict.insert "Pass" False Dict.empty)
+  , Column "Status" True True Unsorted Dict.empty
   , Column "Lsf Status" True True Unsorted Dict.empty
   , Column "Run Time" True False Unsorted Dict.empty
   ]
