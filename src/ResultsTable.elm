@@ -79,14 +79,14 @@ update msg model =
     NoOp ->
       model ! []
 
-    ProcessCheckBox value ->
-      model ! []
+    ProcessCheckBox item ->
+      { model |
+          checkBoxItems = updateCheckBoxItems model.checkBoxItems item
+      } ! []
 
     Sort field ->
       sortByField model field
 
-    -- FIXME   Need to replace model.columns with a new definition.
-    --         (which is in checkBoxItems)
     Filter ->
       { model | 
           showFilterPane = False,
@@ -102,6 +102,13 @@ update msg model =
               (columnFiltersFor model.columns field)
               (filterListElems model.data field)
       }! []
+
+updateCheckBoxItems : Dict String Bool -> AllCheckBoxData -> Dict String Bool
+updateCheckBoxItems checkBoxItems item =
+  -- FIXME - really want to merge into existing Dict
+  Dict.union
+    (Dict.insert item.target.name item.target.checked Dict.empty)
+    checkBoxItems
 
 sortByField : Model -> String -> (Model, Cmd Msg) 
 sortByField model field =
@@ -282,13 +289,13 @@ filterCheckBox name active =
     []
     [
       input 
-      [ type' "checkbox", Attr.name name, Attr.checked active, onCheckboxChange ProcessCheckBox ]
+      [ type' "checkbox", Attr.name name, Attr.checked active, onCheckBoxChange ProcessCheckBox ]
       []
     , text name 
     ]
 
-onCheckboxChange : (AllCheckBoxData -> msg) -> Attribute msg
-onCheckboxChange tagger =
+onCheckBoxChange : (AllCheckBoxData -> msg) -> Attribute msg
+onCheckBoxChange tagger =
   on "change" (Json.map tagger overallDecoder)
 
 type alias AllCheckBoxData =
