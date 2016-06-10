@@ -7,7 +7,6 @@ import List exposing (..)
 import Set exposing (..)
 import Dict exposing (..)
 import Json.Decode as Json exposing (..)
-import Debug exposing (..)
 
 import RegressionData exposing (..)
 
@@ -89,17 +88,20 @@ update msg model =
       { model | 
           showFilterPane = False,
           columns = modifyColumnList model
-      }! []
+      } ! []
 
     ShowFilterPane field ->
       { model 
           | showFilterPane = True,
             itemBeingFiltered = field,
-            -- Merge the column filters with defaults
-            checkBoxItems = Dict.union
-              (columnFiltersFor model.columns field)
-              (filterListElems model.data field)
-      }! []
+            checkBoxItems = mergeFormCheckBoxItems model.columns model.data field
+      } ! []
+
+mergeFormCheckBoxItems : List Column -> List Simulation -> String -> Dict String Bool
+mergeFormCheckBoxItems columns data field =
+  Dict.union
+    (columnFiltersFor columns field)
+    (filterListElems data field)
 
 updateCheckBoxItems : Dict String Bool -> AllCheckBoxData -> Dict String Bool
 updateCheckBoxItems checkBoxItems item =
@@ -362,10 +364,8 @@ replaceFiltersOnColumn columns columnName newFilters =
 swapColumn : String -> Dict String Bool -> Column -> Column
 swapColumn columnName newFilters column =
   if column.name == columnName then
-    Debug.log columnName 
     modifyColumnFilters column newFilters
   else
-    Debug.log columnName 
     column
 
 modifyColumnFilters : Column -> Dict String Bool -> Column
