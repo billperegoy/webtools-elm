@@ -80,7 +80,6 @@ update msg model =
       model ! []
 
     ProcessCheckBox value ->
-      Debug.log (toString value)
       model ! []
 
     Sort field ->
@@ -91,10 +90,7 @@ update msg model =
     Filter ->
       { model | 
           showFilterPane = False,
-          columns = model.columns
-          -- FIXME - start here and build a new column we want to replace with
-          --columns = modifyColumnList model.columns
-          --  (Column "Config" True True Unsorted Dict.empty)
+          columns = modifyColumnList model
       }! []
 
     ShowFilterPane field ->
@@ -140,6 +136,7 @@ listToDict : List String -> Dict String Bool
 listToDict items =
   items
    |> uniquify
+   -- FIXME - This looks to be the broken thing. This always sets things to True?
    |> List.foldl (\item -> Dict.insert item True) Dict.empty
 
 columnFiltersFor : List Column -> String -> Dict String Bool
@@ -346,15 +343,24 @@ filterPane model =
 ------------------------------------------
 -- These functions modify the filters 
 -- for a particulatr column
-modifyColumnList : List Column -> Column -> List Column
-modifyColumnList columns newColumn =
-  List.map (swapColumn newColumn) columns
+modifyColumnList : Model -> List Column
+modifyColumnList model =
+  replaceFiltersOnColumn model.columns model.itemBeingFiltered model.checkBoxItems
 
-swapColumn : Column -> Column -> Column
-swapColumn column newColumn =
-  if column.name == newColumn.name then
-    newColumn
+-- Map over all of the colums and swap the filters only on the matching one
+replaceFiltersOnColumn : List Column -> String -> Dict String Bool -> List Column
+replaceFiltersOnColumn columns columnName newFilters =
+  List.map (swapColumn columnName newFilters) columns
+
+-- Note that the elements being mapped over comes last in the arg list - I
+-- always forget that
+swapColumn : String -> Dict String Bool -> Column -> Column
+swapColumn columnName newFilters column =
+  if column.name == columnName then
+    Debug.log columnName 
+    modifyColumnFilters column newFilters
   else
+    Debug.log columnName 
     column
 
 modifyColumnFilters : Column -> Dict String Bool -> Column
