@@ -64,7 +64,7 @@ initialSimulations =
   ,  (Simulation 6 "random_test_2" "default" "Pass" "Done" 83)
   ,  (Simulation 7 "pcie_advanced" "pcie"    "Fail" "Exit" 112)
   ,  (Simulation 8 "long_test" "default" "Fail" "Exit" 352)
-  ,  (Simulation 8 "error_test" "default" "Error" "Exit" 352)
+  ,  (Simulation 9 "error_test" "default" "Error" "Exit" 352)
   ]
 
 type Msg = NoOp
