@@ -14,7 +14,6 @@ import RegressionData exposing (..)
 type alias Model =
   {
     regressions : List Regression
-  , filteredRegressions : List Regression
   , userFilter : String
   , projectFilter : String
   , runTypeFilter : String
@@ -66,7 +65,7 @@ selectDecoder =
 
 init : Model
 init  =
-  Model initialRegressions initialRegressions "" "" ""
+  Model initialRegressions "" "" ""
 
 type Msg
   = NoOp
@@ -84,22 +83,16 @@ update msg model =
       {
         model | 
           userFilter = data.target.value 
-        , filteredRegressions = 
-            (filterIt model.regressions model.projectFilter data.target.value  model.runTypeFilter)
       } ! []
 
     UpdateProjectFilter data ->
       { model | 
           projectFilter = data.target.value 
-        , filteredRegressions = 
-            (filterIt model.regressions data.target.value model.userFilter model.projectFilter)
       } ! []
 
     UpdateRunTypeFilter data ->
       { model | 
           runTypeFilter = data.target.value 
-        , filteredRegressions = 
-            (filterIt model.regressions model.projectFilter model.userFilter data.target.value)
       } ! []
 
 toSelectOption : String -> Html Msg
@@ -127,22 +120,14 @@ filterByRunType runType unfiltered =
   else
     List.filter (\e -> e.runType == runType) unfiltered
 
-{-
-  FIXME - Note that I've hardcoded the select values in this function.
-          It should really be getting that from the select form elements.
--}
-filterIt : List Regression -> String -> String -> String ->  List Regression
-filterIt regressions projectFilter userFilter runTypeFilter =
-  regressions
-    |> filterByProject projectFilter
-    |> filterByUser userFilter
-    |> filterByRunType runTypeFilter
-
 filteredRegressionList : Model -> List (Html Msg)
 filteredRegressionList model =
-  model.filteredRegressions
-  |> List.map .name
-  |> List.map toSelectOption
+  model.regressions
+    |> filterByProject model.projectFilter
+    |> filterByUser model.userFilter
+    |> filterByRunType model.runTypeFilter
+    |> List.map .name
+    |> List.map toSelectOption
 
 uniquify : List String -> List String
 uniquify list =
