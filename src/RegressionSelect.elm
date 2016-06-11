@@ -2,10 +2,12 @@ module RegressionSelect exposing (..)
 
 import Html exposing (..)
 import Html.App as Html
-import Html.Attributes exposing (..)
+import Html.Attributes as Attr exposing (..)
 import Html.Events exposing (..)
 import List exposing (..)
 import Set exposing (..)
+import Json.Decode as Json exposing (..)
+import Debug exposing (..)
 
 import RegressionData exposing (..)
 
@@ -34,15 +36,43 @@ initialRegressions =
   ,  (Regression "regression12" "project2" "regression" "user3")
   ]
 
+
+onSelectChange : (AllSelectData -> msg) -> Attribute msg
+onSelectChange tagger =
+  on "change" (Json.map tagger overallDecoder)
+
+type alias AllSelectData =
+  {
+    target : SelectValue
+  }
+
+type alias SelectValue =
+  {
+    name : String
+  , value : String
+  }
+
+
+overallDecoder : Json.Decoder AllSelectData
+overallDecoder =
+  object1 AllSelectData
+    ("target" := selectDecoder) 
+
+selectDecoder : Json.Decoder SelectValue
+selectDecoder =
+  object2 SelectValue
+    ("name" := string)
+    ("value" := string)
+
 init : Model
 init  =
   Model initialRegressions initialRegressions "" "" ""
 
 type Msg
   = NoOp
-  | UpdateUserFilter String
-  | UpdateProjectFilter String
-  | UpdateRunTypeFilter String
+  | UpdateUserFilter AllSelectData 
+  | UpdateProjectFilter AllSelectData
+  | UpdateRunTypeFilter AllSelectData
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -50,19 +80,27 @@ update msg model =
     NoOp ->
       model ! []
 
-    UpdateUserFilter newUserFilter ->
+    UpdateUserFilter data ->
       {
         model | 
-          userFilter = newUserFilter
+          userFilter = data.target.value 
         , filteredRegressions = 
-            (filterIt model.regressions model.projectFilter newUserFilter model.runTypeFilter)
+            (filterIt model.regressions model.projectFilter data.target.value  model.runTypeFilter)
       } ! []
 
     UpdateProjectFilter data ->
-      { model | projectFilter = data } ! []
+      { model | 
+          projectFilter = data.target.value 
+        , filteredRegressions = 
+            (filterIt model.regressions data.target.value model.userFilter model.projectFilter)
+      } ! []
 
     UpdateRunTypeFilter data ->
-      { model | runTypeFilter = data } ! []
+      { model | 
+          runTypeFilter = data.target.value 
+        , filteredRegressions = 
+            (filterIt model.regressions model.projectFilter model.userFilter data.target.value)
+      } ! []
 
 toSelectOption : String -> Html Msg
 toSelectOption elem =
@@ -137,7 +175,7 @@ projectFilter model =
             []
             [ text "Projects" ]
         , select
-            []
+            [ Attr.name "project-filter", onSelectChange UpdateProjectFilter ]
             (uniqueProjects model)
         ]
 
@@ -150,7 +188,7 @@ runTypeFilter model =
             []
             [ text "Run Types" ]
         , select
-            []
+            [ Attr.name "runtype-filter", onSelectChange UpdateRunTypeFilter ]
             (uniqueRunTypes model)
         ]
 
@@ -162,12 +200,9 @@ userFilter model =
           label
             []
             [ text "Users" ]
-        , input [onInput UpdateUserFilter] []
-        {-
         , select
-            []
+            [ Attr.name "user-filter", onSelectChange UpdateUserFilter ]
             (uniqueUsers model)
-        -}
         ]
 
 filterRegressions : Model -> Html Msg
