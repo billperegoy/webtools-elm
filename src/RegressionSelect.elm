@@ -4,10 +4,12 @@ import Html exposing (..)
 import Html.App as Html
 import Html.Attributes as Attr exposing (..)
 import List exposing (..)
-import Debug exposing (..)
 
 import StringUtils exposing (uniquify)
 import FormUtils as Form exposing (onSelectChange)
+import HtmlUtils exposing (..)
+
+import Initialize exposing (..)
 import RegressionData exposing (..)
 
 type alias Model =
@@ -18,25 +20,10 @@ type alias Model =
   , runTypeFilter : String
   }
 
-initialRegressions : List Regression
-initialRegressions =
-  [  (Regression "regression1" "project1" "validate" "user1")
-  ,  (Regression "regression2" "project1" "publish" "user2")
-  ,  (Regression "regression3" "project1" "validate" "user2")
-  ,  (Regression "regression4" "project1" "validate" "user1")
-  ,  (Regression "regression5" "project1" "validate" "user1")
-  ,  (Regression "regression6" "project1" "publish" "user1")
-  ,  (Regression "regression7" "project2" "publish" "user2")
-  ,  (Regression "regression8" "project2" "validate" "user2")
-  ,  (Regression "regression9" "project2" "validate" "user1")
-  ,  (Regression "regression10" "project2" "validate" "user1")
-  ,  (Regression "regression11" "project2" "publish" "user1")
-  ,  (Regression "regression12" "project2" "regression" "user3")
-  ]
 
 init : Model
 init  =
-  Model initialRegressions "" "" ""
+  Model Initialize.initialRegressions "" "" ""
 
 type Msg
   = NoOp
@@ -66,99 +53,76 @@ update msg model =
           runTypeFilter = data
       } ! []
 
-toSelectOption : String -> Html Msg
-toSelectOption elem =
-  option [] [text elem]
+filterBy : String -> List Regression -> String -> List Regression
+filterBy filterType unfilteredList name =
+  case filterType of
+    "project" ->
+      List.filter (\e -> e.project == name) unfilteredList
 
-filterByProject : String -> List Regression -> List Regression
-filterByProject project unfiltered =
-  if project == "" then
-    unfiltered
-  else
-    List.filter (\e -> e.project == project) unfiltered
+    "user" ->
+      List.filter (\e -> e.user == name) unfilteredList
 
-filterByUser : String -> List Regression -> List Regression
-filterByUser user unfiltered =
-  if user == "" then
-    unfiltered
-  else
-    List.filter (\e -> e.user == user) unfiltered
+    "runType" ->
+      List.filter (\e -> e.runType == name) unfilteredList
 
-filterByRunType : String -> List Regression -> List Regression
-filterByRunType runType unfiltered =
-  if runType == "" then
-    unfiltered
+    _ -> unfilteredList
+
+
+filterSelect : String -> String -> List Regression -> List Regression
+filterSelect filterType name unfilteredList =
+  if name == "" then
+    unfilteredList
   else
-    List.filter (\e -> e.runType == runType) unfiltered
+    filterBy filterType unfilteredList name
 
 filteredRegressionList : Model -> List (Html Msg)
 filteredRegressionList model =
   model.regressions
-    |> filterByProject model.projectFilter
-    |> filterByUser model.userFilter
-    |> filterByRunType model.runTypeFilter
+    |> filterSelect "project" model.projectFilter
+    |> filterSelect "user" model.userFilter
+    |> filterSelect "runType" model.runTypeFilter
     |> List.map .name
-    |> List.map toSelectOption
+    |> HtmlUtils.listToHtmlSelectOptions
 
-uniqueProjects : Model -> List (Html Msg)
-uniqueProjects model =
-  "" :: List.map .project (model.regressions)
+allElementsByType : Model -> String -> List String
+allElementsByType model selectType =
+  case selectType of
+  "project" ->
+    "" :: List.map .project (model.regressions)
+
+  "user" ->
+    "" :: List.map .user (model.regressions)
+
+  "runType" ->
+    "" :: List.map .runType (model.regressions)
+
+  _ -> []
+
+uniqueElementsByType : Model -> String -> List (Html Msg)
+uniqueElementsByType model selectType =
+  allElementsByType model selectType
     |> StringUtils.uniquify
     |> List.map toSelectOption
 
-uniqueRunTypes : Model -> List (Html Msg)
-uniqueRunTypes model =
-  "" :: List.map .runType (model.regressions)
-    |> StringUtils.uniquify
-    |> List.map toSelectOption
 
-uniqueUsers : Model -> List (Html Msg)
-uniqueUsers model =
-  "" :: List.map .user (model.regressions)
-    |> StringUtils.uniquify
-    |> List.map toSelectOption
-
-projectFilter : Model -> Html Msg
-projectFilter model =
+--
+-- view
+--
+filterHtml : Model -> String -> String -> (String -> Msg) -> Html Msg
+filterHtml model filterLabel selectType msg =
       div
         [ class "select-field" ]
         [
           label
             []
-            [ text "Projects" ]
+            [ text filterLabel ]
         , select
-            [ Attr.name "project-filter", Form.onSelectChange UpdateProjectFilter ]
-            (uniqueProjects model)
+            [ Form.onSelectChange msg ]
+            (uniqueElementsByType model selectType)
         ]
 
-runTypeFilter : Model -> Html Msg
-runTypeFilter model =
-      div
-        [ class "select-field" ]
-        [
-          label
-            []
-            [ text "Run Types" ]
-        , select
-            [ Attr.name "runtype-filter", onSelectChange UpdateRunTypeFilter ]
-            (uniqueRunTypes model)
-        ]
-
-userFilter : Model -> Html Msg
-userFilter model =
-      div
-        [ class "select-field" ]
-        [
-          label
-            []
-            [ text "Users" ]
-        , select
-            [ Attr.name "user-filter", onSelectChange UpdateUserFilter ]
-            (uniqueUsers model)
-        ]
-
-filterRegressions : Model -> Html Msg
-filterRegressions model =
+filteredRegressionsHtml : Model -> Html Msg
+filteredRegressionsHtml model =
   div
     [ class "filtered-select-field" ]
     [
@@ -179,10 +143,10 @@ view model =
       div
         [ class "selectors" ]
         [
-          (projectFilter model)
-        , (runTypeFilter model)
-        , (userFilter model)
+          (filterHtml model "Projects" "project" UpdateProjectFilter)
+        , (filterHtml model "Run Types" "runType" UpdateRunTypeFilter)
+        , (filterHtml model "Users" "user" UpdateUserFilter)
         ]
-    , (filterRegressions model)
+    , (filteredRegressionsHtml model)
     ]
 
