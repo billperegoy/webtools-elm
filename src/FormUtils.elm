@@ -1,32 +1,25 @@
-module FormUtils exposing (onSelectChange, AllSelectData)
+module FormUtils exposing (onSelectChange)
 
 import Json.Decode as Json exposing (..)
 import Html exposing (Attribute)
 import Html.Events exposing (on)
 
-type alias AllSelectData =
-  {
-    target : SelectValue
+{-
+  The select element returns Json that looks like this:
+
+  "target" : {
+    "value" : "the_string_value"
   }
 
-type alias SelectValue =
-  {
-    name : String
-  , value : String
-  }
+  This uses a simple Json decoder that burrows into that
+  Json structure and pulls out just the string representing
+  the value.
+-}
 
-onSelectChange : (AllSelectData -> msg) -> Attribute msg
+onSelectChange : (String -> msg) -> Attribute msg
 onSelectChange tagger =
-  on "change" (Json.map tagger overallDecoder)
+  on "change" (Json.map tagger targetValue)
 
-
-overallDecoder : Json.Decoder AllSelectData
-overallDecoder =
-  object1 AllSelectData
-    ("target" := selectDecoder) 
-
-selectDecoder : Json.Decoder SelectValue
-selectDecoder =
-  object2 SelectValue
-    ("name" := string)
-    ("value" := string)
+targetValue : Json.Decoder String
+targetValue =
+  at ["target", "value"] string

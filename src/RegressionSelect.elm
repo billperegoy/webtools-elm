@@ -3,13 +3,11 @@ module RegressionSelect exposing (..)
 import Html exposing (..)
 import Html.App as Html
 import Html.Attributes as Attr exposing (..)
-import Html.Events exposing (..)
 import List exposing (..)
-import Json.Decode as Json exposing (..)
 import Debug exposing (..)
 
 import StringUtils exposing (uniquify)
-import FormUtils as Form exposing (onSelectChange, AllSelectData)
+import FormUtils as Form exposing (onSelectChange)
 import RegressionData exposing (..)
 
 type alias Model =
@@ -42,9 +40,9 @@ init  =
 
 type Msg
   = NoOp
-  | UpdateUserFilter Form.AllSelectData 
-  | UpdateProjectFilter Form.AllSelectData
-  | UpdateRunTypeFilter Form.AllSelectData
+  | UpdateUserFilter String
+  | UpdateProjectFilter String
+  | UpdateRunTypeFilter String
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -55,17 +53,17 @@ update msg model =
     UpdateUserFilter data ->
       {
         model | 
-          userFilter = data.target.value 
+          userFilter = data
       } ! []
 
     UpdateProjectFilter data ->
       { model | 
-          projectFilter = data.target.value 
+          projectFilter = data
       } ! []
 
     UpdateRunTypeFilter data ->
       { model | 
-          runTypeFilter = data.target.value 
+          runTypeFilter = data
       } ! []
 
 toSelectOption : String -> Html Msg
