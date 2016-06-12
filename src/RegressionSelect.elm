@@ -104,8 +104,8 @@ uniqueElementsByTypeToHtmlSelect model selectType =
 --
 -- view
 --
-filterHtml : Model -> String -> String -> (String -> Msg) -> Html Msg
-filterHtml model filterLabel selectType msg =
+filterElementHtml : Model -> String -> String -> (String -> Msg) -> Html Msg
+filterElementHtml model filterLabel selectType msg =
       div
         [ class "select-field" ]
         [
@@ -139,9 +139,9 @@ view model =
       div
         [ class "selectors" ]
         [
-          (filterHtml model "Projects" "project" UpdateProjectFilter)
-        , (filterHtml model "Run Types" "runType" UpdateRunTypeFilter)
-        , (filterHtml model "Users" "user" UpdateUserFilter)
+          (filterElementHtml model "Projects" "project" UpdateProjectFilter)
+        , (filterElementHtml model "Run Types" "runType" UpdateRunTypeFilter)
+        , (filterElementHtml model "Users" "user" UpdateUserFilter)
         ]
     , (filteredRegressionsHtml model)
     ]
