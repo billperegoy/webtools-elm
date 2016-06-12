@@ -95,8 +95,8 @@ allElementsByType model selectType =
 
   _ -> []
 
-uniqueElementsByType : Model -> String -> List (Html Msg)
-uniqueElementsByType model selectType =
+uniqueElementsByTypeToHtmlSelect : Model -> String -> List (Html Msg)
+uniqueElementsByTypeToHtmlSelect model selectType =
   allElementsByType model selectType
     |> StringUtils.uniquify
     |> HtmlUtils.listToHtmlSelectOptions
@@ -114,7 +114,7 @@ filterHtml model filterLabel selectType msg =
             [ text filterLabel ]
         , select
             [ Form.onSelectChange msg ]
-            (uniqueElementsByType model selectType)
+            (uniqueElementsByTypeToHtmlSelect model selectType)
         ]
 
 filteredRegressionsHtml : Model -> Html Msg
