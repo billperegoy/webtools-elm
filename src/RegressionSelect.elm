@@ -3,15 +3,17 @@ module RegressionSelect exposing (..)
 import Html exposing (..)
 import Html.App as Html
 import Html.Attributes as Attr exposing (..)
-import List exposing (..)
 
 import StringUtils exposing (uniquify)
 import FormUtils as Form exposing (onSelectChange)
-import HtmlUtils exposing (..)
+import HtmlUtils exposing (listToHtmlSelectOptions)
 
 import Initialize exposing (..)
 import RegressionData exposing (..)
 
+--
+-- Model
+--
 type alias Model =
   {
     regressions : List Regression
@@ -25,34 +27,29 @@ init : Model
 init  =
   Model Initialize.initialRegressions "" "" ""
 
+--
+-- Update
+--
 type Msg
-  = NoOp
-  | UpdateUserFilter String
+  = UpdateUserFilter String
   | UpdateProjectFilter String
   | UpdateRunTypeFilter String
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    NoOp ->
-      model ! []
-
     UpdateUserFilter data ->
-      {
-        model | 
-          userFilter = data
-      } ! []
+      { model | userFilter = data } ! []
 
     UpdateProjectFilter data ->
-      { model | 
-          projectFilter = data
-      } ! []
+      { model | projectFilter = data } ! []
 
     UpdateRunTypeFilter data ->
-      { model | 
-          runTypeFilter = data
-      } ! []
+      { model | runTypeFilter = data } ! []
 
+--
+-- View Utilities
+--
 filterBy : String -> List Regression -> String -> List Regression
 filterBy filterType unfilteredList name =
   case filterType of
@@ -102,8 +99,7 @@ uniqueElementsByType : Model -> String -> List (Html Msg)
 uniqueElementsByType model selectType =
   allElementsByType model selectType
     |> StringUtils.uniquify
-    |> List.map toSelectOption
-
+    |> HtmlUtils.listToHtmlSelectOptions
 
 --
 -- view
