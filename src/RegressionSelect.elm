@@ -5,10 +5,11 @@ import Html.App as Html
 import Html.Attributes as Attr exposing (..)
 import Html.Events exposing (..)
 import List exposing (..)
-import Set exposing (..)
 import Json.Decode as Json exposing (..)
 import Debug exposing (..)
 
+import StringUtils exposing (uniquify)
+import FormUtils as Form exposing (onSelectChange, AllSelectData)
 import RegressionData exposing (..)
 
 type alias Model =
@@ -35,43 +36,15 @@ initialRegressions =
   ,  (Regression "regression12" "project2" "regression" "user3")
   ]
 
-
-onSelectChange : (AllSelectData -> msg) -> Attribute msg
-onSelectChange tagger =
-  on "change" (Json.map tagger overallDecoder)
-
-type alias AllSelectData =
-  {
-    target : SelectValue
-  }
-
-type alias SelectValue =
-  {
-    name : String
-  , value : String
-  }
-
-
-overallDecoder : Json.Decoder AllSelectData
-overallDecoder =
-  object1 AllSelectData
-    ("target" := selectDecoder) 
-
-selectDecoder : Json.Decoder SelectValue
-selectDecoder =
-  object2 SelectValue
-    ("name" := string)
-    ("value" := string)
-
 init : Model
 init  =
   Model initialRegressions "" "" ""
 
 type Msg
   = NoOp
-  | UpdateUserFilter AllSelectData 
-  | UpdateProjectFilter AllSelectData
-  | UpdateRunTypeFilter AllSelectData
+  | UpdateUserFilter Form.AllSelectData 
+  | UpdateProjectFilter Form.AllSelectData
+  | UpdateRunTypeFilter Form.AllSelectData
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -129,26 +102,22 @@ filteredRegressionList model =
     |> List.map .name
     |> List.map toSelectOption
 
-uniquify : List String -> List String
-uniquify list =
-  Set.fromList list |> Set.toList
-
 uniqueProjects : Model -> List (Html Msg)
 uniqueProjects model =
   "" :: List.map .project (model.regressions)
-    |> uniquify
+    |> StringUtils.uniquify
     |> List.map toSelectOption
 
 uniqueRunTypes : Model -> List (Html Msg)
 uniqueRunTypes model =
   "" :: List.map .runType (model.regressions)
-    |> uniquify
+    |> StringUtils.uniquify
     |> List.map toSelectOption
 
 uniqueUsers : Model -> List (Html Msg)
 uniqueUsers model =
   "" :: List.map .user (model.regressions)
-    |> uniquify
+    |> StringUtils.uniquify
     |> List.map toSelectOption
 
 projectFilter : Model -> Html Msg
@@ -160,7 +129,7 @@ projectFilter model =
             []
             [ text "Projects" ]
         , select
-            [ Attr.name "project-filter", onSelectChange UpdateProjectFilter ]
+            [ Attr.name "project-filter", Form.onSelectChange UpdateProjectFilter ]
             (uniqueProjects model)
         ]
 
