@@ -8,18 +8,10 @@ import Set exposing (..)
 import Dict exposing (..)
 import Json.Decode as Json exposing (..)
 
+import StringUtils exposing (uniquify)
 import RegressionData exposing (..)
+import Initialize exposing (..)
 
-type SortStatus = Unsorted | Ascending | Descending
-
-type alias Column =
-  {
-    name : String
-  , sortable : Bool
-  , filterable : Bool
-  , sortStatus : SortStatus
-  , filters : Dict String Bool
-  }
 
 type alias Model =
   {
@@ -33,36 +25,12 @@ type alias Model =
 init : Model
 init =
   {
-    data = initialSimulations
-  , columns = initColumns
+    data = Initialize.initSimulations
+  , columns = Initialize.initColumns
   , showFilterPane = False
   , itemBeingFiltered = ""
   , checkBoxItems = Dict.empty
   }
-
-initColumns : List Column
-initColumns =
-  [
-    Column "#" True False Ascending Dict.empty
-  , Column "Name" True False Unsorted Dict.empty
-  , Column "Config" True True Unsorted Dict.empty
-  , Column "Status" True True Unsorted Dict.empty
-  , Column "Lsf Status" True True Unsorted Dict.empty
-  , Column "Run Time" True False Unsorted Dict.empty
-  ]
-
-initialSimulations : List Simulation
-initialSimulations =
-  [  (Simulation 1 "simple_test" "default" "Pass" "Done" 1154)
-  ,  (Simulation 2 "pcie_basic" "pcie"    "Pass" "Done" 912)
-  ,  (Simulation 3 "wringout_test" "default" "Pass" "Done" 654)
-  ,  (Simulation 4 "ddr_test" "ddr"     "Fail" "Exit" 543)
-  ,  (Simulation 5 "random_test_1" "default" "Pass" "Done" 812)
-  ,  (Simulation 6 "random_test_2" "default" "Pass" "Done" 83)
-  ,  (Simulation 7 "pcie_advanced" "pcie"    "Fail" "Exit" 112)
-  ,  (Simulation 8 "long_test" "default" "Fail" "Exit" 352)
-  ,  (Simulation 9 "error_test" "default" "Error" "Exit" 352)
-  ]
 
 type Msg = NoOp
          | ProcessCheckBox AllCheckBoxData
@@ -135,14 +103,10 @@ sortByField model field =
           model ! []
 
 
-uniquify : List comparable -> List comparable
-uniquify list =
-  list |> Set.fromList |> Set.toList 
-
 listToDict : List String -> Dict String Bool
 listToDict items =
   items
-   |> uniquify
+   |> StringUtils.uniquify
    -- FIXME - This looks to be the broken thing. This always sets things to True?
    |> List.foldl (\item -> Dict.insert item True) Dict.empty
 
@@ -276,15 +240,15 @@ dataToTableRows model =
   List.filter (filterDataTableRow model.columns) model.data
   |> List.map (singleDataTableRow model.columns)
 
-modalAttributes : Model -> List (Html.Attribute Msg)
-modalAttributes model =
+filterPaneAttributes : Model -> List (Html.Attribute Msg)
+filterPaneAttributes model =
   if model.showFilterPane then
     [ class "filter-modal filter-visible" ]
   else
     [ class "filter-modal" ]
 
-filterCheckBox : String -> Bool -> Html Msg
-filterCheckBox name active =
+filterPaneCheckBox : String -> Bool -> Html Msg
+filterPaneCheckBox name active =
   label 
     []
     [
@@ -329,12 +293,12 @@ lookupMenuItem items key =
 
 checkBoxToHtml : Dict String Bool -> List (Html Msg)
 checkBoxToHtml items =
-  Dict.keys items |> List.map (\e -> (filterCheckBox e (lookupMenuItem items e)))
+  Dict.keys items |> List.map (\e -> (filterPaneCheckBox e (lookupMenuItem items e)))
 
 filterPane : Model -> Html Msg
 filterPane model =
   div 
-    (modalAttributes model)
+    (filterPaneAttributes model)
     [ 
       div 
         [] 

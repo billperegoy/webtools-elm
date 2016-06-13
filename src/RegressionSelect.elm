@@ -25,7 +25,7 @@ type alias Model =
 
 init : Model
 init  =
-  Model Initialize.initialRegressions "" "" ""
+  Model Initialize.initRegressions "" "" ""
 
 --
 -- Update

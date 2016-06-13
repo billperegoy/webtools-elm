@@ -1,6 +1,9 @@
 module RegressionData exposing (..)
 
 import Json.Decode as Json exposing (..)
+import Dict exposing (..)
+
+type SortStatus = Unsorted | Ascending | Descending
 
 type alias SingleResult =
   {
@@ -50,4 +53,13 @@ type alias Simulation =
   , status : String 
   , lsfStatus : String 
   , runTime : Int
+  }
+
+type alias Column =
+  {
+    name : String
+  , sortable : Bool
+  , filterable : Bool
+  , sortStatus : SortStatus
+  , filters : Dict String Bool
   }
