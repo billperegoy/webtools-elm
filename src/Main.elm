@@ -9,7 +9,7 @@ import Time exposing (..)
 
 import RegressionData exposing(..)
 import RegressionSelect exposing(view)
-import RunTypeSummary exposing(view)
+import RegressionSummary exposing(view)
 import ResultsTable exposing(view)
 
 main : Program Never
@@ -129,22 +129,7 @@ view model =
         [ class "regression-select_container" ]
         [ App.map RegressionSelect (RegressionSelect.view model.regressionSelect) ]
 
-    , div
-        [ class "all-summaries" ]
-        [
-          div
-            [ class "summary-container" ]
-            [ (RunTypeSummary.view model.compileSummary) ]
-        , div
-            [ class "summary-container" ]
-            [ (RunTypeSummary.view model.lintSummary) ]
-        , div
-            [ class "summary-container" ]
-            [ (RunTypeSummary.view model.simSummary) ]
-        ]
-        , div
-            [ class "error-box" ]
-            [ text model.errors ]
+    , (RegressionSummary.view model)
     , App.map CompileResults (ResultsTable.view model.compileResults)
     , App.map LintResults (ResultsTable.view model.lintResults)
     , App.map SimResults (ResultsTable.view model.simResults)
