@@ -38,6 +38,7 @@ type Msg = NoOp
          | Sort String
          | ShowFilterPane String
          | Filter
+         | ClearAllFilters
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -64,6 +65,10 @@ update msg model =
           | showFilterPane = True,
             itemBeingFiltered = field,
             checkBoxItems = mergeFormCheckBoxItems model.columns model.data field
+      } ! []
+
+    ClearAllFilters ->
+      { model | columns = clearAllFilters model
       } ! []
 
 mergeFormCheckBoxItems : List Column -> List Simulation -> String -> Dict String Bool
@@ -312,6 +317,10 @@ modifyColumnList : Model -> List Column
 modifyColumnList model =
   replaceFiltersOnColumn model.columns model.itemBeingFiltered model.checkBoxItems
 
+clearAllFilters : Model -> List Column
+clearAllFilters model =
+  List.map (modifyColumnFilters Dict.empty) model.columns
+
 -- Map over all of the colums and swap the filters only on the matching one
 replaceFiltersOnColumn : List Column -> String -> Dict String Bool -> List Column
 replaceFiltersOnColumn columns columnName newFilters =
@@ -322,14 +331,20 @@ replaceFiltersOnColumn columns columnName newFilters =
 swapColumn : String -> Dict String Bool -> Column -> Column
 swapColumn columnName newFilters column =
   if column.name == columnName then
-    modifyColumnFilters column newFilters
+    modifyColumnFilters newFilters column
   else
     column
 
-modifyColumnFilters : Column -> Dict String Bool -> Column
-modifyColumnFilters column newFilters =
+modifyColumnFilters : Dict String Bool -> Column -> Column
+modifyColumnFilters newFilters column =
  { column | filters = newFilters }
 ------------------------------------------
+
+clearFiltersButton : Html Msg
+clearFiltersButton =
+  button
+    [ onClick ClearAllFilters ]
+    [ text "Clear Filters" ]
 
 view : Model -> Html Msg
 view model =
@@ -337,6 +352,7 @@ view model =
     []
     [
       (filterPane model)
+    , clearFiltersButton
     , table
         []
         (tableRows model)
