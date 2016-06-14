@@ -28,7 +28,9 @@ type alias Model =
   , compileSummary : RunTypeSummaryData
   , lintSummary : RunTypeSummaryData
   , simSummary : RunTypeSummaryData
+  , compileResults : ResultsTable.Model
   , lintResults : ResultsTable.Model
+  , simResults : ResultsTable.Model
   , errors : String
   }
 
@@ -48,7 +50,9 @@ init =
   , compileSummary = emptySummaryData "compiles"
   , lintSummary = emptySummaryData "lints"
   , simSummary = emptySummaryData "sims"
+  , compileResults = ResultsTable.init
   , lintResults = ResultsTable.init
+  , simResults = ResultsTable.init
   , errors = ""
   } ! []
 
@@ -65,7 +69,9 @@ type Msg
   | HttpSucceed ResultsTriad
   | HttpFail Http.Error
   | PollHttp Time
+  | CompileResults ResultsTable.Msg
   | LintResults ResultsTable.Msg
+  | SimResults ResultsTable.Msg
   | RegressionSelect RegressionSelect.Msg
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -98,9 +104,19 @@ update msg model =
           | regressionSelect = fst(RegressionSelect.update msg model.regressionSelect)
       } ! []
 
+    CompileResults msg ->
+      { model
+          | compileResults = fst(ResultsTable.update msg model.compileResults)
+      } ! []
+
     LintResults msg ->
       { model
           | lintResults = fst(ResultsTable.update msg model.lintResults)
+      } ! []
+
+    SimResults msg ->
+      { model
+          | simResults = fst(ResultsTable.update msg model.simResults)
       } ! []
 
 
@@ -131,7 +147,22 @@ view model =
             [ text model.errors ]
     , div
         []
-        [ App.map LintResults (ResultsTable.view model.lintResults) ]
+        [
+          h1 [] [ text "Compiles" ]
+        , App.map CompileResults (ResultsTable.view model.compileResults)
+        ]
+    , div
+        []
+        [
+          h1 [] [ text "Lints" ]
+        , App.map LintResults (ResultsTable.view model.lintResults)
+        ]
+    , div
+        []
+        [
+          h1 [] [ text "Simuations" ]
+        , App.map SimResults (ResultsTable.view model.simResults)
+        ]
     ]
 
 
