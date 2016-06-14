@@ -8,6 +8,7 @@ import Set exposing (..)
 import Dict exposing (..)
 import Json.Decode as Json exposing (..)
 
+import DictUtils exposing (getWithDefault)
 import StringUtils exposing (uniquify)
 import RegressionData exposing (..)
 import Initialize exposing (..)
@@ -293,7 +294,7 @@ lookupMenuItem items key =
 
 checkBoxToHtml : Dict String Bool -> List (Html Msg)
 checkBoxToHtml items =
-  Dict.keys items |> List.map (\e -> (filterPaneCheckBox e (lookupMenuItem items e)))
+  Dict.keys items |> List.map (\e -> (filterPaneCheckBox e (DictUtils.getWithDefault items e True)))
 
 filterPane : Model -> Html Msg
 filterPane model =
