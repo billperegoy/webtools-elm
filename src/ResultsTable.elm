@@ -285,13 +285,6 @@ checkBoxDecoder =
     ("name" := string)
     ("checked" := bool)
 
--- Return True if item is not in Dict (default to visible)
-lookupMenuItem : Dict String Bool -> String -> Bool
-lookupMenuItem items key =
-  case Dict.get key items of
-    Just a -> a
-    Nothing -> True
-
 checkBoxToHtml : Dict String Bool -> List (Html Msg)
 checkBoxToHtml items =
   Dict.keys items |> List.map (\e -> (filterPaneCheckBox e (DictUtils.getWithDefault items e True)))
