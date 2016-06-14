@@ -16,17 +16,19 @@ import Initialize exposing (..)
 
 type alias Model =
   {
-    data : List Simulation
+    resultsType : String
+  , data : List Simulation
   , columns : List Column
   , showFilterPane : Bool
   , itemBeingFiltered : String
   , checkBoxItems : Dict String Bool
   }
 
-init : Model
-init =
+init : String -> Model
+init resultsType =
   {
-    data = Initialize.initSimulations
+    resultsType = resultsType
+  , data = Initialize.initSimulations
   , columns = Initialize.initColumns
   , showFilterPane = False
   , itemBeingFiltered = ""
@@ -352,6 +354,7 @@ view model =
     []
     [
       (filterPane model)
+    , h1 [] [ text model.resultsType ]
     , clearFiltersButton
     , table
         []

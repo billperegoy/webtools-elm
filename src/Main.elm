@@ -50,9 +50,9 @@ init =
   , compileSummary = emptySummaryData "compiles"
   , lintSummary = emptySummaryData "lints"
   , simSummary = emptySummaryData "sims"
-  , compileResults = ResultsTable.init
-  , lintResults = ResultsTable.init
-  , simResults = ResultsTable.init
+  , compileResults = ResultsTable.init "Compiles"
+  , lintResults = ResultsTable.init "Lints"
+  , simResults = ResultsTable.init "Simulations"
   , errors = ""
   } ! []
 
@@ -145,24 +145,9 @@ view model =
         , div
             [ class "error-box" ]
             [ text model.errors ]
-    , div
-        []
-        [
-          h1 [] [ text "Compiles" ]
-        , App.map CompileResults (ResultsTable.view model.compileResults)
-        ]
-    , div
-        []
-        [
-          h1 [] [ text "Lints" ]
-        , App.map LintResults (ResultsTable.view model.lintResults)
-        ]
-    , div
-        []
-        [
-          h1 [] [ text "Simuations" ]
-        , App.map SimResults (ResultsTable.view model.simResults)
-        ]
+    , App.map CompileResults (ResultsTable.view model.compileResults)
+    , App.map LintResults (ResultsTable.view model.lintResults)
+    , App.map SimResults (ResultsTable.view model.simResults)
     ]
 
 
