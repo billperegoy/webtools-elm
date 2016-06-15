@@ -7,10 +7,11 @@ import Task exposing (..)
 import Json.Decode as Json exposing (..)
 import Time exposing (..)
 
-import RegressionData exposing(..)
-import RegressionSelect exposing(view)
-import RegressionSummary exposing(view)
-import ResultsTable exposing(view)
+import Initialize exposing (..)
+import RegressionData exposing (..)
+import RegressionSelect exposing (view)
+import RegressionSummary exposing (view)
+import ResultsTable exposing (view)
 
 main : Program Never
 main =
@@ -50,9 +51,9 @@ init =
   , compileSummary = emptySummaryData "compiles"
   , lintSummary = emptySummaryData "lints"
   , simSummary = emptySummaryData "sims"
-  , compileResults = ResultsTable.init "Compiles"
-  , lintResults = ResultsTable.init "Lints"
-  , simResults = ResultsTable.init "Simulations"
+  , compileResults = ResultsTable.init "Compiles" Initialize.initCompiles
+  , lintResults = ResultsTable.init "Lints" Initialize.initLints
+  , simResults = ResultsTable.init "Simulations" Initialize.initSimulations
   , errors = ""
   } ! []
 

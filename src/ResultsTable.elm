@@ -24,11 +24,11 @@ type alias Model =
   , checkBoxItems : Dict String Bool
   }
 
-init : String -> Model
-init resultsType =
+init : String -> List Simulation -> Model
+init resultsType data =
   {
     resultsType = resultsType
-  , data = Initialize.initSimulations
+  , data = data 
   , columns = Initialize.initColumns
   , showFilterPane = False
   , itemBeingFiltered = ""

@@ -44,3 +44,15 @@ initSimulations =
   ,  (Simulation 8 "long_test" "default" "Fail" "Exit" 352)
   ,  (Simulation 9 "error_test" "default" "Error" "Exit" 352)
   ]
+
+initCompiles : List Simulation
+initCompiles =
+  [  (Simulation 1 "simple_test" "default" "Pass" "Done" 1154)
+  ,  (Simulation 2 "pcie_basic" "pcie"    "Pass" "Done" 912)
+  ,  (Simulation 3 "wringout_test" "default" "Pass" "Done" 654)
+  ]
+
+initLints : List Simulation
+initLints =
+  [  (Simulation 1 "simple_test" "default" "Pass" "Done" 1154)
+  ]

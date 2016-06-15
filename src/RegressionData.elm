@@ -37,6 +37,11 @@ decodeAll =
     ("lints" := decodeSingle)
     ("sims" := decodeSingle)
 
+type alias ResultsTableProps =
+  {
+    data : List Simulation
+  }
+
 type alias Regression =
   {
     name : String
