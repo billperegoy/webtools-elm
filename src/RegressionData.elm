@@ -7,12 +7,12 @@ type SortStatus = Unsorted | Ascending | Descending
 
 type alias SingleRun =
   {
-    run_name : Int 
+    runNum : Int 
   , name : String
   , config : String
   , status : String
-  , lsf_status : String
-  , run_time : Int
+  , lsfStatus : String
+  , runTime : Int
   }
 
 type alias AllResults =

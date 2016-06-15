@@ -42,6 +42,7 @@ type Msg = NoOp
          | ShowFilterPane String
          | Filter
          | ClearAllFilters
+         | UpdateData (List Simulation)
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -49,14 +50,16 @@ update msg model =
     NoOp ->
       model ! []
 
+    UpdateData data ->
+      Debug.log ("Updating data" ++ toString data)
+      { model | data = data } ! []
+
     ProcessCheckBox item ->
       { model |
           checkBoxItems = updateCheckBoxItems model.checkBoxItems item
       } ! []
 
     Sort field ->
-      Debug.log (toString model)
-      --sortByField model field
       { model |
           columns = setSortStatus model field
         , data = sortByField model.data field model.columns

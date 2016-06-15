@@ -33,6 +33,7 @@ type alias Model =
   , lintResults : ResultsTable.Model
   , simResults : ResultsTable.Model
   , errors : String
+  , tempData : List Simulation
   }
 
 emptySummaryData : String -> RunTypeSummaryData
@@ -55,6 +56,7 @@ init =
   , lintResults = ResultsTable.init "Lints" Initialize.initLints
   , simResults = ResultsTable.init "Simulations" Initialize.initSimulations
   , errors = ""
+  , tempData = []
   } ! []
 
 getHttpData : Cmd Msg
@@ -90,6 +92,7 @@ update msg model =
          | compileSummary = RunTypeSummaryData "compiles" results.summary.compiles
          , lintSummary = RunTypeSummaryData "lints" results.summary.lints
          , simSummary = RunTypeSummaryData "simulations" results.summary.sims
+         , tempData = results.simulations
          , errors = ""
       } ! []
 
@@ -127,7 +130,8 @@ view model =
   div
     []
     [
-      div
+      button [ onClick (SimResults (ResultsTable.UpdateData model.tempData)) ] [ text "Update Data" ]
+    , div
         [ class "regression-select_container" ]
         [ App.map RegressionSelect (RegressionSelect.view model.regressionSelect) ]
 
@@ -139,5 +143,8 @@ view model =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions _ =
-  Time.every (2000 * millisecond) PollHttp
+subscriptions model =
+  Sub.batch  
+    [ Time.every (2000 * millisecond) PollHttp 
+    --, ResultsTable.update ResultsTable.UpdateData model.simResults
+    ]

@@ -26,9 +26,9 @@ def gen_run_list(count)
     list << {
       run_number: num,
       name: "test_" + num.to_s,
-      config: "default",
-      status: "PASS",
-      lsf_status: "DONE",
+      config: ["default", "pcie", "ddr", "bypass"][rand(3)],
+      status: ["PASS", "FAIL", "ERROR"][rand(2)],
+      lsf_status: ["DONE", "EXIT", "RUN"][rand(3)],
       run_time: rand(1000)
     }
   end
