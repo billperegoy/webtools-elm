@@ -12,6 +12,7 @@ import DictUtils exposing (getWithDefault)
 import StringUtils exposing (uniquify)
 import RegressionData exposing (..)
 import Initialize exposing (..)
+import Debug exposing (..)
 
 
 type alias Model =
@@ -54,7 +55,12 @@ update msg model =
       } ! []
 
     Sort field ->
-      sortByField model field
+      Debug.log (toString model)
+      --sortByField model field
+      { model |
+          columns = setSortStatus model field
+        , data = sortByField model.data field model.columns
+      } ! []
 
     Filter ->
       { model | 
@@ -86,29 +92,50 @@ updateCheckBoxItems checkBoxItems item =
     (Dict.insert item.target.name item.target.checked Dict.empty)
     checkBoxItems
 
-sortByField : Model -> String -> (Model, Cmd Msg) 
-sortByField model field =
-      case field of
-        "Status" -> 
-          { model | data = List.sortBy .status model.data } ! []
+sortByField : List Simulation -> String -> List Column -> List Simulation
+sortByField data field columns =
+  let 
+    direction = columnSortStatusFor columns field 
+  in
+    case field of
+      "Status" -> 
+        case direction of
+          Descending -> List.sortBy .status data
+          Ascending -> List.reverse (List.sortBy .status data)
+          Unsorted -> List.sortBy .status data 
 
-        "Lsf Status" -> 
-          { model | data = List.sortBy .lsfStatus model.data } ! []
+      "Lsf Status" -> 
+        case direction of
+          Descending -> List.sortBy .lsfStatus data
+          Ascending -> List.reverse (List.sortBy .lsfStatus data)
+          Unsorted -> List.sortBy .lsfStatus data 
 
-        "#" -> 
-          { model | data = List.sortBy .runNum model.data } ! []
+      "#" -> 
+        case direction of
+          Descending -> List.sortBy .runNum data
+          Ascending -> List.reverse (List.sortBy .runNum data)
+          Unsorted -> List.sortBy .runNum data 
 
-        "Config" -> 
-          { model | data = List.sortBy .config model.data } ! []
+      "Config" -> 
+        case direction of
+          Descending -> List.sortBy .config data
+          Ascending -> List.reverse (List.sortBy .config data)
+          Unsorted -> List.sortBy .config data 
 
-        "Name" -> 
-          { model | data = List.sortBy .name model.data } ! []
+      "Name" -> 
+        case direction of
+          Descending -> List.sortBy .name data
+          Ascending -> List.reverse (List.sortBy .name data)
+          Unsorted -> List.sortBy .name data 
 
-        "Run Time" -> 
-          { model | data = List.sortBy .runTime model.data } ! []
+      "Run Time" -> 
+        case direction of
+          Descending -> List.sortBy .runTime data
+          Ascending -> List.reverse (List.sortBy .runTime data)
+          Unsorted -> List.sortBy .runTime data 
 
-        _ ->
-          model ! []
+      _ ->
+        data
 
 
 listToDict : List String -> Dict String Bool
@@ -129,6 +156,18 @@ columnFiltersFor columns columnName =
           Just a -> a.filters
           Nothing -> Dict.empty
       _ -> Dict.empty
+
+columnSortStatusFor : List Column -> String -> SortStatus
+columnSortStatusFor columns columnName =
+  let 
+    filteredColumns = List.filter (\column -> (column.name == columnName)) columns
+  in
+    case length filteredColumns of
+      1 -> 
+        case head filteredColumns of
+          Just a -> a.sortStatus
+          Nothing -> Unsorted 
+      _ -> Unsorted 
 
 
 filterListElems : List Simulation -> String -> Dict String Bool
@@ -341,6 +380,25 @@ modifyColumnFilters : Dict String Bool -> Column -> Column
 modifyColumnFilters newFilters column =
  { column | filters = newFilters }
 ------------------------------------------
+
+flipSortStatus : SortStatus -> SortStatus
+flipSortStatus status =
+  case status of
+    Ascending -> Descending
+    Descending -> Ascending
+    Unsorted -> Ascending
+
+updateOneSortStatus : String -> Column -> Column
+updateOneSortStatus name column =
+  if column.name == name then
+    { column | sortStatus = flipSortStatus column.sortStatus }
+  else
+    { column | sortStatus = Unsorted }
+
+
+setSortStatus : Model -> String -> List Column 
+setSortStatus model name =
+  List.map (updateOneSortStatus name) model.columns
 
 clearFiltersButton : Html Msg
 clearFiltersButton =
