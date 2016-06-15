@@ -8,7 +8,31 @@ get '/api/results' do
 end
 
 def random_regression_result
-  { compiles: random_triplet, lints: random_triplet, sims: random_triplet}
+  {
+    summary: {
+      compiles: random_triplet,
+      lints: random_triplet,
+      sims: random_triplet
+    },
+    compiles: gen_run_list(10),
+    lints: gen_run_list(3),
+    simulations: gen_run_list(1000)
+  }
+end
+
+def gen_run_list(count)
+  list = []
+  (1..count).each do |num|
+    list << {
+      run_number: num,
+      name: "test_" + num.to_s,
+      config: "default",
+      status: "PASS",
+      lsf_status: "DONE",
+      run_time: rand(1000)
+    }
+  end
+  list
 end
 
 def random_triplet

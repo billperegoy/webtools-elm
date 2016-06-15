@@ -5,6 +5,24 @@ import Dict exposing (..)
 
 type SortStatus = Unsorted | Ascending | Descending
 
+type alias SingleRun =
+  {
+    run_name : Int 
+  , name : String
+  , config : String
+  , status : String
+  , lsf_status : String
+  , run_time : Int
+  }
+
+type alias AllResults =
+  {
+    summary : ResultsTriad
+  , compiles : List SingleRun
+  , lints : List SingleRun
+  , simulations : List SingleRun 
+  }
+
 type alias SingleResult =
   {
     total : Int
@@ -36,6 +54,31 @@ decodeAll =
     ("compiles" := decodeSingle)
     ("lints" := decodeSingle)
     ("sims" := decodeSingle)
+
+
+decodeSingleRun : Json.Decoder SingleRun
+decodeSingleRun =
+  Json.object6 SingleRun
+    ("run_number" := Json.int)
+    ("name" := Json.string)
+    ("config" := Json.string)
+    ("status" := Json.string)
+    ("lsf_status" := Json.string)
+    ("run_time" := Json.int)
+
+
+decodeRunList : Json.Decoder (List SingleRun)
+decodeRunList =
+  list decodeSingleRun
+
+
+decodeEverything : Json.Decoder AllResults
+decodeEverything =
+  Json.object4 AllResults 
+    ("summary" := decodeAll)
+    ("compiles" := decodeRunList)
+    ("lints" := decodeRunList)
+    ("simulations" := decodeRunList)
 
 type alias ResultsTableProps =
   {

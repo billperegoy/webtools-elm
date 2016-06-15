@@ -62,12 +62,12 @@ getHttpData =
   let
     url = "http://localhost:4567/api/results"
   in
-    Task.perform HttpFail HttpSucceed (Http.get decodeAll url)
+    Task.perform HttpFail HttpSucceed (Http.get decodeEverything url)
 
 type Msg
   = NoOp
   | GetApiData
-  | HttpSucceed ResultsTriad
+  | HttpSucceed AllResults
   | HttpFail Http.Error
   | PollHttp Time
   | CompileResults ResultsTable.Msg
@@ -84,11 +84,12 @@ update msg model =
     GetApiData ->
       (model, getHttpData)
 
-    HttpSucceed triad ->
-      { model
-         | compileSummary = RunTypeSummaryData "compiles" triad.compiles
-         , lintSummary = RunTypeSummaryData "lints" triad.lints
-         , simSummary = RunTypeSummaryData "simulations" triad.sims
+    HttpSucceed results ->
+      { 
+        model
+         | compileSummary = RunTypeSummaryData "compiles" results.summary.compiles
+         , lintSummary = RunTypeSummaryData "lints" results.summary.lints
+         , simSummary = RunTypeSummaryData "simulations" results.summary.sims
          , errors = ""
       } ! []
 
@@ -139,4 +140,4 @@ view model =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-  Time.every (200 * millisecond) PollHttp
+  Time.every (2000 * millisecond) PollHttp
