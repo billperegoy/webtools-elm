@@ -217,7 +217,8 @@ singleTableHeader column =
 
 columnsToTableHeader : List Column -> List (Html Msg)
 columnsToTableHeader columns =
-  List.map singleTableHeader columns
+  List.filter (\c -> c.visible) columns
+  |> List.map singleTableHeader
 
 
 tableRows : Model -> List (Html Msg)
@@ -245,7 +246,8 @@ lookupDataValue simulation name =
 
 singleDataRowColumns : List Column -> Simulation -> List (Html Msg)
 singleDataRowColumns columns simulation =
-  List.map (\c -> td [] [ text (lookupDataValue simulation c.name) ]) columns
+  List.filter (\c -> c.visible) columns
+  |> List.map (\c -> td [] [ text (lookupDataValue simulation c.name) ])
 
 singleDataTableRow : List Column -> Simulation -> Html Msg
 singleDataTableRow columns simulation =

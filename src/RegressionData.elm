@@ -106,6 +106,7 @@ type alias Simulation =
 type alias Column =
   {
     name : String
+  , visible : Bool
   , sortable : Bool
   , filterable : Bool
   , sortStatus : SortStatus
