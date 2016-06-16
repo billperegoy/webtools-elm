@@ -82,7 +82,7 @@ decodeEverything =
 
 type alias ResultsTableProps =
   {
-    data : List Simulation
+    data : List SingleRun 
   }
 
 type alias Regression =
@@ -91,16 +91,6 @@ type alias Regression =
   , project : String
   , runType : String 
   , user : String
-  }
-
-type alias Simulation =
-  {
-    runNum : Int
-  , name : String
-  , config : String
-  , status : String 
-  , lsfStatus : String 
-  , runTime : Int
   }
 
 type alias Column =

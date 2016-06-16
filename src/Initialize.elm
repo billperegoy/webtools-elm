@@ -32,27 +32,27 @@ initColumns =
   , Column "Run Time" True True False Unsorted Dict.empty
   ]
 
-initSimulations : List Simulation
+initSimulations : List SingleRun 
 initSimulations =
-  [  (Simulation 1 "simple_test" "default" "Pass" "Done" 1154)
-  ,  (Simulation 2 "pcie_basic" "pcie"    "Pass" "Done" 912)
-  ,  (Simulation 3 "wringout_test" "default" "Pass" "Done" 654)
-  ,  (Simulation 4 "ddr_test" "ddr"     "Fail" "Exit" 543)
-  ,  (Simulation 5 "random_test_1" "default" "Pass" "Done" 812)
-  ,  (Simulation 6 "random_test_2" "default" "Pass" "Done" 83)
-  ,  (Simulation 7 "pcie_advanced" "pcie"    "Fail" "Exit" 112)
-  ,  (Simulation 8 "long_test" "default" "Fail" "Exit" 352)
-  ,  (Simulation 9 "error_test" "default" "Error" "Exit" 352)
+  [  (SingleRun 1 "simple_test" "default" "Pass" "Done" 1154)
+  ,  (SingleRun 2 "pcie_basic" "pcie"    "Pass" "Done" 912)
+  ,  (SingleRun 3 "wringout_test" "default" "Pass" "Done" 654)
+  ,  (SingleRun 4 "ddr_test" "ddr"     "Fail" "Exit" 543)
+  ,  (SingleRun 5 "random_test_1" "default" "Pass" "Done" 812)
+  ,  (SingleRun 6 "random_test_2" "default" "Pass" "Done" 83)
+  ,  (SingleRun 7 "pcie_advanced" "pcie"    "Fail" "Exit" 112)
+  ,  (SingleRun 8 "long_test" "default" "Fail" "Exit" 352)
+  ,  (SingleRun 9 "error_test" "default" "Error" "Exit" 352)
   ]
 
-initCompiles : List Simulation
+initCompiles : List SingleRun
 initCompiles =
-  [  (Simulation 1 "simple_test" "default" "Pass" "Done" 1154)
-  ,  (Simulation 2 "pcie_basic" "pcie"    "Pass" "Done" 912)
-  ,  (Simulation 3 "wringout_test" "default" "Pass" "Done" 654)
+  [  (SingleRun 1 "simple_test" "default" "Pass" "Done" 1154)
+  ,  (SingleRun 2 "pcie_basic" "pcie"    "Pass" "Done" 912)
+  ,  (SingleRun 3 "wringout_test" "default" "Pass" "Done" 654)
   ]
 
-initLints : List Simulation
+initLints : List SingleRun
 initLints =
-  [  (Simulation 1 "simple_test" "default" "Pass" "Done" 1154)
+  [  (SingleRun 1 "simple_test" "default" "Pass" "Done" 1154)
   ]

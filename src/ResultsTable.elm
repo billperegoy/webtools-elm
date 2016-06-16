@@ -18,7 +18,7 @@ import Debug exposing (..)
 type alias Model =
   {
     resultsType : String
-  , data : List Simulation
+  , data : List SingleRun 
   , columns : List Column
   , showEditColumnsPane : Bool
   , showFilterPane : Bool
@@ -27,7 +27,7 @@ type alias Model =
   , columnVisibilityItems : Dict String Bool
   }
 
-init : String -> List Simulation -> Model
+init : String -> List SingleRun -> Model
 init resultsType data =
   {
     resultsType = resultsType
@@ -49,7 +49,7 @@ type Msg = NoOp
          | UpdateColumnVisibility
          | Filter
          | ClearAllFilters
-         | UpdateData (List Simulation)
+         | UpdateData (List SingleRun)
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -106,7 +106,7 @@ update msg model =
       { model | columns = clearAllFilters model
       } ! []
 
-mergeFormCheckBoxItems : List Column -> List Simulation -> String -> Dict String Bool
+mergeFormCheckBoxItems : List Column -> List SingleRun -> String -> Dict String Bool
 mergeFormCheckBoxItems columns data field =
   Dict.union
     (columnFiltersFor columns field)
@@ -118,7 +118,7 @@ updateColumnFilterItems columnFilterItems item =
     (Dict.insert item.target.name item.target.checked Dict.empty)
     columnFilterItems
 
-sortByField : List Simulation -> String -> List Column -> List Simulation
+sortByField : List SingleRun -> String -> List Column -> List SingleRun 
 sortByField data field columns =
   let 
     direction = columnSortStatusFor columns field 
@@ -196,7 +196,7 @@ columnSortStatusFor columns columnName =
       _ -> Unsorted 
 
 
-filterListElems : List Simulation -> String -> Dict String Bool
+filterListElems : List SingleRun -> String -> Dict String Bool
 filterListElems data filterColumnName =
   case filterColumnName of
     "Config" -> (List.map .config data) |> listToDict
@@ -256,7 +256,7 @@ tableHeader model =
 
 -- FIXME - can we do this in a less brute force way?
 --
-lookupDataValue : Simulation -> String -> String
+lookupDataValue : SingleRun -> String -> String
 lookupDataValue simulation name =
   case name of
     "#" -> toString simulation.runNum
@@ -267,12 +267,12 @@ lookupDataValue simulation name =
     "Run Time" -> toString simulation.runTime
     _ -> "-"
 
-singleDataRowColumns : List Column -> Simulation -> List (Html Msg)
+singleDataRowColumns : List Column -> SingleRun -> List (Html Msg)
 singleDataRowColumns columns simulation =
   List.filter (\c -> c.visible) columns
   |> List.map (\c -> td [] [ text (lookupDataValue simulation c.name) ])
 
-singleDataTableRow : List Column -> Simulation -> Html Msg
+singleDataTableRow : List Column -> SingleRun -> Html Msg
 singleDataTableRow columns simulation =
   tr
     []
@@ -286,18 +286,18 @@ findFilterBoolean : Dict comparable Bool -> comparable -> Bool
 findFilterBoolean filters value =
   Maybe.withDefault True (Dict.get value filters)
 
-columnFilterContainsValue : Column -> Simulation -> Bool
+columnFilterContainsValue : Column -> SingleRun -> Bool
 columnFilterContainsValue column simulation =
   let value =
     lookupDataValue simulation column.name
   in
     findFilterBoolean column.filters value
 
-singleColumnToBoolean : Simulation -> Column -> Bool
+singleColumnToBoolean : SingleRun -> Column -> Bool
 singleColumnToBoolean simulation column =
   Dict.isEmpty column.filters || (columnFilterContainsValue column simulation)
 
-columnsToBooleanList : List Column -> Simulation -> List Bool
+columnsToBooleanList : List Column -> SingleRun -> List Bool
 columnsToBooleanList columns simulation=
   List.map (singleColumnToBoolean simulation) columns
 
@@ -305,7 +305,7 @@ columnFiltersReduce : List Bool -> Bool
 columnFiltersReduce list =
   List.foldr (&&) True list
 
-filterDataTableRow : List Column -> Simulation -> Bool
+filterDataTableRow : List Column -> SingleRun -> Bool
 filterDataTableRow columns simulation =
   columnsToBooleanList columns simulation
   |> columnFiltersReduce

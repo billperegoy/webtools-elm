@@ -41,7 +41,7 @@ type alias Model =
   , lintResults : ResultsTable.Model
   , simResults : ResultsTable.Model
   , errors : String
-  , tempData : List Simulation
+  , tempData : List SingleRun 
   }
 
 emptySummaryData : String -> RunTypeSummaryData
