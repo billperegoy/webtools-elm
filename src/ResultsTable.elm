@@ -20,10 +20,11 @@ type alias Model =
     resultsType : String
   , data : List Simulation
   , columns : List Column
-  , showEditColumnPane : Bool
+  , showEditColumnsPane : Bool
   , showFilterPane : Bool
   , itemBeingFiltered : String
-  , checkBoxItems : Dict String Bool
+  , columnFilterItems : Dict String Bool
+  , columnVisibilityItems : Dict String Bool
   }
 
 init : String -> List Simulation -> Model
@@ -31,18 +32,20 @@ init resultsType data =
   {
     resultsType = resultsType
   , data = data 
-  , showEditColumnPane = False
+  , showEditColumnsPane = False
   , columns = Initialize.initColumns
   , showFilterPane = False
   , itemBeingFiltered = ""
-  , checkBoxItems = Dict.empty
+  , columnFilterItems = Dict.empty
+  , columnVisibilityItems = Dict.empty
   }
 
 type Msg = NoOp
          | Sort String
          | ShowFilterPane String
-         | ProcessCheckBox AllCheckBoxData
-         | ShowEditColumns
+         | ProcessFilterCheckBox AllCheckBoxData
+         | ShowColumnVisibilityPane
+         | ProcessColumnVisibilityCheckBox
          | UpdateColumnVisibility
          | Filter
          | ClearAllFilters
@@ -58,9 +61,9 @@ update msg model =
       Debug.log ("Updating data" ++ toString data)
       { model | data = data } ! []
 
-    ProcessCheckBox item ->
+    ProcessFilterCheckBox item ->
       { model |
-          checkBoxItems = updateCheckBoxItems model.checkBoxItems item
+          columnFilterItems = updateColumnFilterItems model.columnFilterItems item
       } ! []
 
     Sort field ->
@@ -79,14 +82,17 @@ update msg model =
       { model 
           | showFilterPane = True,
             itemBeingFiltered = field,
-            checkBoxItems = mergeFormCheckBoxItems model.columns model.data field
+            columnFilterItems = mergeFormCheckBoxItems model.columns model.data field
       } ! []
 
-    ShowEditColumns ->
+    ShowColumnVisibilityPane ->
+      { model | showEditColumnsPane = True } ! []
+
+    ProcessColumnVisibilityCheckBox ->
       model ! []
 
     UpdateColumnVisibility ->
-      model ! []
+      { model | showEditColumnsPane = False } ! []
 
     ClearAllFilters ->
       { model | columns = clearAllFilters model
@@ -98,12 +104,11 @@ mergeFormCheckBoxItems columns data field =
     (columnFiltersFor columns field)
     (filterListElems data field)
 
-updateCheckBoxItems : Dict String Bool -> AllCheckBoxData -> Dict String Bool
-updateCheckBoxItems checkBoxItems item =
-  -- FIXME - really want to merge into existing Dict
+updateColumnFilterItems : Dict String Bool -> AllCheckBoxData -> Dict String Bool
+updateColumnFilterItems columnFilterItems item =
   Dict.union
     (Dict.insert item.target.name item.target.checked Dict.empty)
-    checkBoxItems
+    columnFilterItems
 
 sortByField : List Simulation -> String -> List Column -> List Simulation
 sortByField data field columns =
@@ -315,7 +320,7 @@ filterPaneCheckBox name active =
     []
     [
       input 
-      [ type' "checkbox", Attr.name name, Attr.checked active, onCheckBoxChange ProcessCheckBox ]
+      [ type' "checkbox", Attr.name name, Attr.checked active, onCheckBoxChange ProcessFilterCheckBox ]
       []
     , text name 
     ]
@@ -360,29 +365,58 @@ filterPane model =
         [ text ("Filtering: " ++ model.itemBeingFiltered) ]
     , div 
       []
-      (checkBoxToHtml model.checkBoxItems)
+      (checkBoxToHtml model.columnFilterItems)
     , button
         [ onClick Filter ]
         [ text "Filter" ]
     ]
 
+-------------------------------------------
+-- This code is all associated with editng the column visibility
 editColumnsPane : Model -> Html Msg
 editColumnsPane model =
   div
-    []
+    (editColumnsPaneAttributes model)
     [ 
-      text "Edit Columns"
+      div 
+        []
+        (editColumnsPaneCheckBoxes model)
     , button
-        [] 
+        [ onClick UpdateColumnVisibility ]
         [ text "Submit" ]
     ]
+
+editColumnsPaneCheckBoxes : Model -> List (Html Msg)
+editColumnsPaneCheckBoxes model =
+  List.map editColumnsPaneCheckBox model.columns
+
+editColumnsPaneCheckBox : Column -> Html Msg
+editColumnsPaneCheckBox column =
+  label 
+    [][
+      input 
+      [ type' "checkbox", Attr.name column.name, Attr.checked column.visible ]
+      []
+    , text column.name 
+    ]
+
+editColumnsPaneAttributes : Model -> List (Html.Attribute Msg)
+editColumnsPaneAttributes model =
+  if model.showEditColumnsPane then
+    [ class "edit-columns-pane edit-columns-visible" ]
+  else
+    [ class "edit-columns-pane" ]
+-------------------------------------------
+
+
+
 
 ------------------------------------------
 -- These functions modify the filters 
 -- for a particulatr column
 modifyColumnList : Model -> List Column
 modifyColumnList model =
-  replaceFiltersOnColumn model.columns model.itemBeingFiltered model.checkBoxItems
+  replaceFiltersOnColumn model.columns model.itemBeingFiltered model.columnFilterItems
 
 clearAllFilters : Model -> List Column
 clearAllFilters model =
@@ -435,7 +469,7 @@ clearFiltersButton =
 editColumnsButton : Html Msg
 editColumnsButton = 
   button
-    [  ]
+    [ onClick ShowColumnVisibilityPane ]
     [ text "Edit Columns" ]
 
 view : Model -> Html Msg
@@ -443,9 +477,9 @@ view model =
   div
     []
     [
-      (filterPane model)
+      h1 [] [ text model.resultsType ]
+    , (filterPane model)
     , (editColumnsPane model)
-    , h1 [] [ text model.resultsType ]
     , clearFiltersButton
     , editColumnsButton
     , table

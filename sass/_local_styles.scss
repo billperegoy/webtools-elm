@@ -82,6 +82,16 @@ $fail-color: #ff9999;
   width: 200px;
 }
 
+
 .filter-visible {
+  display: block;
+}
+
+.edit-columns-pane {
+  border: 1px solid;
+  margin: 5px;
+  display: none;
+}
+.edit-columns-visible {
   display: block;
 }
