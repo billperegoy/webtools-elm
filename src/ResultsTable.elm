@@ -20,6 +20,7 @@ type alias Model =
     resultsType : String
   , data : List Simulation
   , columns : List Column
+  , showEditColumnPane : Bool
   , showFilterPane : Bool
   , itemBeingFiltered : String
   , checkBoxItems : Dict String Bool
@@ -30,6 +31,7 @@ init resultsType data =
   {
     resultsType = resultsType
   , data = data 
+  , showEditColumnPane = False
   , columns = Initialize.initColumns
   , showFilterPane = False
   , itemBeingFiltered = ""
@@ -37,9 +39,11 @@ init resultsType data =
   }
 
 type Msg = NoOp
-         | ProcessCheckBox AllCheckBoxData
          | Sort String
          | ShowFilterPane String
+         | ProcessCheckBox AllCheckBoxData
+         | ShowEditColumns
+         | UpdateColumnVisibility
          | Filter
          | ClearAllFilters
          | UpdateData (List Simulation)
@@ -77,6 +81,12 @@ update msg model =
             itemBeingFiltered = field,
             checkBoxItems = mergeFormCheckBoxItems model.columns model.data field
       } ! []
+
+    ShowEditColumns ->
+      model ! []
+
+    UpdateColumnVisibility ->
+      model ! []
 
     ClearAllFilters ->
       { model | columns = clearAllFilters model
@@ -356,6 +366,17 @@ filterPane model =
         [ text "Filter" ]
     ]
 
+editColumnsPane : Model -> Html Msg
+editColumnsPane model =
+  div
+    []
+    [ 
+      text "Edit Columns"
+    , button
+        [] 
+        [ text "Submit" ]
+    ]
+
 ------------------------------------------
 -- These functions modify the filters 
 -- for a particulatr column
@@ -411,14 +432,22 @@ clearFiltersButton =
     [ onClick ClearAllFilters ]
     [ text "Clear Filters" ]
 
+editColumnsButton : Html Msg
+editColumnsButton = 
+  button
+    [  ]
+    [ text "Edit Columns" ]
+
 view : Model -> Html Msg
 view model =
   div
     []
     [
       (filterPane model)
+    , (editColumnsPane model)
     , h1 [] [ text model.resultsType ]
     , clearFiltersButton
+    , editColumnsButton
     , table
         []
         (tableRows model)
