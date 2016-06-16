@@ -25,7 +25,15 @@ main =
 
 type alias Model =
   {
-    regressionSelect : RegressionSelect.Model
+    runName : String
+  , releaseLabel : String
+  , runStatus : String
+  , elapsedTime : Int
+  , releaseUrl : String
+  , gvpLogUrl : String
+  , gatherGroupsUrl : String
+  , rtmReportUrl : String
+  , regressionSelect : RegressionSelect.Model
   , compileSummary : RunTypeSummaryData
   , lintSummary : RunTypeSummaryData
   , simSummary : RunTypeSummaryData
@@ -48,7 +56,15 @@ emptySummaryData label =
 init : (Model, Cmd Msg)
 init =
   {
-    regressionSelect = RegressionSelect.init
+    runName = "My Run Name"
+  , releaseLabel = "My Release Label"
+  , runStatus = "RUN"
+  , elapsedTime = 1234
+  , releaseUrl = "#"
+  , gvpLogUrl = "#"
+  , gatherGroupsUrl = "#"
+  , rtmReportUrl = "#"
+  , regressionSelect = RegressionSelect.init
   , compileSummary = emptySummaryData "compiles"
   , lintSummary = emptySummaryData "lints"
   , simSummary = emptySummaryData "sims"

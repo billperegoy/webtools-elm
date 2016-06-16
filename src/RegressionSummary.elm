@@ -10,6 +10,33 @@ view props =
     []
     [
       div
+        []
+        [ text ("Run Name: " ++ props.runName) ]
+    , div
+        []
+        [ text ("Release Label: " ++ props.releaseLabel) ]
+    , div
+        []
+        [ text ("Run Status: " ++ props.runStatus) ]
+    , div
+        []
+        [ text "Progress Bar" ]
+    , div
+        []
+        [ text ("Elapsed Time: " ++ toString props.elapsedTime) ]
+    , a
+        [ href props.releaseUrl]
+        [ text "Release Link" ]
+    , a
+        [ href props.gvpLogUrl ]
+        [ text "GVP Log Link" ]
+    , a
+        [ href props.gatherGroupsUrl ]
+        [ text "RTM Report Link" ]
+    , a
+        [ href props.gatherGroupsUrl]
+        [ text "Gather Groups Link" ]
+    , div
         [ class "all-summaries" ]
         [
           div
