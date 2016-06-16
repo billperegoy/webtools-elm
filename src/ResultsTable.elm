@@ -45,7 +45,7 @@ type Msg = NoOp
          | ShowFilterPane String
          | ProcessFilterCheckBox AllCheckBoxData
          | ShowColumnVisibilityPane
-         | ProcessColumnVisibilityCheckBox
+         | ProcessColumnVisibilityCheckBox AllCheckBoxData
          | UpdateColumnVisibility
          | Filter
          | ClearAllFilters
@@ -86,13 +86,21 @@ update msg model =
       } ! []
 
     ShowColumnVisibilityPane ->
-      { model | showEditColumnsPane = True } ! []
+      { model | 
+          showEditColumnsPane = True
+        , columnVisibilityItems = setInitialColumnVisibility model
+      } ! []
 
-    ProcessColumnVisibilityCheckBox ->
-      model ! []
+    ProcessColumnVisibilityCheckBox item ->
+      { model | columnVisibilityItems = updateColumnVisibilityItems model.columnVisibilityItems item
+      } ! []
 
     UpdateColumnVisibility ->
-      { model | showEditColumnsPane = False } ! []
+      -- FIXME here we transfer the new visibility values to the column
+      { model | 
+          showEditColumnsPane = False 
+        , columns = updateColumnVisibilityFromForm model 
+      } ! []
 
     ClearAllFilters ->
       { model | columns = clearAllFilters model
@@ -393,7 +401,8 @@ editColumnsPaneCheckBoxes model =
 editColumnsPaneCheckBox : Column -> Html Msg
 editColumnsPaneCheckBox column =
   label 
-    [][
+    [ onCheckBoxChange ProcessColumnVisibilityCheckBox ]
+    [
       input 
       [ type' "checkbox", Attr.name column.name, Attr.checked column.visible ]
       []
@@ -406,6 +415,18 @@ editColumnsPaneAttributes model =
     [ class "edit-columns-pane edit-columns-visible" ]
   else
     [ class "edit-columns-pane" ]
+
+setInitialColumnVisibility : Model -> Dict String Bool
+setInitialColumnVisibility model =
+  List.foldl (\item -> Dict.insert item.name item.visible) Dict.empty model.columns
+
+updateColumnVisibilityFromForm : Model -> List Column
+updateColumnVisibilityFromForm model =
+  List.map (\column -> { column | visible = (getNewColumnVisibility model.columnVisibilityItems column.name) } ) model.columns  
+
+getNewColumnVisibility : Dict String Bool -> String -> Bool
+getNewColumnVisibility items columnName =
+  DictUtils.getWithDefault items columnName True 
 -------------------------------------------
 
 
@@ -439,6 +460,12 @@ swapColumn columnName newFilters column =
 modifyColumnFilters : Dict String Bool -> Column -> Column
 modifyColumnFilters newFilters column =
  { column | filters = newFilters }
+
+updateColumnVisibilityItems : Dict String Bool -> AllCheckBoxData -> Dict String Bool 
+updateColumnVisibilityItems columnVisibilityItems item =
+  Dict.insert item.target.name item.target.checked columnVisibilityItems
+
+
 ------------------------------------------
 
 flipSortStatus : SortStatus -> SortStatus
