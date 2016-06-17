@@ -18,7 +18,7 @@ import Debug exposing (..)
 type alias Model =
   {
     resultsType : String
-  , data : List SingleRun 
+  , data : List SingleRun
   , columns : List Column
   , showEditColumnsPane : Bool
   , showFilterPane : Bool
@@ -31,7 +31,7 @@ init : String -> List SingleRun -> Model
 init resultsType data =
   {
     resultsType = resultsType
-  , data = data 
+  , data = data
   , showEditColumnsPane = False
   , columns = Initialize.initColumns
   , showFilterPane = False
@@ -73,20 +73,20 @@ update msg model =
       } ! []
 
     Filter ->
-      { model | 
+      { model |
           showFilterPane = False,
           columns = modifyColumnList model
       } ! []
 
     ShowFilterPane field ->
-      { model 
+      { model
           | showFilterPane = True,
             itemBeingFiltered = field,
             columnFilterItems = mergeFormCheckBoxItems model.columns model.data field
       } ! []
 
     ShowColumnVisibilityPane ->
-      { model | 
+      { model |
           showEditColumnsPane = True
         , columnVisibilityItems = setInitialColumnVisibility model
       } ! []
@@ -97,9 +97,9 @@ update msg model =
 
     UpdateColumnVisibility ->
       -- FIXME here we transfer the new visibility values to the column
-      { model | 
-          showEditColumnsPane = False 
-        , columns = updateColumnVisibilityFromForm model 
+      { model |
+          showEditColumnsPane = False
+        , columns = updateColumnVisibilityFromForm model
       } ! []
 
     ClearAllFilters ->
@@ -118,47 +118,47 @@ updateColumnFilterItems columnFilterItems item =
     (Dict.insert item.target.name item.target.checked Dict.empty)
     columnFilterItems
 
-sortByField : List SingleRun -> String -> List Column -> List SingleRun 
+sortByField : List SingleRun -> String -> List Column -> List SingleRun
 sortByField data field columns =
-  let 
-    direction = columnSortStatusFor columns field 
+  let
+    direction = columnSortStatusFor columns field
   in
     case field of
-      "Status" -> 
+      "Status" ->
         case direction of
           Descending -> List.sortBy .status data
           Ascending -> List.reverse (List.sortBy .status data)
-          Unsorted -> List.sortBy .status data 
+          Unsorted -> List.sortBy .status data
 
-      "Lsf Status" -> 
+      "Lsf Status" ->
         case direction of
           Descending -> List.sortBy .lsfStatus data
           Ascending -> List.reverse (List.sortBy .lsfStatus data)
-          Unsorted -> List.sortBy .lsfStatus data 
+          Unsorted -> List.sortBy .lsfStatus data
 
-      "#" -> 
+      "#" ->
         case direction of
           Descending -> List.sortBy .runNum data
           Ascending -> List.reverse (List.sortBy .runNum data)
-          Unsorted -> List.sortBy .runNum data 
+          Unsorted -> List.sortBy .runNum data
 
-      "Config" -> 
+      "Config" ->
         case direction of
           Descending -> List.sortBy .config data
           Ascending -> List.reverse (List.sortBy .config data)
-          Unsorted -> List.sortBy .config data 
+          Unsorted -> List.sortBy .config data
 
-      "Name" -> 
+      "Name" ->
         case direction of
           Descending -> List.sortBy .name data
           Ascending -> List.reverse (List.sortBy .name data)
-          Unsorted -> List.sortBy .name data 
+          Unsorted -> List.sortBy .name data
 
-      "Run Time" -> 
+      "Run Time" ->
         case direction of
           Descending -> List.sortBy .runTime data
           Ascending -> List.reverse (List.sortBy .runTime data)
-          Unsorted -> List.sortBy .runTime data 
+          Unsorted -> List.sortBy .runTime data
 
       _ ->
         data
@@ -173,11 +173,11 @@ listToDict items =
 
 columnFiltersFor : List Column -> String -> Dict String Bool
 columnFiltersFor columns columnName =
-  let 
+  let
     filteredColumns = List.filter (\column -> (column.name == columnName)) columns
   in
     case length filteredColumns of
-      1 -> 
+      1 ->
         case head filteredColumns of
           Just a -> a.filters
           Nothing -> Dict.empty
@@ -185,15 +185,15 @@ columnFiltersFor columns columnName =
 
 columnSortStatusFor : List Column -> String -> SortStatus
 columnSortStatusFor columns columnName =
-  let 
+  let
     filteredColumns = List.filter (\column -> (column.name == columnName)) columns
   in
     case length filteredColumns of
-      1 -> 
+      1 ->
         case head filteredColumns of
           Just a -> a.sortStatus
-          Nothing -> Unsorted 
-      _ -> Unsorted 
+          Nothing -> Unsorted
+      _ -> Unsorted
 
 
 filterListElems : List SingleRun -> String -> Dict String Bool
@@ -202,7 +202,7 @@ filterListElems data filterColumnName =
     "Config" -> (List.map .config data) |> listToDict
     "Status" -> (List.map .status data) |> listToDict
     "Lsf Status" -> (List.map .lsfStatus data) |> listToDict
-    _ -> Dict.empty 
+    _ -> Dict.empty
 
 tableIconAttributes : Msg -> String -> List (Attribute Msg)
 tableIconAttributes msg file =
@@ -257,20 +257,20 @@ tableHeader model =
 -- FIXME - can we do this in a less brute force way?
 --
 lookupDataValue : SingleRun -> String -> String
-lookupDataValue simulation name =
+lookupDataValue job name =
   case name of
-    "#" -> toString simulation.runNum
-    "Name" -> simulation.name
-    "Config" -> simulation.config
-    "Status" -> simulation.status
-    "Lsf Status" -> simulation.lsfStatus
-    "Run Time" -> toString simulation.runTime
+    "#" -> toString job.runNum
+    "Name" -> job.name
+    "Config" -> job.config
+    "Status" -> job.status
+    "Lsf Status" -> job.lsfStatus
+    "Run Time" -> toString job.runTime
     _ -> "-"
 
 singleDataRowColumns : List Column -> SingleRun -> List (Html Msg)
-singleDataRowColumns columns simulation =
+singleDataRowColumns columns job =
   List.filter (\c -> c.visible) columns
-  |> List.map (\c -> td [] [ text (lookupDataValue simulation c.name) ])
+  |> List.map (\c -> td [] [ text (lookupDataValue job c.name) ])
 
 singleTableRowAttributes data =
   let
@@ -289,10 +289,10 @@ singleTableRowAttributes data =
       []
 
 singleDataTableRow : List Column -> SingleRun -> Html Msg
-singleDataTableRow columns simulation =
+singleDataTableRow columns job =
   tr
-    (singleTableRowAttributes simulation)
-    (singleDataRowColumns columns simulation)
+    (singleTableRowAttributes job)
+    (singleDataRowColumns columns job)
 
 
 -- Look up a value in the filter dictionary. If it's not there,
@@ -303,27 +303,27 @@ findFilterBoolean filters value =
   Maybe.withDefault True (Dict.get value filters)
 
 columnFilterContainsValue : Column -> SingleRun -> Bool
-columnFilterContainsValue column simulation =
+columnFilterContainsValue column job =
   let value =
-    lookupDataValue simulation column.name
+    lookupDataValue job column.name
   in
     findFilterBoolean column.filters value
 
 singleColumnToBoolean : SingleRun -> Column -> Bool
-singleColumnToBoolean simulation column =
-  Dict.isEmpty column.filters || (columnFilterContainsValue column simulation)
+singleColumnToBoolean job column =
+  Dict.isEmpty column.filters || (columnFilterContainsValue column job)
 
 columnsToBooleanList : List Column -> SingleRun -> List Bool
-columnsToBooleanList columns simulation=
-  List.map (singleColumnToBoolean simulation) columns
+columnsToBooleanList columns job =
+  List.map (singleColumnToBoolean job) columns
 
 columnFiltersReduce : List Bool -> Bool
 columnFiltersReduce list =
   List.foldr (&&) True list
 
 filterDataTableRow : List Column -> SingleRun -> Bool
-filterDataTableRow columns simulation =
-  columnsToBooleanList columns simulation
+filterDataTableRow columns job =
+  columnsToBooleanList columns job
   |> columnFiltersReduce
 
 dataToTableRows :  Model -> List (Html Msg)
@@ -340,13 +340,13 @@ filterPaneAttributes model =
 
 filterPaneCheckBox : String -> Bool -> Html Msg
 filterPaneCheckBox name active =
-  label 
+  label
     []
     [
-      input 
+      input
       [ type' "checkbox", Attr.name name, Attr.checked active, onCheckBoxChange ProcessFilterCheckBox ]
       []
-    , text name 
+    , text name
     ]
 
 onCheckBoxChange : (AllCheckBoxData -> msg) -> Attribute msg
@@ -367,7 +367,7 @@ type alias CheckBoxValue =
 overallDecoder : Json.Decoder AllCheckBoxData
 overallDecoder =
   object1 AllCheckBoxData
-    ("target" := checkBoxDecoder) 
+    ("target" := checkBoxDecoder)
 
 checkBoxDecoder : Json.Decoder CheckBoxValue
 checkBoxDecoder =
@@ -381,13 +381,13 @@ checkBoxToHtml items =
 
 filterPane : Model -> Html Msg
 filterPane model =
-  div 
+  div
     (filterPaneAttributes model)
-    [ 
-      div 
-        [] 
+    [
+      div
+        []
         [ text ("Filtering: " ++ model.itemBeingFiltered) ]
-    , div 
+    , div
       []
       (checkBoxToHtml model.columnFilterItems)
     , button
@@ -401,8 +401,8 @@ editColumnsPane : Model -> Html Msg
 editColumnsPane model =
   div
     (editColumnsPaneAttributes model)
-    [ 
-      div 
+    [
+      div
         []
         (editColumnsPaneCheckBoxes model)
     , button
@@ -416,13 +416,13 @@ editColumnsPaneCheckBoxes model =
 
 editColumnsPaneCheckBox : Column -> Html Msg
 editColumnsPaneCheckBox column =
-  label 
+  label
     [ onCheckBoxChange ProcessColumnVisibilityCheckBox ]
     [
-      input 
+      input
       [ type' "checkbox", Attr.name column.name, Attr.checked column.visible ]
       []
-    , text column.name 
+    , text column.name
     ]
 
 editColumnsPaneAttributes : Model -> List (Html.Attribute Msg)
@@ -438,18 +438,18 @@ setInitialColumnVisibility model =
 
 updateColumnVisibilityFromForm : Model -> List Column
 updateColumnVisibilityFromForm model =
-  List.map (\column -> { column | visible = (getNewColumnVisibility model.columnVisibilityItems column.name) } ) model.columns  
+  List.map (\column -> { column | visible = (getNewColumnVisibility model.columnVisibilityItems column.name) } ) model.columns
 
 getNewColumnVisibility : Dict String Bool -> String -> Bool
 getNewColumnVisibility items columnName =
-  DictUtils.getWithDefault items columnName True 
+  DictUtils.getWithDefault items columnName True
 -------------------------------------------
 
 
 
 
 ------------------------------------------
--- These functions modify the filters 
+-- These functions modify the filters
 -- for a particulatr column
 modifyColumnList : Model -> List Column
 modifyColumnList model =
@@ -477,7 +477,7 @@ modifyColumnFilters : Dict String Bool -> Column -> Column
 modifyColumnFilters newFilters column =
  { column | filters = newFilters }
 
-updateColumnVisibilityItems : Dict String Bool -> AllCheckBoxData -> Dict String Bool 
+updateColumnVisibilityItems : Dict String Bool -> AllCheckBoxData -> Dict String Bool
 updateColumnVisibilityItems columnVisibilityItems item =
   Dict.insert item.target.name item.target.checked columnVisibilityItems
 
@@ -499,7 +499,7 @@ updateOneSortStatus name column =
     { column | sortStatus = Unsorted }
 
 
-setSortStatus : Model -> String -> List Column 
+setSortStatus : Model -> String -> List Column
 setSortStatus model name =
   List.map (updateOneSortStatus name) model.columns
 
@@ -510,7 +510,7 @@ clearFiltersButton =
     [ text "Clear Filters" ]
 
 editColumnsButton : Html Msg
-editColumnsButton = 
+editColumnsButton =
   button
     [ onClick ShowColumnVisibilityPane ]
     [ text "Edit Columns" ]
