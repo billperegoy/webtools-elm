@@ -277,12 +277,12 @@ singleTableRowAttributes data =
     status = lookupDataValue data "Status"
     lsfStatus = lookupDataValue data "Lsf Status"
   in
-    if status == "Pass" then
+    if lsfStatus == "Run" then
+      [ class "job-run" ]
+    else if status == "Pass" then
       [ class "job-pass" ]
     else if (status == "Fail") || (status == "Error")  then
       [ class "job-fail" ]
-    else if lsfStatus == "Run" then
-      [ class "job-run" ]
     else if lsfStatus == "Pend" then
       [ class "job-pend" ]
     else

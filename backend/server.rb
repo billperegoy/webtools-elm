@@ -32,8 +32,8 @@ def gen_run_list(count)
       run_number: num,
       name: "test_" + num.to_s,
       config: ["default", "pcie", "ddr", "bypass"][rand(3)],
-      status: ["PASS", "FAIL", "ERROR"][rand(2)],
-      lsf_status: ["DONE", "EXIT", "RUN"][rand(3)],
+      status: ["Pass", "Fail", "Error"][rand(2)],
+      lsf_status: ["Done", "Exit", "Run"][rand(3)],
       run_time: rand(1000)
     }
   end
