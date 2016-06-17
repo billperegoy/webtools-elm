@@ -7,7 +7,7 @@ import RunTypeSummary exposing (..)
 
 view props =
   div
-    []
+    [ class "regression-summary" ]
     [
       div
         []

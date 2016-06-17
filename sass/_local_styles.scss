@@ -26,6 +26,7 @@ $fail-color: #ff9999;
 .all-summaries {
   @include display(flex);
   @include flex-direction(row);
+  margin: 10px;
 }
 
 .summary-container {
@@ -94,4 +95,9 @@ $fail-color: #ff9999;
 }
 .edit-columns-visible {
   display: block;
+}
+
+.regression-summary {
+  border: 1px solid;
+  margin: 10px;
 }
