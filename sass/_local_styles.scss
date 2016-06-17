@@ -1,6 +1,7 @@
 $pass-color: #ccffcc;
 $run-color: #ffffcc;
 $fail-color: #ff9999;
+$pend-color: #f2f2f2;
 
 // Styles for RegressionSelect
 .regression-select {
@@ -100,4 +101,20 @@ $fail-color: #ff9999;
 .regression-summary {
   border: 1px solid;
   margin: 10px;
+}
+
+.job-pass {
+  background-color: $pass-color;
+}
+
+.job-fail {
+  background-color: $fail-color;
+}
+
+.job-run {
+  background-color: $run-color;
+}
+
+.job-pend {
+  background-color: $pend-color;
 }

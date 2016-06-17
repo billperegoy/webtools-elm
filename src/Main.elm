@@ -160,6 +160,7 @@ view model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-  Sub.batch  
-    [ Time.every (200 * millisecond) PollHttp 
+  Sub.batch
+    [ Time.every (1000 * millisecond) PollHttp 
+    --, Time.every (3000 * millisecond) (SimResults (ResultsTable.UpdateData []))
     ]

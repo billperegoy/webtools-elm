@@ -272,10 +272,26 @@ singleDataRowColumns columns simulation =
   List.filter (\c -> c.visible) columns
   |> List.map (\c -> td [] [ text (lookupDataValue simulation c.name) ])
 
+singleTableRowAttributes data =
+  let
+    status = lookupDataValue data "Status"
+    lsfStatus = lookupDataValue data "Lsf Status"
+  in
+    if status == "Pass" then
+      [ class "job-pass" ]
+    else if (status == "Fail") || (status == "Error")  then
+      [ class "job-fail" ]
+    else if lsfStatus == "Run" then
+      [ class "job-run" ]
+    else if lsfStatus == "Pend" then
+      [ class "job-pend" ]
+    else
+      []
+
 singleDataTableRow : List Column -> SingleRun -> Html Msg
 singleDataTableRow columns simulation =
   tr
-    []
+    (singleTableRowAttributes simulation)
     (singleDataRowColumns columns simulation)
 
 

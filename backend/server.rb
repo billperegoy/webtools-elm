@@ -16,7 +16,7 @@ def random_regression_result
     },
     compiles: gen_run_list(10),
     lints: gen_run_list(3),
-    simulations: gen_run_list(10000)
+    simulations: gen_run_list(1000)
   }
 end
 
