@@ -518,7 +518,7 @@ editColumnsButton =
 view : Model -> Html Msg
 view model =
   div
-    []
+    [ class "results-table" ]
     [
       h1 [] [ text model.resultsType ]
     , (filterPane model)

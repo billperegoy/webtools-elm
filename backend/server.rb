@@ -10,6 +10,11 @@ end
 def random_regression_result
   {
     summary: {
+      run_name: "val__project_2106_06_17",
+      release_label: "REL_0.23.34",
+      start_time: "2016-06-17 03:34",
+      end_time: nil,
+      gvp_log: "#",
       compiles: random_triplet,
       lints: random_triplet,
       sims: random_triplet

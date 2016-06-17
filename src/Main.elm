@@ -163,4 +163,5 @@ subscriptions model =
   Sub.batch
     [ Time.every (1000 * millisecond) PollHttp 
     --, Time.every (3000 * millisecond) (SimResults (ResultsTable.UpdateData []))
+    --, Time.every (3000 * millisecond) (SimResults ResultsTable.UpdateData)
     ]

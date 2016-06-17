@@ -3,6 +3,21 @@ $run-color: #ffffcc;
 $fail-color: #ff9999;
 $pend-color: #f2f2f2;
 
+$button-color: #80ffff;
+$button-text-color: #404040;
+
+button {
+  margin: 5px;
+  background-color: $button-color;
+  color: $button-text-color;
+}
+
+.results-table {
+  margin-top: 50px;
+  padding: 10px 10px 0px 10px;
+  border: 1px solid;
+}
+
 // Styles for RegressionSelect
 .regression-select {
   @include display(flex);
