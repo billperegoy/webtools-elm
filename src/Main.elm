@@ -41,7 +41,7 @@ type alias Model =
   , lintResults : ResultsTable.Model
   , simResults : ResultsTable.Model
   , errors : String
-  , tempData : List SingleRun 
+  , simData : List SingleRun 
   }
 
 emptySummaryData : String -> RunTypeSummaryData
@@ -72,7 +72,7 @@ init =
   , lintResults = ResultsTable.init "Lints" Initialize.initLints
   , simResults = ResultsTable.init "Simulations" Initialize.initSimulations
   , errors = ""
-  , tempData = []
+  , simData = []
   } ! []
 
 getHttpData : Cmd Msg
@@ -83,7 +83,7 @@ getHttpData =
     Task.perform HttpFail HttpSucceed (Http.get decodeEverything url)
 
 type Msg
-  = NoOp
+  = RegressionSelect RegressionSelect.Msg
   | GetApiData
   | HttpSucceed AllResults
   | HttpFail Http.Error
@@ -91,14 +91,10 @@ type Msg
   | CompileResults ResultsTable.Msg
   | LintResults ResultsTable.Msg
   | SimResults ResultsTable.Msg
-  | RegressionSelect RegressionSelect.Msg
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    NoOp ->
-      model ! []
-
     GetApiData ->
       (model, getHttpData)
 
@@ -108,7 +104,11 @@ update msg model =
          | compileSummary = RunTypeSummaryData "compiles" results.summary.compiles
          , lintSummary = RunTypeSummaryData "lints" results.summary.lints
          , simSummary = RunTypeSummaryData "simulations" results.summary.sims
-         , tempData = results.simulations
+         -- FIXME - This forces us back to the init.
+         --         I really want to modify what's there
+         , compileResults = ResultsTable.init "Comoiles" Initialize.initSimulations
+         , lintResults = ResultsTable.init "Lints" Initialize.initSimulations
+         --, simResults = ResultsTable.update ResultsTable.UpdateData []
          , errors = ""
       } ! []
 
@@ -146,7 +146,7 @@ view model =
   div
     []
     [
-      button [ onClick (SimResults (ResultsTable.UpdateData model.tempData)) ] [ text "Update Data" ]
+      button [ onClick (SimResults (ResultsTable.UpdateData model.simData)) ] [ text "Update Data" ]
     , div
         [ class "regression-select_container" ]
         [ App.map RegressionSelect (RegressionSelect.view model.regressionSelect) ]
@@ -161,7 +161,5 @@ view model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
   Sub.batch
-    [ Time.every (1000 * millisecond) PollHttp 
-    --, Time.every (3000 * millisecond) (SimResults (ResultsTable.UpdateData []))
-    --, Time.every (3000 * millisecond) (SimResults ResultsTable.UpdateData)
+    [ Time.every (5000 * millisecond) PollHttp 
     ]
