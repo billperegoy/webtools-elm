@@ -108,7 +108,8 @@ update msg model =
          --         I really want to modify what's there
          , compileResults = ResultsTable.init "Comoiles" Initialize.initSimulations
          , lintResults = ResultsTable.init "Lints" Initialize.initSimulations
-         --, simResults = ResultsTable.update ResultsTable.UpdateData []
+         , simResults = ResultsTable.init "Simulations" Initialize.initSimulations
+         , simData = results.simulations
          , errors = ""
       } ! []
 
