@@ -10,6 +10,7 @@ import Json.Decode as Json exposing (..)
 
 import DictUtils exposing (getWithDefault)
 import StringUtils exposing (uniquify)
+import FormUtils as Form exposing (..)
 import RegressionData exposing (..)
 import Initialize exposing (..)
 import Debug exposing (..)
@@ -43,9 +44,9 @@ init resultsType data =
 type Msg = NoOp
          | Sort String
          | ShowFilterPane String
-         | ProcessFilterCheckBox AllCheckBoxData
+         | ProcessFilterCheckBox Form.CheckBoxData
          | ShowColumnVisibilityPane
-         | ProcessColumnVisibilityCheckBox AllCheckBoxData
+         | ProcessColumnVisibilityCheckBox Form.CheckBoxData
          | UpdateColumnVisibility
          | Filter
          | ClearAllFilters
@@ -112,7 +113,7 @@ mergeFormCheckBoxItems columns data field =
     (columnFiltersFor columns field)
     (filterListElems data field)
 
-updateColumnFilterItems : Dict String Bool -> AllCheckBoxData -> Dict String Bool
+updateColumnFilterItems : Dict String Bool -> Form.CheckBoxData -> Dict String Bool
 updateColumnFilterItems columnFilterItems item =
   Dict.union
     (Dict.insert item.target.name item.target.checked Dict.empty)
@@ -344,36 +345,10 @@ filterPaneCheckBox name active =
     []
     [
       input
-      [ type' "checkbox", Attr.name name, Attr.checked active, onCheckBoxChange ProcessFilterCheckBox ]
+      [ type' "checkbox", Attr.name name, Attr.checked active, Form.onCheckBoxChange ProcessFilterCheckBox ]
       []
     , text name
     ]
-
-onCheckBoxChange : (AllCheckBoxData -> msg) -> Attribute msg
-onCheckBoxChange tagger =
-  on "change" (Json.map tagger overallDecoder)
-
-type alias AllCheckBoxData =
-  {
-    target : CheckBoxValue
-  }
-
-type alias CheckBoxValue =
-  {
-    name : String
-  , checked : Bool
-  }
-
-overallDecoder : Json.Decoder AllCheckBoxData
-overallDecoder =
-  object1 AllCheckBoxData
-    ("target" := checkBoxDecoder)
-
-checkBoxDecoder : Json.Decoder CheckBoxValue
-checkBoxDecoder =
-  object2 CheckBoxValue
-    ("name" := string)
-    ("checked" := bool)
 
 checkBoxToHtml : Dict String Bool -> List (Html Msg)
 checkBoxToHtml items =
@@ -417,7 +392,7 @@ editColumnsPaneCheckBoxes model =
 editColumnsPaneCheckBox : Column -> Html Msg
 editColumnsPaneCheckBox column =
   label
-    [ onCheckBoxChange ProcessColumnVisibilityCheckBox ]
+    [ Form.onCheckBoxChange ProcessColumnVisibilityCheckBox ]
     [
       input
       [ type' "checkbox", Attr.name column.name, Attr.checked column.visible ]
@@ -477,7 +452,7 @@ modifyColumnFilters : Dict String Bool -> Column -> Column
 modifyColumnFilters newFilters column =
  { column | filters = newFilters }
 
-updateColumnVisibilityItems : Dict String Bool -> AllCheckBoxData -> Dict String Bool
+updateColumnVisibilityItems : Dict String Bool -> Form.CheckBoxData -> Dict String Bool
 updateColumnVisibilityItems columnVisibilityItems item =
   Dict.insert item.target.name item.target.checked columnVisibilityItems
 
