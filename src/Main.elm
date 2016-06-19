@@ -168,5 +168,5 @@ view model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
   Sub.batch
-    [ Time.every (10000 * millisecond) PollHttp 
+    [ Time.every (1000 * millisecond) PollHttp 
     ]

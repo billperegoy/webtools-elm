@@ -26,6 +26,7 @@ type alias Model =
   , itemBeingFiltered : String
   , columnFilterItems : Dict String Bool
   , columnVisibilityItems : Dict String Bool
+  , sortField : String
   }
 
 init : String -> List SingleRun -> Model
@@ -39,6 +40,7 @@ init resultsType data =
   , itemBeingFiltered = ""
   , columnFilterItems = Dict.empty
   , columnVisibilityItems = Dict.empty
+  , sortField = "#"
   }
 
 type Msg = NoOp
@@ -70,7 +72,7 @@ update msg model =
     Sort field ->
       { model |
           columns = setSortStatus model field
-        , data = sortByField model.data field model.columns
+        , sortField = field
       } ! []
 
     Filter ->
@@ -329,7 +331,8 @@ filterDataTableRow columns job =
 
 dataToTableRows :  Model -> List (Html Msg)
 dataToTableRows model =
-  List.filter (filterDataTableRow model.columns) model.data
+  sortByField model.data model.sortField model.columns
+  |> List.filter (filterDataTableRow model.columns)
   |> List.map (singleDataTableRow model.columns)
 
 filterPaneAttributes : Model -> List (Html.Attribute Msg)
