@@ -41,6 +41,8 @@ type alias Model =
   , lintResults : ResultsTable.Model
   , simResults : ResultsTable.Model
   , errors : String
+  , compileData : List SingleRun 
+  , lintData : List SingleRun 
   , simData : List SingleRun 
   }
 
@@ -72,6 +74,8 @@ init =
   , lintResults = ResultsTable.init "Lints" Initialize.initLints
   , simResults = ResultsTable.init "Simulations" Initialize.initSimulations
   , errors = ""
+  , lintData = []
+  , compileData = []
   , simData = []
   } ! []
 
@@ -104,11 +108,8 @@ update msg model =
          | compileSummary = RunTypeSummaryData "compiles" results.summary.compiles
          , lintSummary = RunTypeSummaryData "lints" results.summary.lints
          , simSummary = RunTypeSummaryData "simulations" results.summary.sims
-         -- FIXME - This forces us back to the init.
-         --         I really want to modify what's there
-         , compileResults = ResultsTable.init "Comoiles" Initialize.initSimulations
-         , lintResults = ResultsTable.init "Lints" Initialize.initSimulations
-         , simResults = ResultsTable.init "Simulations" Initialize.initSimulations
+         , compileData = results.compiles
+         , lintData = results.lints
          , simData = results.simulations
          , errors = ""
       } ! []
@@ -162,5 +163,5 @@ view model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
   Sub.batch
-    [ Time.every (5000 * millisecond) PollHttp 
+    [ Time.every (500 * millisecond) PollHttp 
     ]
