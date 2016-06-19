@@ -52,17 +52,12 @@ type Msg = NoOp
          | UpdateColumnVisibility
          | Filter
          | ClearAllFilters
-         | UpdateData (List SingleRun)
 
-update : Msg -> Model -> (Model, Cmd Msg)
-update msg model =
+update : Msg -> Model -> List SingleRun -> (Model, Cmd Msg)
+update msg model data =
   case msg of
     NoOp ->
       model ! []
-
-    UpdateData data ->
-      Debug.log ("Updating data" ++ toString data)
-      { model | data = data } ! []
 
     ProcessFilterCheckBox item ->
       { model |
@@ -85,7 +80,7 @@ update msg model =
       { model
           | showFilterPane = True,
             itemBeingFiltered = field,
-            columnFilterItems = mergeFormCheckBoxItems model.columns model.data field
+            columnFilterItems = mergeFormCheckBoxItems model.columns data field
       } ! []
 
     ShowColumnVisibilityPane ->
@@ -247,9 +242,9 @@ columnsToTableHeader columns =
   |> List.map singleTableHeader
 
 
-tableRows : Model -> List (Html Msg)
-tableRows model =
-  (tableHeader model) :: (dataToTableRows model)
+tableRows : Model -> List SingleRun -> List (Html Msg)
+tableRows model data =
+  (tableHeader model) :: (dataToTableRows model data)
 
 tableHeader : Model -> Html Msg
 tableHeader model =
@@ -329,9 +324,9 @@ filterDataTableRow columns job =
   columnsToBooleanList columns job
   |> columnFiltersReduce
 
-dataToTableRows :  Model -> List (Html Msg)
-dataToTableRows model =
-  sortByField model.data model.sortField model.columns
+dataToTableRows :  Model -> List SingleRun -> List (Html Msg)
+dataToTableRows model data =
+  sortByField data model.sortField model.columns
   |> List.filter (filterDataTableRow model.columns)
   |> List.map (singleDataTableRow model.columns)
 
@@ -493,8 +488,8 @@ editColumnsButton =
     [ onClick ShowColumnVisibilityPane ]
     [ text "Edit Columns" ]
 
-view : Model -> Html Msg
-view model =
+view : Model -> List SingleRun -> Html Msg
+view model data =
   div
     [ class "results-table" ]
     [
@@ -505,5 +500,5 @@ view model =
     , editColumnsButton
     , table
         []
-        (tableRows model)
+        (tableRows model data)
     ]

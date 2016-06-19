@@ -113,6 +113,10 @@ update msg model =
          | compileSummary = RunTypeSummaryData "compiles" results.summary.compiles
          , lintSummary = RunTypeSummaryData "lints" results.summary.lints
          , simSummary = RunTypeSummaryData "simulations" results.summary.sims
+
+         , compileData = results.compiles
+         , lintData = results.lints
+         , simData = results.simulations
          , compileResults = replaceRunData model.compileResults results.compiles
          , lintResults = replaceRunData model.lintResults results.lints
          , simResults = replaceRunData model.simResults results.simulations
@@ -134,17 +138,17 @@ update msg model =
 
     CompileResults msg ->
       { model
-          | compileResults = fst(ResultsTable.update msg model.compileResults)
+          | compileResults = fst(ResultsTable.update msg model.compileResults model.compileData)
       } ! []
 
     LintResults msg ->
       { model
-          | lintResults = fst(ResultsTable.update msg model.lintResults)
+          | lintResults = fst(ResultsTable.update msg model.lintResults model.lintData)
       } ! []
 
     SimResults msg ->
       { model
-          | simResults = fst(ResultsTable.update msg model.simResults)
+          | simResults = fst(ResultsTable.update msg model.simResults model.simData)
       } ! []
 
 
@@ -153,15 +157,14 @@ view model =
   div
     []
     [
-      button [ onClick (SimResults (ResultsTable.UpdateData model.simData)) ] [ text "Update Data" ]
-    , div
+      div
         [ class "regression-select_container" ]
         [ App.map RegressionSelect (RegressionSelect.view model.regressionSelect) ]
 
     , (RegressionSummary.view model)
-    , App.map CompileResults (ResultsTable.view model.compileResults)
-    , App.map LintResults (ResultsTable.view model.lintResults)
-    , App.map SimResults (ResultsTable.view model.simResults)
+    , App.map CompileResults (ResultsTable.view model.compileResults model.compileData)
+    , App.map LintResults (ResultsTable.view model.lintResults model.lintData)
+    , App.map SimResults (ResultsTable.view model.simResults model.simData)
     ]
 
 
