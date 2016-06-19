@@ -96,6 +96,11 @@ type Msg
   | LintResults ResultsTable.Msg
   | SimResults ResultsTable.Msg
 
+
+replaceRunData : ResultsTable.Model -> List SingleRun -> ResultsTable.Model
+replaceRunData results data =
+  { results | data = data }
+
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
@@ -108,9 +113,9 @@ update msg model =
          | compileSummary = RunTypeSummaryData "compiles" results.summary.compiles
          , lintSummary = RunTypeSummaryData "lints" results.summary.lints
          , simSummary = RunTypeSummaryData "simulations" results.summary.sims
-         , compileData = results.compiles
-         , lintData = results.lints
-         , simData = results.simulations
+         , compileResults = replaceRunData model.compileResults results.compiles
+         , lintResults = replaceRunData model.lintResults results.lints
+         , simResults = replaceRunData model.simResults results.simulations
          , errors = ""
       } ! []
 
@@ -163,5 +168,5 @@ view model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
   Sub.batch
-    [ Time.every (500 * millisecond) PollHttp 
+    [ Time.every (10000 * millisecond) PollHttp 
     ]
