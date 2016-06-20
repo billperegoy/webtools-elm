@@ -24,7 +24,7 @@ initRegressions =
 initColumns : List Column
 initColumns =
   [
-    Column "#" True True False Ascending Dict.empty
+    Column "#" True True False Unsorted Dict.empty
   , Column "Name" True True False Unsorted Dict.empty
   , Column "Config" True True True Unsorted Dict.empty
   , Column "Status" True True True Unsorted Dict.empty

@@ -153,16 +153,24 @@ update msg model =
       } ! []
 
 
+completedRun : SingleRun -> Bool
+completedRun run = 
+  (run.lsfStatus == "Done") || (run.lsfStatus == "Exit")
+
+failedRun : SingleRun -> Bool
+failedRun run = 
+  (run.status == "Fail") || (run.status == "Error")
+
 summarizeData : String -> List SingleRun -> RunTypeSummaryData
 summarizeData label data =
   let
     total = List.length data
+
     complete = data
-      |> List.filter (\e -> ((e.lsfStatus == "Done") || (e.lsfStatus == "Exit"))) 
-      |> List.length
+      |> List.filter completedRun |> List.length
+
     failed = data
-      |> List.filter (\e -> ((e.status == "Fail") || (e.status == "Error"))) 
-      |> List.length
+      |> List.filter failedRun |> List.length
   in
     RunTypeSummaryData label (SingleResult total complete failed)
 
