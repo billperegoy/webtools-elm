@@ -33,6 +33,10 @@ type alias Model =
   , gvpLogUrl : String
   , gatherGroupsUrl : String
   , rtmReportUrl : String
+  , compileData : List SingleRun 
+  , lintData : List SingleRun 
+  , simData : List SingleRun 
+
   , regressionSelect : RegressionSelect.Model
   , compileSummary : RunTypeSummaryData
   , lintSummary : RunTypeSummaryData
@@ -41,9 +45,6 @@ type alias Model =
   , lintResults : ResultsTable.Model
   , simResults : ResultsTable.Model
   , errors : String
-  , compileData : List SingleRun 
-  , lintData : List SingleRun 
-  , simData : List SingleRun 
   }
 
 emptySummaryData : String -> RunTypeSummaryData
@@ -152,6 +153,27 @@ update msg model =
       } ! []
 
 
+summarizeData : String -> List SingleRun -> RunTypeSummaryData
+summarizeData label data =
+  let
+    total = List.length data
+    complete = data
+      |> List.filter (\e -> ((e.lsfStatus == "Done") || (e.lsfStatus == "Exit"))) 
+      |> List.length
+    failed = data
+      |> List.filter (\e -> ((e.status == "Fail") || (e.status == "Error"))) 
+      |> List.length
+  in
+    RunTypeSummaryData label (SingleResult total complete failed)
+
+summaryProps : Model -> Model
+summaryProps model =
+  { model |
+      compileSummary = summarizeData "compiles" model.compileData
+  ,   lintSummary = summarizeData "lints" model.lintData
+  ,   simSummary = summarizeData "sims" model.simData
+  }
+
 view : Model -> Html Msg
 view model =
   div
@@ -161,7 +183,7 @@ view model =
         [ class "regression-select_container" ]
         [ App.map RegressionSelect (RegressionSelect.view model.regressionSelect) ]
 
-    , (RegressionSummary.view model)
+    , (RegressionSummary.view (summaryProps model))
     , App.map CompileResults (ResultsTable.view model.compileResults model.compileData)
     , App.map LintResults (ResultsTable.view model.lintResults model.lintData)
     , App.map SimResults (ResultsTable.view model.simResults model.simData)
