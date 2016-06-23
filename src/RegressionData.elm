@@ -80,11 +80,6 @@ decodeEverything =
     ("lints" := decodeRunList)
     ("simulations" := decodeRunList)
 
-type alias ResultsTableProps =
-  {
-    data : List SingleRun 
-  }
-
 type alias Regression =
   {
     name : String

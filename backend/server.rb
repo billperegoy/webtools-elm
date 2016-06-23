@@ -1,6 +1,38 @@
 require 'json'
 require 'sinatra'
+require 'mongo'
 
+get '/api/real' do
+  headers 'Access-Control-Allow-Origin' => '*'
+
+  servers = ['mongol.icd.teradyne.com:27017', 'kiku.std.teradyne.com:27017']
+  replica_set = 'regression_data'
+  database_name = 'regression_data'
+  username = 'regr_ro'
+  password = 'regr_ro'
+
+ regression_name = 'val__teslarel_edison_validate__2016_06_23_13_30_20_35168'
+
+ db = Mongo::Client.new(servers,
+                            replica_set: replica_set,
+                            read: { mode: :primary_preferred },
+                            database: database_name,
+                            auth_mech: :mongodb_cr,
+                            user: username,
+                            password: password,
+                            max_pool_size: 1,
+                            server_selection_timeout: 10,
+                            socket_timeout: 10,
+                            wait_queue_timeout: 10,
+                            connect_timeout: 10
+                           )
+
+
+ db['sim_data']
+   .find({'regr' => regression_name})
+   .map { |rec| rec }
+   .to_json
+end
 
 get '/api/results' do
   headers 'Access-Control-Allow-Origin' => '*'
