@@ -16,6 +16,14 @@ a {
   margin: 0 8px 0 8px;
 }
 
+td {
+  width: 2000px;
+}
+
+table {
+  table-layout: fixed;
+}
+
 .results-table {
   margin-top: 50px;
   padding: 10px 10px 0px 10px;

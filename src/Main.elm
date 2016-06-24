@@ -12,6 +12,7 @@ import RegressionData exposing (..)
 import RegressionSelect exposing (view)
 import RegressionSummary exposing (view)
 import ResultsTable exposing (view)
+import ApiDataTypes exposing (..)
 
 main : Program Never
 main =
@@ -83,14 +84,14 @@ init =
 getHttpData : Cmd Msg
 getHttpData =
   let
-    url = "http://localhost:4567/api/results"
+    url = "http://localhost:9292/api/results"
   in
-    Task.perform HttpFail HttpSucceed (Http.get decodeEverything url)
+    Task.perform HttpFail HttpSucceed (Http.get decodeTopApiData url)
 
 type Msg
   = RegressionSelect RegressionSelect.Msg
   | GetApiData
-  | HttpSucceed AllResults
+  | HttpSucceed TopApiData 
   | HttpFail Http.Error
   | PollHttp Time
   | CompileResults ResultsTable.Msg
@@ -109,13 +110,11 @@ update msg model =
       (model, getHttpData)
 
     HttpSucceed results ->
+      model ! []
+    {- FIXME
       { 
         model
-         | compileSummary = RunTypeSummaryData "compiles" results.summary.compiles
-         , lintSummary = RunTypeSummaryData "lints" results.summary.lints
-         , simSummary = RunTypeSummaryData "simulations" results.summary.sims
-
-         , compileData = results.compiles
+         | compileData = results.compiles
          , lintData = results.lints
          , simData = results.simulations
          , compileResults = replaceRunData model.compileResults results.compiles
@@ -123,10 +122,11 @@ update msg model =
          , simResults = replaceRunData model.simResults results.simulations
          , errors = ""
       } ! []
+    -}
 
-    HttpFail _ ->
+    HttpFail error ->
       { model
-         | errors = "HTTP error detected"
+         | errors = "HTTP error detected: " ++ toString error
       } ! []
 
     PollHttp time ->
@@ -155,7 +155,7 @@ update msg model =
 
 completedRun : SingleRun -> Bool
 completedRun run = 
-  (run.lsfStatus == "Done") || (run.lsfStatus == "Exit")
+  (run.lsfInfo.status == "Done") || (run.lsfInfo.status == "Exit")
 
 failedRun : SingleRun -> Bool
 failedRun run = 
@@ -201,5 +201,5 @@ view model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
   Sub.batch
-    [ Time.every (1000 * millisecond) PollHttp 
+    [ Time.every (5000 * millisecond) PollHttp 
     ]

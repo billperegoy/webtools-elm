@@ -7,6 +7,7 @@ import List exposing (..)
 import Set exposing (..)
 import Dict exposing (..)
 import Json.Decode as Json exposing (..)
+import String exposing (..)
 
 import DictUtils exposing (getWithDefault)
 import StringUtils exposing (uniquify)
@@ -128,11 +129,13 @@ sortByField data field columns =
           Ascending -> List.reverse (List.sortBy .status data)
           Unsorted -> List.sortBy .status data
 
+{-
       "Lsf Status" ->
         case direction of
-          Descending -> List.sortBy .lsfStatus data
-          Ascending -> List.reverse (List.sortBy .lsfStatus data)
-          Unsorted -> List.sortBy .lsfStatus data
+          Descending -> List.sortBy .lsfInfo data
+          Ascending -> List.reverse (List.sortBy .lsfInfo data)
+          Unsorted -> List.sortBy .lsfInfo data
+-}
 
       "#" ->
         case direction of
@@ -152,11 +155,13 @@ sortByField data field columns =
           Ascending -> List.reverse (List.sortBy .name data)
           Unsorted -> List.sortBy .name data
 
+{-
       "Run Time" ->
         case direction of
-          Descending -> List.sortBy .runTime data
-          Ascending -> List.reverse (List.sortBy .runTime data)
-          Unsorted -> List.sortBy .runTime data
+          Descending -> List.sortBy .lsfInfo data
+          Ascending -> List.reverse (List.sortBy .lsfInfo data)
+          Unsorted -> List.sortBy .lsfInfo data
+-}
 
       _ ->
         data
@@ -174,7 +179,7 @@ columnFiltersFor columns columnName =
   let
     filteredColumns = List.filter (\column -> (column.name == columnName)) columns
   in
-    case length filteredColumns of
+    case List.length filteredColumns of
       1 ->
         case head filteredColumns of
           Just a -> a.filters
@@ -186,7 +191,7 @@ columnSortStatusFor columns columnName =
   let
     filteredColumns = List.filter (\column -> (column.name == columnName)) columns
   in
-    case length filteredColumns of
+    case List.length filteredColumns of
       1 ->
         case head filteredColumns of
           Just a -> a.sortStatus
@@ -199,7 +204,7 @@ filterListElems data filterColumnName =
   case filterColumnName of
     "Config" -> (List.map .config data) |> listToDict
     "Status" -> (List.map .status data) |> listToDict
-    "Lsf Status" -> (List.map .lsfStatus data) |> listToDict
+    "Lsf Status" -> (List.map .lsfInfo data) |> (List.map .status) |> listToDict
     _ -> Dict.empty
 
 tableIconAttributes : Msg -> String -> List (Attribute Msg)
@@ -261,8 +266,8 @@ lookupDataValue job name =
     "Name" -> job.name
     "Config" -> job.config
     "Status" -> job.status
-    "Lsf Status" -> job.lsfStatus
-    "Run Time" -> toString job.runTime
+    "Lsf Status" -> job.lsfInfo.status
+    "Run Time" -> toString job.lsfInfo.elapsedTime
     _ -> "-"
 
 singleDataRowColumns : List Column -> SingleRun -> List (Html Msg)
@@ -275,13 +280,13 @@ singleTableRowAttributes data =
     status = lookupDataValue data "Status"
     lsfStatus = lookupDataValue data "Lsf Status"
   in
-    if (status == "Fail") || (status == "Error")  then
+    if ((String.toLower status) == "Fail") || ((String.toLower status) == "Error")  then
       [ class "job-fail" ]
     else if lsfStatus == "Run" then
       [ class "job-run" ]
-    else if status == "Pass" then
+    else if (String.toLower status) == "pass" then
       [ class "job-pass" ]
-    else if lsfStatus == "Pend" then
+    else if (String.toLower lsfStatus) == "pend" then
       [ class "job-pend" ]
     else
       []
