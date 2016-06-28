@@ -26,6 +26,10 @@ main =
 
 type alias Model =
   {
+  -- FIXME - This should all be embedded in a sub-type
+  --         to simp;lify the model.
+  --         Some of this is likley derived as well.
+  --
     runName : String
   , releaseLabel : String
   , runStatus : String
@@ -34,17 +38,27 @@ type alias Model =
   , gvpLogUrl : String
   , gatherGroupsUrl : String
   , rtmReportUrl : String
-  , compileData : List SingleRun 
-  , lintData : List SingleRun 
-  , simData : List SingleRun 
+
+  , compileData : List SingleRun
+  , lintData : List SingleRun
+  , simData : List SingleRun
 
   , regressionSelect : RegressionSelect.Model
+
+  -- FIXME - these should be dreived from the data
+  --         and eventually go away
+  --
   , compileSummary : RunTypeSummaryData
   , lintSummary : RunTypeSummaryData
   , simSummary : RunTypeSummaryData
+
+
+  -- These are references to subcomponents
+  --
   , compileResults : ResultsTable.Model
   , lintResults : ResultsTable.Model
   , simResults : ResultsTable.Model
+
   , errors : String
   }
 
@@ -91,7 +105,7 @@ getHttpData =
 type Msg
   = RegressionSelect RegressionSelect.Msg
   | GetApiData
-  | HttpSucceed TopApiData 
+  | HttpSucceed TopApiData
   | HttpFail Http.Error
   | PollHttp Time
   | CompileResults ResultsTable.Msg
@@ -99,9 +113,46 @@ type Msg
   | SimResults ResultsTable.Msg
 
 
-replaceRunData : ResultsTable.Model -> List SingleRun -> ResultsTable.Model
-replaceRunData results data =
-  { results | data = data }
+convertApiLsfDataToViewLsfData : LsfApiData -> LsfViewData
+convertApiLsfDataToViewLsfData apiData =
+  {
+    jobId = apiData.jobId
+  , status = apiData.status
+  , execHost = apiData.execHost
+  , elapsedTime = apiData.elapsedTime
+  }
+
+convertCompileApiDataToSingleResult : CompileApiData -> SingleRun
+convertCompileApiDataToSingleResult apiData =
+  {
+    runNum = 0
+  , name = apiData.name
+  , config = apiData.config
+  , status = apiData.runStatus
+  , lsfInfo = convertApiLsfDataToViewLsfData apiData.lsfInfo
+  }
+
+{- FIXME
+convertLintApiDataToSingleResult : LintApiData -> SingleRun
+convertLintApiDataToSingleResult apiData =
+  {
+    runNum = 0 
+  , name = "x" 
+  , config = "" 
+  , status = "" 
+  , lsfInfo = convertApiLsfDataToViewLsfData apiData.lsfInfo
+  }
+-}
+
+convertSimApiDataToSingleResult : SimulationApiData -> SingleRun
+convertSimApiDataToSingleResult apiData =
+  {
+    runNum = apiData.testId
+  , name = apiData.name
+  , config = apiData.config
+  , status = apiData.runStatus
+  , lsfInfo = convertApiLsfDataToViewLsfData apiData.lsfInfo
+  }
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -110,19 +161,12 @@ update msg model =
       (model, getHttpData)
 
     HttpSucceed results ->
-      model ! []
-    {- FIXME
-      { 
-        model
-         | compileData = results.compiles
-         , lintData = results.lints
-         , simData = results.simulations
-         , compileResults = replaceRunData model.compileResults results.compiles
-         , lintResults = replaceRunData model.lintResults results.lints
-         , simResults = replaceRunData model.simResults results.simulations
-         , errors = ""
+      { model |
+          compileData = List.map (\e -> convertCompileApiDataToSingleResult e) results.compiles
+        --, lintData = List.map (\e -> convertLintApiDataToSingleResult e) results.lints
+        , simData = List.map (\e -> convertSimApiDataToSingleResult e) results.simulations
+        , errors = ""
       } ! []
-    -}
 
     HttpFail error ->
       { model
@@ -154,11 +198,11 @@ update msg model =
 
 
 completedRun : SingleRun -> Bool
-completedRun run = 
+completedRun run =
   (run.lsfInfo.status == "Done") || (run.lsfInfo.status == "Exit")
 
 failedRun : SingleRun -> Bool
-failedRun run = 
+failedRun run =
   (run.status == "Fail") || (run.status == "Error")
 
 summarizeData : String -> List SingleRun -> RunTypeSummaryData
@@ -201,5 +245,5 @@ view model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
   Sub.batch
-    [ Time.every (5000 * millisecond) PollHttp 
+    [ Time.every (5000 * millisecond) PollHttp
     ]

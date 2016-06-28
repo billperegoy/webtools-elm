@@ -182,14 +182,14 @@ decodeSimulationApiData =
 
 type alias LintApiData =
   {
-    name : String
-  , lintType : String
+  -- FIXME   name : String
+    lintType : String
   , regressionName : String
   , projectName : String
   , lsfLogFile : String
   , executionLogFile : String
   , runStatus : String
-  , lsfInfo : LsfApiData
+  -- FIXME , lsfInfo : LsfApiData
   }
 
 decodeLintApiList : Json.Decoder (List LintApiData)
@@ -199,14 +199,14 @@ decodeLintApiList =
 decodeLintApiData : Json.Decoder LintApiData
 decodeLintApiData =
   Json.map LintApiData
-    ("name" := Json.string) `apply`
-    ("lintType" := Json.string) `apply`
-    ("regressionName" := Json.string) `apply`
-    ("projectName" := Json.string) `apply`
-    ("lsfLogFile" := Json.string) `apply`
-    ("executionLogFile" := Json.string) `apply`
-    ("runStatus" := Json.string) `apply`
-    ("lsfInfo" := decodeLsfApiData)
+    -- FIXME ("name" := Json.string) `apply`
+    ("type" := Json.string) `apply`
+    ("regr" := Json.string) `apply`
+    ("proj" := Json.string) `apply`
+    ("lsf_log" := Json.string) `apply`
+    ("verilog_log" := Json.string) `apply`
+    ("status" := Json.string)
+    -- FIXME ("lsf_info" := decodeLsfApiData)
 
 type alias TopApiData =
   {

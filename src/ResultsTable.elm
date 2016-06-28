@@ -14,7 +14,6 @@ import StringUtils exposing (uniquify)
 import FormUtils as Form exposing (..)
 import RegressionData exposing (..)
 import Initialize exposing (..)
-import Debug exposing (..)
 
 
 type alias Model =
@@ -249,6 +248,7 @@ columnsToTableHeader columns =
 
 tableRows : Model -> List SingleRun -> List (Html Msg)
 tableRows model data =
+  Debug.log (toString data)
   (tableHeader model) :: (dataToTableRows model data)
 
 tableHeader : Model -> Html Msg
