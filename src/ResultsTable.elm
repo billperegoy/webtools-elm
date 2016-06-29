@@ -278,7 +278,7 @@ singleTableRowAttributes data =
   in
     if ((String.toLower status) == "Fail") || ((String.toLower status) == "Error")  then
       [ class "job-fail" ]
-    else if lsfStatus == "Run" then
+    else if (String.toLower lsfStatus) == "run" then
       [ class "job-run" ]
     else if (String.toLower status) == "pass" then
       [ class "job-pass" ]

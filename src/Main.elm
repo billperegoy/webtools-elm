@@ -104,14 +104,13 @@ type Msg
   | LintResults ResultsTable.Msg
   | SimResults ResultsTable.Msg
 
-
 convertApiLsfDataToViewLsfData : LsfApiData -> LsfViewData
 convertApiLsfDataToViewLsfData apiData =
   {
     jobId = apiData.jobId
   , status = apiData.status
   , execHost = apiData.execHost
-  , elapsedTime = apiData.elapsedTime
+  , elapsedTime = Maybe.withDefault 0 apiData.elapsedTime
   }
 
 convertCompileApiDataToSingleResult : CompileApiData -> SingleRun
@@ -248,5 +247,5 @@ view model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
   Sub.batch
-    [ Time.every (5000 * millisecond) PollHttp
+    [ Time.every (1000 * millisecond) PollHttp
     ]

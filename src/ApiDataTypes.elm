@@ -66,14 +66,14 @@ type alias LsfApiData =
   , submitHost : String
   , execHost : String
   , cpu : Float
-  , avgMem : Int
-  , maxMem : Int
+  , avgMem : Maybe Int
+  , maxMem : Maybe Int
   , swap : Int
   , pids : String
   , submitTime : String
-  , startTime : String
-  , endTime : String
-  , elapsedTime : Int
+  , startTime : Maybe String
+  , endTime : Maybe String
+  , elapsedTime : Maybe Int
   }
 
 decodeLsfApiData : Json.Decoder LsfApiData
@@ -88,14 +88,14 @@ decodeLsfApiData =
     ("submit_host" := Json.string) `apply`
     ("exec_host" := Json.string) `apply`
     ("cpu" := Json.float) `apply`
-    ("avg_mem" := Json.int) `apply`
-    ("max_mem" := Json.int) `apply`
+    (maybe ("avg_mem" := Json.int)) `apply`
+    (maybe ("max_mem" := Json.int)) `apply`
     ("swap" := Json.int) `apply`
     ("pids" := Json.string) `apply`
     ("submit_time" := Json.string) `apply`
-    ("start_time" := Json.string) `apply`
-    ("end_time" := Json.string) `apply`
-    ("elapsed_time" := Json.int)
+    (maybe ("start_time" := Json.string)) `apply`
+    (maybe ("end_time" := Json.string)) `apply`
+    (maybe ("elapsed_time" := Json.int))
 
 type alias CompileApiData =
   {
