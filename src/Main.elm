@@ -90,7 +90,7 @@ init =
 getHttpData : Cmd Msg
 getHttpData =
   let
-    url = "http://localhost:9292/api/results"
+    url = "http://localhost:9292/api/regressions/peregoy_raven_1__2016_06_29_14_35_37_29229"
   in
     Task.perform HttpFail HttpSucceed (Http.get decodeTopApiData url)
 

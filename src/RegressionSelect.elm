@@ -20,12 +20,13 @@ type alias Model =
   , userFilter : String
   , projectFilter : String
   , runTypeFilter : String
+  , selectedElement : String
   }
 
 
 init : Model
 init  =
-  Model Initialize.initRegressions "" "" ""
+  Model Initialize.initRegressions "" "" "" ""
 
 --
 -- Update
@@ -34,6 +35,7 @@ type Msg
   = UpdateUserFilter String
   | UpdateProjectFilter String
   | UpdateRunTypeFilter String
+  | UpdateSelectedElement String
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -46,6 +48,9 @@ update msg model =
 
     UpdateRunTypeFilter data ->
       { model | runTypeFilter = data } ! []
+
+    UpdateSelectedElement data ->
+      { model | selectedElement = data } ! []
 
 --
 -- View Utilities
@@ -126,7 +131,7 @@ filteredRegressionsHtml model =
          []
          [ text "Filtered List" ]
      , select
-         []
+         [ Form.onSelectChange UpdateSelectedElement ]
          (filteredRegressionList model)
     ]
 
@@ -144,5 +149,6 @@ view model =
         , (filterElementHtml model "Users" "user" UpdateUserFilter)
         ]
     , (filteredRegressionsHtml model)
+    , p [] [ text model.selectedElement ]
     ]
 

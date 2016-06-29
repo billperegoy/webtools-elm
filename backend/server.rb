@@ -24,10 +24,22 @@ class Application < Sinatra::Base
                            connect_timeout: 10
                           )
 
-  def get_api_data
-   regression_name = 'val__dnldrel_par_reg_dnld_validate__2016_06_11_19_35_17_47669'
-   regression_name = 'val__teslarel_edison_validate__2016_06_23_13_30_20_35168'
-   regression_name = 'peregoy_raven_1__2016_06_29_14_35_37_29229'
+  def regressions_index
+    fourteen_days_ago = Time.new - 14 * 24 * 60 * 60
+    query = {'start_date' =>  {'$gt' => fourteen_days_ago}}
+    projection = {'_id' => false,
+                  'name' => true,
+                  'user' => true,
+                  'proj' => true,
+                  "run_type" => true}
+
+    @@db['regress_data']
+      .find(query)
+      .projection(projection)
+      .map { |rec| rec }
+  end
+
+  def regressions_show(regression_name)
    compiles = @@db['compile_data']
      .find({'regr' => regression_name})
      .projection({'_id' => false})
@@ -46,42 +58,14 @@ class Application < Sinatra::Base
    {compiles: compiles, lints: lints, simulations: simulations}
   end
 
-  get '/api/real' do
+  get '/api/regressions' do
     headers 'Access-Control-Allow-Origin' => '*'
-
-   results = get_api_data
-   results.to_json
+    regressions_index.to_json
   end
 
-  get '/api/results' do
+  get '/api/regressions/:name' do
     headers 'Access-Control-Allow-Origin' => '*'
-    get_api_data.to_json
-  end
-
-  def gen_run_list(count)
-    list = []
-    (1..count).each do |num|
-      list << {
-        test_num: num,
-        name: "test_" + num.to_s,
-        config: ["default", "pcie", "ddr", "bypass"][rand(3)],
-        status: ["Pass", "Fail", "Error"][rand(2)],
-        lsf_status: ["Done", "Exit", "Run"][rand(3)],
-        run_time: rand(1000)
-      }
-    end
-    list
-  end
-
-  def random_triplet
-    total = rand(10)
-
-    complete = rand(total)
-    complete = complete < 1 ? 0 : complete
-
-    fail = rand(complete)
-    fail = fail < 1 ? 0 : fail
-
-    {total: total, complete: complete, fail: fail}
+    regression_name = params['name']
+    regressions_show(regression_name).to_json
   end
 end
