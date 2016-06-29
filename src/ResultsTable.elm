@@ -128,13 +128,11 @@ sortByField data field columns =
           Descending -> List.reverse (List.sortBy .status data)
           Unsorted -> List.sortBy .status data
 
-{-
       "Lsf Status" ->
         case direction of
-          Ascending -> List.sortBy .lsfInfo data
-          Descending -> List.reverse (List.sortBy .lsfInfo data)
-          Unsorted -> List.sortBy .lsfInfo data
--}
+          Ascending -> List.sortBy (\e -> e.lsfInfo.status) data
+          Descending -> List.reverse (List.sortBy (\e -> e.lsfInfo.status) data)
+          Unsorted -> List.sortBy (\e -> e.lsfInfo.status) data
 
       "#" ->
         case direction of
@@ -154,13 +152,11 @@ sortByField data field columns =
           Descending -> List.reverse (List.sortBy .name data)
           Unsorted -> List.sortBy .name data
 
-{-
       "Run Time" ->
         case direction of
-          Ascending -> List.sortBy .lsfInfo data
-          Descending -> List.reverse (List.sortBy .lsfInfo data)
-          Unsorted -> List.sortBy .lsfInfo data
--}
+          Ascending -> List.sortBy (\e -> e.lsfInfo.elapsedTime) data
+          Descending -> List.reverse (List.sortBy (\e -> e.lsfInfo.elapsedTime) data)
+          Unsorted -> List.sortBy (\e -> e.lsfInfo.elapsedTime) data
 
       _ ->
         data
