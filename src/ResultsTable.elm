@@ -29,13 +29,13 @@ type alias Model =
   , sortField : String
   }
 
-init : String -> List SingleRun -> Model
-init resultsType data =
+init : String -> List Column -> List SingleRun -> Model
+init resultsType columns data =
   {
     resultsType = resultsType
   , data = data
   , showEditColumnsPane = False
-  , columns = Initialize.initColumns
+  , columns = columns
   , showFilterPane = False
   , itemBeingFiltered = ""
   , columnFilterItems = Dict.empty
@@ -124,41 +124,41 @@ sortByField data field columns =
     case field of
       "Status" ->
         case direction of
-          Descending -> List.sortBy .status data
-          Ascending -> List.reverse (List.sortBy .status data)
+          Ascending -> List.sortBy .status data
+          Descending -> List.reverse (List.sortBy .status data)
           Unsorted -> List.sortBy .status data
 
 {-
       "Lsf Status" ->
         case direction of
-          Descending -> List.sortBy .lsfInfo data
-          Ascending -> List.reverse (List.sortBy .lsfInfo data)
+          Ascending -> List.sortBy .lsfInfo data
+          Descending -> List.reverse (List.sortBy .lsfInfo data)
           Unsorted -> List.sortBy .lsfInfo data
 -}
 
       "#" ->
         case direction of
-          Descending -> List.sortBy .runNum data
-          Ascending -> List.reverse (List.sortBy .runNum data)
+          Ascending -> List.sortBy .runNum data
+          Descending -> List.reverse (List.sortBy .runNum data)
           Unsorted -> List.sortBy .runNum data
 
       "Config" ->
         case direction of
-          Descending -> List.sortBy .config data
-          Ascending -> List.reverse (List.sortBy .config data)
+          Ascending -> List.sortBy .config data
+          Descending -> List.reverse (List.sortBy .config data)
           Unsorted -> List.sortBy .config data
 
       "Name" ->
         case direction of
-          Descending -> List.sortBy .name data
-          Ascending -> List.reverse (List.sortBy .name data)
+          Ascending -> List.sortBy .name data
+          Descending -> List.reverse (List.sortBy .name data)
           Unsorted -> List.sortBy .name data
 
 {-
       "Run Time" ->
         case direction of
-          Descending -> List.sortBy .lsfInfo data
-          Ascending -> List.reverse (List.sortBy .lsfInfo data)
+          Ascending -> List.sortBy .lsfInfo data
+          Descending -> List.reverse (List.sortBy .lsfInfo data)
           Unsorted -> List.sortBy .lsfInfo data
 -}
 

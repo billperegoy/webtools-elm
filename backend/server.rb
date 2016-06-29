@@ -27,6 +27,7 @@ class Application < Sinatra::Base
   def get_api_data
    regression_name = 'val__dnldrel_par_reg_dnld_validate__2016_06_11_19_35_17_47669'
    regression_name = 'val__teslarel_edison_validate__2016_06_23_13_30_20_35168'
+   regression_name = 'peregoy_raven_1__2016_06_28_15_17_17_21693'
    compiles = @@db['compile_data']
      .find({'regr' => regression_name})
      .projection({'_id' => false})

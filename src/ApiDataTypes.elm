@@ -105,7 +105,7 @@ type alias CompileApiData =
   , compileType : String
   , config : String
   , lsfLogFile : String
-  , executionLogFile : String
+  , executionLogFile : Maybe String
   , runCommand : String
   , runStatus : String
   , failSignatures : List String
@@ -125,7 +125,7 @@ decodeCompileApiData =
     ("type" := Json.string) `apply`
     ("config" := Json.string) `apply`
     ("lsf_log" := Json.string) `apply`
-    ("verilog_log" := Json.string) `apply`
+    (maybe ("verilog_log" := Json.string)) `apply`
     ("sim_lsf_cmd" := Json.string) `apply`
     ("status" := Json.string) `apply`
     ("fail_signatures" := decodeStringList) `apply`
@@ -141,13 +141,13 @@ type alias SimulationApiData =
   , projectName : String
   , config : String
   , lsfLogFile : String
-  , executionLogFile : String
+  , executionLogFile : Maybe String
   , runCommand : Maybe String
   , simArgs : String
   , runStatus : String
-  , simTime : String
+  , simTime : Maybe String
   , owner : Maybe String
-  , seed : String
+  , seed : String 
   , wordSize : Int
   , reservedMemory : Int
   , failSignatures : List String
@@ -168,11 +168,11 @@ decodeSimulationApiData =
     ("proj" := Json.string) `apply`
     ("config" := Json.string) `apply`
     ("lsf_log" := Json.string) `apply`
-    ("verilog_log" := Json.string) `apply`
+    (maybe ("verilog_log" := Json.string)) `apply`
     (maybe ("sim_lsf_cmd" := Json.string)) `apply`
     ("sim_args" := Json.string) `apply`
     ("status" := Json.string) `apply`
-    ("sim_time" := Json.string) `apply`
+    (maybe ("sim_time" := Json.string)) `apply`
     (maybe ("owner" := Json.string)) `apply`
     ("seed" := Json.string) `apply`
     ("word_size" := Json.int) `apply`

@@ -9,6 +9,7 @@ view props =
   div
     [ class "regression-summary" ]
     [
+{- FIXME
       div
         []
         [ text ("Run Name: " ++ props.runName) ]
@@ -36,7 +37,8 @@ view props =
     , a
         [ href props.gatherGroupsUrl]
         [ text "Gather Groups Link" ]
-    , div
+-}
+      div
         [ class "all-summaries" ]
         [
           div

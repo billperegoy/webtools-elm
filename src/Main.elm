@@ -6,6 +6,7 @@ import Http exposing (..)
 import Task exposing (..)
 import Json.Decode as Json exposing (..)
 import Time exposing (..)
+import String exposing (..)
 
 import Initialize exposing (..)
 import RegressionData exposing (..)
@@ -45,15 +46,6 @@ type alias Model =
 
   , regressionSelect : RegressionSelect.Model
 
-  -- FIXME - these should be dreived from the data
-  --         and eventually go away
-  --
-  , compileSummary : RunTypeSummaryData
-  , lintSummary : RunTypeSummaryData
-  , simSummary : RunTypeSummaryData
-
-
-  -- These are references to subcomponents
   --
   , compileResults : ResultsTable.Model
   , lintResults : ResultsTable.Model
@@ -83,12 +75,9 @@ init =
   , gatherGroupsUrl = "#"
   , rtmReportUrl = "#"
   , regressionSelect = RegressionSelect.init
-  , compileSummary = emptySummaryData "compiles"
-  , lintSummary = emptySummaryData "lints"
-  , simSummary = emptySummaryData "sims"
-  , compileResults = ResultsTable.init "Compiles" Initialize.initCompiles
-  , lintResults = ResultsTable.init "Lints" Initialize.initLints
-  , simResults = ResultsTable.init "Simulations" Initialize.initSimulations
+  , compileResults = ResultsTable.init "Compiles" Initialize.initCompileColumns Initialize.initCompiles
+  , lintResults = ResultsTable.init "Lints" Initialize.initLintColumns Initialize.initLints
+  , simResults = ResultsTable.init "Simulations" Initialize.initSimColumns Initialize.initSimulations
   , errors = ""
   , lintData = []
   , compileData = []
@@ -199,11 +188,11 @@ update msg model =
 
 completedRun : SingleRun -> Bool
 completedRun run =
-  (run.lsfInfo.status == "Done") || (run.lsfInfo.status == "Exit")
+  (String.toLower run.lsfInfo.status == "done") || (String.toLower run.lsfInfo.status == "exit")
 
 failedRun : SingleRun -> Bool
 failedRun run =
-  (run.status == "Fail") || (run.status == "Error")
+  (String.toLower run.status == "fail") || (String.toLower run.status == "error")
 
 summarizeData : String -> List SingleRun -> RunTypeSummaryData
 summarizeData label data =
@@ -218,12 +207,21 @@ summarizeData label data =
   in
     RunTypeSummaryData label (SingleResult total complete failed)
 
-summaryProps : Model -> Model
+type alias AllRunTypeSummaries =
+  {
+    errors : String
+  , compileSummary : RunTypeSummaryData
+  , lintSummary : RunTypeSummaryData
+  , simSummary : RunTypeSummaryData
+  }
+
+summaryProps : Model -> AllRunTypeSummaries
 summaryProps model =
-  { model |
-      compileSummary = summarizeData "compiles" model.compileData
-  ,   lintSummary = summarizeData "lints" model.lintData
-  ,   simSummary = summarizeData "sims" model.simData
+  { 
+    errors = model.errors
+  , compileSummary = summarizeData "compiles" model.compileData
+  , lintSummary = summarizeData "lints" model.lintData
+  , simSummary = summarizeData "sims" model.simData
   }
 
 view : Model -> Html Msg
