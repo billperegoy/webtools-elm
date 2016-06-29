@@ -9,36 +9,34 @@ view props =
   div
     [ class "regression-summary" ]
     [
-{- FIXME
       div
         []
-        [ text ("Run Name: " ++ props.runName) ]
+        [ text ("Run Name: " ++ props.runSummary.name) ]
     , div
         []
-        [ text ("Release Label: " ++ props.releaseLabel) ]
+        [ text ("Release Label: " ++ props.runSummary.releaseLabel) ]
     , div
         []
-        [ text ("Run Status: " ++ props.runStatus) ]
+        [ text ("Run Status: " ++ props.runSummary.runStatus) ]
     , div
         []
         [ text "Progress Bar" ]
     , div
         []
-        [ text ("Elapsed Time: " ++ toString props.elapsedTime) ]
+        [ text ("Elapsed Time: " ++ toString props.runSummary.elapsedTime) ]
     , a
-        [ href props.releaseUrl]
+        [ href props.runSummary.releaseUrl]
         [ text "Release Link" ]
     , a
-        [ href props.gvpLogUrl ]
+        [ href props.runSummary.gvpLogUrl ]
         [ text "GVP Log Link" ]
     , a
-        [ href props.gatherGroupsUrl ]
+        [ href props.runSummary.gatherGroupsUrl ]
         [ text "RTM Report Link" ]
     , a
-        [ href props.gatherGroupsUrl]
+        [ href props.runSummary.gatherGroupsUrl]
         [ text "Gather Groups Link" ]
--}
-      div
+    , div
         [ class "all-summaries" ]
         [
           div

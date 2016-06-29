@@ -25,28 +25,39 @@ main =
     }
 
 
-type alias Model =
+type alias RunSummaryData =
   {
-  -- FIXME - This should all be embedded in a sub-type
-  --         to simp;lify the model.
-  --         Some of this is likley derived as well.
-  --
-    runName : String
+    name : String
   , releaseLabel : String
   , runStatus : String
   , elapsedTime : Int
-  , releaseUrl : String
+  , releaseUrl : String 
   , gvpLogUrl : String
   , gatherGroupsUrl : String
-  , rtmReportUrl : String
+  , rtmReportUrl :String
+  }
 
-  , compileData : List SingleRun
+initSummaryData : RunSummaryData
+initSummaryData = 
+  {
+    name = "My Run Name"
+  , releaseLabel = "My Release Label"
+  , runStatus = "RUN"
+  , elapsedTime = 1234
+  , releaseUrl = "#"
+  , gvpLogUrl = "#"
+  , gatherGroupsUrl = "#"
+  , rtmReportUrl = "#"
+  }
+
+type alias Model =
+  {
+    compileData : List SingleRun
   , lintData : List SingleRun
   , simData : List SingleRun
 
+  -- Sub-components
   , regressionSelect : RegressionSelect.Model
-
-  --
   , compileResults : ResultsTable.Model
   , lintResults : ResultsTable.Model
   , simResults : ResultsTable.Model
@@ -66,15 +77,7 @@ emptySummaryData label =
 init : (Model, Cmd Msg)
 init =
   {
-    runName = "My Run Name"
-  , releaseLabel = "My Release Label"
-  , runStatus = "RUN"
-  , elapsedTime = 1234
-  , releaseUrl = "#"
-  , gvpLogUrl = "#"
-  , gatherGroupsUrl = "#"
-  , rtmReportUrl = "#"
-  , regressionSelect = RegressionSelect.init
+    regressionSelect = RegressionSelect.init
   , compileResults = ResultsTable.init "Compiles" Initialize.initCompileColumns Initialize.initCompiles
   , lintResults = ResultsTable.init "Lints" Initialize.initLintColumns Initialize.initLints
   , simResults = ResultsTable.init "Simulations" Initialize.initSimColumns Initialize.initSimulations
@@ -210,6 +213,7 @@ summarizeData label data =
 type alias AllRunTypeSummaries =
   {
     errors : String
+  , runSummary : RunSummaryData
   , compileSummary : RunTypeSummaryData
   , lintSummary : RunTypeSummaryData
   , simSummary : RunTypeSummaryData
@@ -219,6 +223,7 @@ summaryProps : Model -> AllRunTypeSummaries
 summaryProps model =
   { 
     errors = model.errors
+  , runSummary = initSummaryData
   , compileSummary = summarizeData "compiles" model.compileData
   , lintSummary = summarizeData "lints" model.lintData
   , simSummary = summarizeData "sims" model.simData
