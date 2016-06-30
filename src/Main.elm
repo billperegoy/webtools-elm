@@ -123,7 +123,6 @@ convertCompileApiDataToSingleResult apiData =
   , lsfInfo = convertApiLsfDataToViewLsfData apiData.lsfInfo
   }
 
-{- FIXME
 convertLintApiDataToSingleResult : LintApiData -> SingleRun
 convertLintApiDataToSingleResult apiData =
   {
@@ -133,7 +132,6 @@ convertLintApiDataToSingleResult apiData =
   , status = "" 
   , lsfInfo = convertApiLsfDataToViewLsfData apiData.lsfInfo
   }
--}
 
 convertSimApiDataToSingleResult : SimulationApiData -> SingleRun
 convertSimApiDataToSingleResult apiData =
@@ -154,7 +152,7 @@ update msg model =
     HttpSucceed results ->
       { model |
           compileData = List.map (\e -> convertCompileApiDataToSingleResult e) results.compiles
-        --, lintData = List.map (\e -> convertLintApiDataToSingleResult e) results.lints
+        , lintData = List.map (\e -> convertLintApiDataToSingleResult e) results.lints
         , simData = List.map (\e -> convertSimApiDataToSingleResult e) results.simulations
         , errors = ""
       } ! []

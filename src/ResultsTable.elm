@@ -244,7 +244,6 @@ columnsToTableHeader columns =
 
 tableRows : Model -> List SingleRun -> List (Html Msg)
 tableRows model data =
-  Debug.log (toString data)
   (tableHeader model) :: (dataToTableRows model data)
 
 tableHeader : Model -> Html Msg
