@@ -16,8 +16,7 @@ import RegressionData exposing (..)
 --
 type alias Model =
   {
-    regressions : List Regression
-  , userFilter : String
+    userFilter : String
   , projectFilter : String
   , runTypeFilter : String
   , selectedElement : String
@@ -26,7 +25,7 @@ type alias Model =
 
 init : Model
 init  =
-  Model Initialize.initRegressions "" "" "" ""
+  Model "" "" "" ""
 
 --
 -- Update
@@ -77,40 +76,40 @@ filterSelect filterType name unfilteredList =
   else
     filterBy filterType unfilteredList name
 
-filteredRegressionList : Model -> List (Html Msg)
-filteredRegressionList model =
-  model.regressions
+filteredRegressionList : Model -> List Regression -> List (Html Msg)
+filteredRegressionList model regressions =
+  regressions
     |> filterSelect "project" model.projectFilter
     |> filterSelect "user" model.userFilter
     |> filterSelect "runType" model.runTypeFilter
     |> List.map .name
     |> HtmlUtils.listToHtmlSelectOptions
 
-allElementsByType : Model -> String -> List String
-allElementsByType model selectType =
+allElementsByType : Model -> List Regression -> String -> List String
+allElementsByType model regressions selectType =
   case selectType of
   "project" ->
-    "" :: List.map .project (model.regressions)
+    "" :: List.map .project regressions
 
   "user" ->
-    "" :: List.map .user (model.regressions)
+    "" :: List.map .user regressions
 
   "runType" ->
-    "" :: List.map .runType (model.regressions)
+    "" :: List.map .runType regressions
 
   _ -> []
 
-uniqueElementsByTypeToHtmlSelect : Model -> String -> List (Html Msg)
-uniqueElementsByTypeToHtmlSelect model selectType =
-  allElementsByType model selectType
+uniqueElementsByTypeToHtmlSelect : Model -> List Regression -> String -> List (Html Msg)
+uniqueElementsByTypeToHtmlSelect model regressions selectType =
+  allElementsByType model regressions selectType
     |> StringUtils.uniquify
     |> HtmlUtils.listToHtmlSelectOptions
 
 --
 -- view
 --
-filterElementHtml : Model -> String -> String -> (String -> Msg) -> Html Msg
-filterElementHtml model filterLabel selectType msg =
+filterElementHtml : Model -> List Regression -> String -> String -> (String -> Msg) -> Html Msg
+filterElementHtml model regressions filterLabel selectType msg =
       div
         [ class "select-field" ]
         [
@@ -119,11 +118,11 @@ filterElementHtml model filterLabel selectType msg =
             [ text filterLabel ]
         , select
             [ Form.onSelectChange msg ]
-            (uniqueElementsByTypeToHtmlSelect model selectType)
+            (uniqueElementsByTypeToHtmlSelect model regressions selectType)
         ]
 
-filteredRegressionsHtml : Model -> Html Msg
-filteredRegressionsHtml model =
+filteredRegressionsHtml : Model -> List Regression -> Html Msg
+filteredRegressionsHtml model regressions =
   div
     [ class "filtered-select-field" ]
     [
@@ -132,23 +131,23 @@ filteredRegressionsHtml model =
          [ text "Filtered List" ]
      , select
          [ Form.onSelectChange UpdateSelectedElement ]
-         (filteredRegressionList model)
+         (filteredRegressionList model regressions)
     ]
 
 
-view : Model -> Html Msg
-view model =
+view : Model -> List Regression -> Html Msg
+view model regressions =
   div
     [ class "regression-select" ]
     [
       div
         [ class "selectors" ]
         [
-          (filterElementHtml model "Projects" "project" UpdateProjectFilter)
-        , (filterElementHtml model "Run Types" "runType" UpdateRunTypeFilter)
-        , (filterElementHtml model "Users" "user" UpdateUserFilter)
+          (filterElementHtml model regressions "Projects" "project" UpdateProjectFilter)
+        , (filterElementHtml model regressions "Run Types" "runType" UpdateRunTypeFilter)
+        , (filterElementHtml model regressions "Users" "user" UpdateUserFilter)
         ]
-    , (filteredRegressionsHtml model)
+    , (filteredRegressionsHtml model regressions)
     , p [] [ text model.selectedElement ]
     ]
 

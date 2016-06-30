@@ -63,33 +63,6 @@ decodeAll =
     ("lints" := decodeSingle)
     ("sims" := decodeSingle)
 
-{-
-decodeSingleRun : Json.Decoder SingleRun
-decodeSingleRun =
-  Json.object6 SingleRun
-    ("test_num" := Json.int)
-    ("name" := Json.string)
-    ("config" := Json.string)
-    ("status" := Json.string)
-    ("lsf_status" := Json.string)
-    ("run_time" := Json.int)
--}
-
-
-{-
-decodeRunList : Json.Decoder (List SingleRun)
-decodeRunList =
-  list decodeSingleRun
-
-decodeEverything : Json.Decoder AllResults
-decodeEverything =
-  Json.object4 AllResults 
-    ("summary" := decodeAll)
-    ("compiles" := decodeRunList)
-    ("lints" := decodeRunList)
-    ("simulations" := decodeRunList)
--}
-
 type alias Regression =
   {
     name : String
@@ -97,6 +70,19 @@ type alias Regression =
   , runType : String 
   , user : String
   }
+
+decodeRegression : Json.Decoder Regression
+decodeRegression =
+  Json.object4 Regression
+    ("name" := Json.string)
+    ("project" := Json.string)
+    ("runType" := Json.string)
+    ("user" := Json.string)
+
+
+decodeRegressionList : Json.Decoder (List Regression)
+decodeRegressionList =
+  list decodeRegression 
 
 type alias Column =
   {

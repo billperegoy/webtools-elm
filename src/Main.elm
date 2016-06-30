@@ -52,7 +52,9 @@ initSummaryData =
 
 type alias Model =
   {
-    compileData : List SingleRun
+    regressionList : List Regression
+
+  , compileData : List SingleRun
   , lintData : List SingleRun
   , simData : List SingleRun
 
@@ -77,7 +79,8 @@ emptySummaryData label =
 init : (Model, Cmd Msg)
 init =
   {
-    regressionSelect = RegressionSelect.init
+    regressionList = Initialize.initRegressions
+  , regressionSelect = RegressionSelect.init
   , compileResults = ResultsTable.init "Compiles" Initialize.initCompileColumns Initialize.initCompiles
   , lintResults = ResultsTable.init "Lints" Initialize.initLintColumns Initialize.initLints
   , simResults = ResultsTable.init "Simulations" Initialize.initSimColumns Initialize.initSimulations
@@ -233,7 +236,7 @@ view model =
     [
       div
         [ class "regression-select_container" ]
-        [ App.map RegressionSelect (RegressionSelect.view model.regressionSelect) ]
+        [ App.map RegressionSelect (RegressionSelect.view model.regressionSelect model.regressionList) ]
 
     , (RegressionSummary.view (summaryProps model))
     , App.map CompileResults (ResultsTable.view model.compileResults model.compileData)
