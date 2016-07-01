@@ -65,6 +65,7 @@ type alias Model =
   , simResults : ResultsTable.Model
 
   , resultsHttpErrors : String
+  , regressionsHttpErrors : String
   }
 
 emptySummaryData : String -> RunTypeSummaryData
@@ -85,6 +86,7 @@ init =
   , lintResults = ResultsTable.init "Lints" Initialize.initLintColumns Initialize.initLints
   , simResults = ResultsTable.init "Simulations" Initialize.initSimColumns Initialize.initSimulations
   , resultsHttpErrors = ""
+  , regressionsHttpErrors = ""
   , lintData = []
   , compileData = []
   , simData = []
@@ -97,12 +99,26 @@ getResultsHttpData =
   in
     Task.perform ResultsHttpFail ResultsHttpSucceed (Http.get decodeTopApiData url)
 
+getRegressionsHttpData : Cmd Msg
+getRegressionsHttpData =
+  let
+    url = "http://localhost:9292/api/regressions"
+  in
+    Task.perform RegressionsHttpFail RegressionsHttpSucceed (Http.get decodeRegressionList url)
+
 type Msg
   = RegressionSelect RegressionSelect.Msg
+
   | GetResultsApiData
   | ResultsHttpSucceed TopApiData
   | ResultsHttpFail Http.Error
   | PollResultsHttp Time
+
+  | GetRegressionsApiData
+  | RegressionsHttpSucceed (List Regression) 
+  | RegressionsHttpFail Http.Error
+  | PollRegressionsHttp Time
+
   | CompileResults ResultsTable.Msg
   | LintResults ResultsTable.Msg
   | SimResults ResultsTable.Msg
@@ -151,6 +167,23 @@ update msg model =
   case msg of
     GetResultsApiData ->
       (model, getResultsHttpData)
+
+    GetRegressionsApiData ->
+      (model, getRegressionsHttpData)
+
+    RegressionsHttpSucceed results ->
+      { model |
+          regressionList = results
+        , regressionsHttpErrors = ""
+      } ! []
+
+    RegressionsHttpFail error ->
+      { model |
+          regressionsHttpErrors = "Http errors: " ++ toString error 
+      } ! []
+
+    PollRegressionsHttp time ->
+      (model, getRegressionsHttpData)
 
     ResultsHttpSucceed results ->
       { model |
@@ -237,6 +270,7 @@ view model =
       div
         [ class "regression-select_container" ]
         [ App.map RegressionSelect (RegressionSelect.view model.regressionSelect model.regressionList) ]
+    , p [] [ text model.regressionsHttpErrors ]
 
     , (RegressionSummary.view (summaryProps model))
     , App.map CompileResults (ResultsTable.view model.compileResults model.compileData)
@@ -249,5 +283,6 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
   Sub.batch
     [ 
-      Time.every (1000 * millisecond) PollResultsHttp
+      Time.every (10000 * millisecond) PollResultsHttp
+    , Time.every (60000 * millisecond) PollRegressionsHttp
     ]

@@ -75,8 +75,8 @@ decodeRegression : Json.Decoder Regression
 decodeRegression =
   Json.object4 Regression
     ("name" := Json.string)
-    ("project" := Json.string)
-    ("runType" := Json.string)
+    ("proj" := Json.string)
+    ("run_type" := Json.string)
     ("user" := Json.string)
 
 

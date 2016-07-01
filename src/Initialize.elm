@@ -18,6 +18,7 @@ initRegressions =
   ,  (Regression "regression10" "project2" "validate" "user1")
   ,  (Regression "regression11" "project2" "publish" "user1")
   ,  (Regression "regression12" "project2" "regression" "user3")
+  ,  (Regression "regression13" "project2" "regression" "user3")
   ]
 
 
