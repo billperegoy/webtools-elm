@@ -92,10 +92,10 @@ init =
   , simData = []
   } ! []
 
-getResultsHttpData : Cmd Msg
-getResultsHttpData =
+getResultsHttpData : String -> Cmd Msg
+getResultsHttpData regressionName =
   let
-    url = "http://localhost:9292/api/regressions/peregoy_raven_1__2016_06_29_14_35_37_29229"
+    url = "http://localhost:9292/api/regressions/" ++ regressionName
   in
     Task.perform ResultsHttpFail ResultsHttpSucceed (Http.get decodeTopApiData url)
 
@@ -109,12 +109,10 @@ getRegressionsHttpData =
 type Msg
   = RegressionSelect RegressionSelect.Msg
 
-  | GetResultsApiData
   | ResultsHttpSucceed TopApiData
   | ResultsHttpFail Http.Error
   | PollResultsHttp Time
 
-  | GetRegressionsApiData
   | RegressionsHttpSucceed (List Regression) 
   | RegressionsHttpFail Http.Error
   | PollRegressionsHttp Time
@@ -165,12 +163,6 @@ convertSimApiDataToSingleResult apiData =
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    GetResultsApiData ->
-      (model, getResultsHttpData)
-
-    GetRegressionsApiData ->
-      (model, getRegressionsHttpData)
-
     RegressionsHttpSucceed results ->
       { model |
           regressionList = results
@@ -191,7 +183,7 @@ update msg model =
         , lintData = List.map (\e -> convertLintApiDataToSingleResult e) results.lints
         , simData = List.map (\e -> convertSimApiDataToSingleResult e) results.simulations
         , resultsHttpErrors = ""
-      } ! []
+       } ! []
 
     ResultsHttpFail error ->
       { model
@@ -199,7 +191,7 @@ update msg model =
       } ! []
 
     PollResultsHttp time ->
-      (model, getResultsHttpData)
+      (model, getResultsHttpData model.regressionSelect.selectedElement)
 
     RegressionSelect msg ->
       { model
