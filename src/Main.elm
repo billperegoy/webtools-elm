@@ -64,7 +64,7 @@ type alias Model =
   , lintResults : ResultsTable.Model
   , simResults : ResultsTable.Model
 
-  , errors : String
+  , resultsHttpErrors : String
   }
 
 emptySummaryData : String -> RunTypeSummaryData
@@ -84,25 +84,25 @@ init =
   , compileResults = ResultsTable.init "Compiles" Initialize.initCompileColumns Initialize.initCompiles
   , lintResults = ResultsTable.init "Lints" Initialize.initLintColumns Initialize.initLints
   , simResults = ResultsTable.init "Simulations" Initialize.initSimColumns Initialize.initSimulations
-  , errors = ""
+  , resultsHttpErrors = ""
   , lintData = []
   , compileData = []
   , simData = []
   } ! []
 
-getHttpData : Cmd Msg
-getHttpData =
+getResultsHttpData : Cmd Msg
+getResultsHttpData =
   let
     url = "http://localhost:9292/api/regressions/peregoy_raven_1__2016_06_29_14_35_37_29229"
   in
-    Task.perform HttpFail HttpSucceed (Http.get decodeTopApiData url)
+    Task.perform ResultsHttpFail ResultsHttpSucceed (Http.get decodeTopApiData url)
 
 type Msg
   = RegressionSelect RegressionSelect.Msg
-  | GetApiData
-  | HttpSucceed TopApiData
-  | HttpFail Http.Error
-  | PollHttp Time
+  | GetResultsApiData
+  | ResultsHttpSucceed TopApiData
+  | ResultsHttpFail Http.Error
+  | PollResultsHttp Time
   | CompileResults ResultsTable.Msg
   | LintResults ResultsTable.Msg
   | SimResults ResultsTable.Msg
@@ -149,24 +149,24 @@ convertSimApiDataToSingleResult apiData =
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    GetApiData ->
-      (model, getHttpData)
+    GetResultsApiData ->
+      (model, getResultsHttpData)
 
-    HttpSucceed results ->
+    ResultsHttpSucceed results ->
       { model |
           compileData = List.map (\e -> convertCompileApiDataToSingleResult e) results.compiles
         , lintData = List.map (\e -> convertLintApiDataToSingleResult e) results.lints
         , simData = List.map (\e -> convertSimApiDataToSingleResult e) results.simulations
-        , errors = ""
+        , resultsHttpErrors = ""
       } ! []
 
-    HttpFail error ->
+    ResultsHttpFail error ->
       { model
-         | errors = "HTTP error detected: " ++ toString error
+         | resultsHttpErrors = "HTTP error detected: " ++ toString error
       } ! []
 
-    PollHttp time ->
-      (model, getHttpData)
+    PollResultsHttp time ->
+      (model, getResultsHttpData)
 
     RegressionSelect msg ->
       { model
@@ -222,7 +222,7 @@ type alias AllRunTypeSummaries =
 summaryProps : Model -> AllRunTypeSummaries
 summaryProps model =
   { 
-    errors = model.errors
+    errors = model.resultsHttpErrors
   , runSummary = initSummaryData
   , compileSummary = summarizeData "compiles" model.compileData
   , lintSummary = summarizeData "lints" model.lintData
@@ -248,5 +248,6 @@ view model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
   Sub.batch
-    [ Time.every (1000 * millisecond) PollHttp
+    [ 
+      Time.every (1000 * millisecond) PollResultsHttp
     ]
