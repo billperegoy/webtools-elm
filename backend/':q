@@ -1,8 +1,0 @@
-require 'json'
-require 'sinatra'
-
-
-get '/api/results' do
-  { compiles: {total: 12, complete: 10, fail: 4 }}.to_json
-end
-

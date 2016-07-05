@@ -24,6 +24,15 @@ class Application < Sinatra::Base
                            connect_timeout: 10
                           )
 
+  def map_seed_field(records)
+    records.map do |rec|
+      if rec['seed']
+        rec['seed'] = rec['seed'].to_s
+      end
+      rec
+    end
+  end
+
   def regressions_index
     fourteen_days_ago = Time.new - 14 * 24 * 60 * 60
     query = {'start_date' =>  {'$gt' => fourteen_days_ago}}
@@ -36,6 +45,7 @@ class Application < Sinatra::Base
     @@db['regress_data']
       .find(query)
       .projection(projection)
+      .sort({'start_date' => -1})
       .map { |rec| rec }
   end
 
@@ -55,7 +65,7 @@ class Application < Sinatra::Base
      .projection({'_id' => false})
      .map { |rec| rec }
 
-   {compiles: compiles, lints: lints, simulations: simulations}
+   {compiles: compiles, lints: lints, simulations: map_seed_field(simulations)}
   end
 
   get '/api/regressions' do
