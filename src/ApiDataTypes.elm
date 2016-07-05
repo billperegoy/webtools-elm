@@ -149,7 +149,7 @@ type alias SimulationApiData =
   , owner : Maybe String
   , seed : String 
   , wordSize : Int
-  , reservedMemory : Int
+  , reservedMemory : Maybe Int
   , failSignatures : List String
   , lsfInfo : LsfApiData
   }
@@ -176,7 +176,7 @@ decodeSimulationApiData =
     (maybe ("owner" := Json.string)) `apply`
     ("seed" := Json.string) `apply`
     ("word_size" := Json.int) `apply`
-    ("reserved_mem" := Json.int) `apply`
+    (maybe("reserved_mem" := Json.int)) `apply`
     ("fail_signatures" := decodeStringList) `apply`
     ("lsf_info" := decodeLsfApiData)
 

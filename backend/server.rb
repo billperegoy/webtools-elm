@@ -24,11 +24,33 @@ class Application < Sinatra::Base
                            connect_timeout: 10
                           )
 
-  def map_seed_field(records)
+  # Map any bad simulation values from mongoDB to legal values
+  # for the front-end.
+  #
+  def map_simulation_records(records)
     records.map do |rec|
-      if rec['seed']
-        rec['seed'] = rec['seed'].to_s
+      rec['seed'] = rec['seed'].to_s
+      rec['status'] = rec['status'] || '-'
+
+      rec
+    end
+  end
+
+  # Map any bad compile values from mongoDB to legal values
+  # for the front-end.
+  #
+  def map_compile_records(records)
+    records.map do |rec|
+      rec['status'] = rec['status'] || '-'
+
+      unless rec['lsf_info']['cpu'].class == Float
+        rec['lsf_info']['cpu'] = 0.0
       end
+
+      unless rec['lsf_info']['swap'].class == Fixnum
+        rec['lsf_info']['swap'] = 0
+      end
+
       rec
     end
   end
@@ -65,7 +87,11 @@ class Application < Sinatra::Base
      .projection({'_id' => false})
      .map { |rec| rec }
 
-   {compiles: compiles, lints: lints, simulations: map_seed_field(simulations)}
+   {
+     compiles: map_compile_records(compiles),
+     lints: lints,
+     simulations: map_simulation_records(simulations)
+   }
   end
 
   get '/api/regressions' do
