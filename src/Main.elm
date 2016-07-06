@@ -30,7 +30,7 @@ type alias RunSummaryData =
     name : String
   , releaseLabel : String
   , runStatus : String
-  , elapsedTime : Int
+  , elapsedTime : Float
   , releaseUrl : String 
   , gvpLogUrl : String
   , gatherGroupsUrl : String
@@ -217,18 +217,23 @@ update msg model =
       } ! []
 
 
+-- FIXME - Fill this in
 convertRegressionApiDataToRegressionViewData : RegressionApiData -> RunSummaryData
 convertRegressionApiDataToRegressionViewData apiData =
-  {
-    name = apiData.runName
-  , releaseLabel = apiData.gvpLabel
-  , runStatus = "RUN"
-  , elapsedTime = 1234
-  , releaseUrl = "#"
-  , gvpLogUrl = "#"
-  , gatherGroupsUrl = "#"
-  , rtmReportUrl = "#"
-  }
+  let 
+    releaseLabel = Maybe.withDefault "" apiData.gvpLabel
+    elapsedTime = Maybe.withDefault 0.0 apiData.elapsedTime
+  in
+    {
+      name = apiData.runName
+    , releaseLabel = releaseLabel
+    , runStatus = "RUN"
+    , elapsedTime = elapsedTime
+    , releaseUrl = "#"
+    , gvpLogUrl = "#"
+    , gatherGroupsUrl = "#"
+    , rtmReportUrl = "#"
+    }
 
 completedRun : SingleRun -> Bool
 completedRun run =

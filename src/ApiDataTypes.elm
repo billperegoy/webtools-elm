@@ -18,15 +18,15 @@ type alias RegressionApiData =
   , user : String
   , site : String
   , runType : String
-  , gvpLabel : String
+  , gvpLabel : Maybe String
   , startDate : String
-  , endDate : String
+  , endDate : Maybe String
   , startDay : String
   , lsfJobSuffix : String
   , active : Bool
   , timedOut : Bool
   , gvpMergeError : Bool
-  , elapsedTime : Float
+  , elapsedTime : Maybe Float
   , success : Int
   -- , gatherGroups
   -- , gvpMergeGroups
@@ -44,15 +44,15 @@ decodeRegressionApiData =
     ("user" := Json.string) `apply`
     ("site" := Json.string) `apply`
     ("run_type" := Json.string) `apply`
-    ("gvp_label" := Json.string) `apply`
+    (maybe("gvp_label" := Json.string)) `apply`
     ("start_date" := Json.string) `apply`
-    ("end_date" := Json.string) `apply`
+    (maybe("end_date" := Json.string)) `apply`
     ("start_day" := Json.string) `apply`
     ("lsf_job_suffix" := Json.string) `apply`
     ("active" := Json.bool) `apply`
     ("timed_out" := Json.bool) `apply`
     ("gvp_merge_error" := Json.bool) `apply`
-    ("elapsed_time" := Json.float) `apply`
+    (maybe("elapsed_time" := Json.float)) `apply`
     ("success" := Json.int)
 
 type alias LsfApiData =
@@ -95,7 +95,7 @@ decodeLsfApiData =
     ("submit_time" := Json.string) `apply`
     (maybe ("start_time" := Json.string)) `apply`
     (maybe ("end_time" := Json.string)) `apply`
-    (maybe ("elapsed_time" := Json.int))
+    (maybe("elapsed_time" := Json.int))
 
 type alias CompileApiData =
   {
