@@ -3,6 +3,7 @@ module RegressionSummary exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 
+import TimeUtils exposing (..)
 import RunTypeSummary exposing (..)
 
 view props =
@@ -23,7 +24,7 @@ view props =
         [ text "Progress Bar" ]
     , div
         []
-        [ text ("Elapsed Time: " ++ toString props.runSummary.elapsedTime) ]
+        [ text ("Elapsed Time: " ++ TimeUtils.durationToString props.runSummary.elapsedTime) ]
     , a
         [ href props.runSummary.releaseUrl]
         [ text "Release Link" ]

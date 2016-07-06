@@ -187,7 +187,7 @@ type alias LintApiData =
   , regressionName : String
   , projectName : String
   , lsfLogFile : String
-  , executionLogFile : String
+  -- FIXME , executionLogFile : String
   , runStatus : String
   , lsfInfo : LsfApiData
   }
@@ -204,7 +204,7 @@ decodeLintApiData =
     ("regr" := Json.string) `apply`
     ("proj" := Json.string) `apply`
     ("lsf_log" := Json.string) `apply`
-    ("verilog_log" := Json.string) `apply`
+    -- FIXME ("verilog_log" := Json.string) `apply`
     ("status" := Json.string) `apply`
     ("lsf_info" := decodeLsfApiData)
 

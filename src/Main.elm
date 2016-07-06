@@ -7,6 +7,7 @@ import Task exposing (..)
 import Json.Decode as Json exposing (..)
 import Time exposing (..)
 import String exposing (..)
+import Date exposing (..)
 
 import Initialize exposing (..)
 import RegressionData exposing (..)
@@ -40,10 +41,10 @@ type alias RunSummaryData =
 initSummaryData : RunSummaryData
 initSummaryData = 
   {
-    name = "My Run Name"
-  , releaseLabel = "My Release Label"
-  , runStatus = "RUN"
-  , elapsedTime = 1234
+    name = ""
+  , releaseLabel = ""
+  , runStatus = ""
+  , elapsedTime = 0 
   , releaseUrl = "#"
   , gvpLogUrl = "#"
   , gatherGroupsUrl = "#"
@@ -217,17 +218,49 @@ update msg model =
       } ! []
 
 
+convertDateString dateStr =
+  let
+    date = Date.fromString dateStr
+  in
+    case date of
+      Ok a ->
+        a
+      Err  _->
+        fromTime 0
+
+-- FIXME - do date math here. If end date is not defined, use the 
+--         current time
+dateDifference : String -> Maybe String -> Float
+dateDifference start end =
+  let 
+    x = 0
+  in
+    Debug.log start
+    --Debug.log (toString (convertDateString start))
+    0.0
+
+elapsedRegressionTime : String -> Maybe String -> Maybe Float -> Float
+elapsedRegressionTime startTime endTime elapsedTime =
+  case elapsedTime of
+    Just a -> a
+    Nothing ->
+      dateDifference startTime endTime
+
 -- FIXME - Fill this in
 convertRegressionApiDataToRegressionViewData : RegressionApiData -> RunSummaryData
 convertRegressionApiDataToRegressionViewData apiData =
   let 
     releaseLabel = Maybe.withDefault "" apiData.gvpLabel
-    elapsedTime = Maybe.withDefault 0.0 apiData.elapsedTime
+    elapsedTime = elapsedRegressionTime apiData.startDate apiData.endDate  apiData.elapsedTime
+    runStatus =
+      case apiData.elapsedTime of
+        Nothing -> "Run"
+        Just a -> "Done"
   in
     {
       name = apiData.runName
     , releaseLabel = releaseLabel
-    , runStatus = "RUN"
+    , runStatus = runStatus 
     , elapsedTime = elapsedTime
     , releaseUrl = "#"
     , gvpLogUrl = "#"
@@ -296,6 +329,6 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
   Sub.batch
     [ 
-      Time.every (10000 * millisecond) PollResultsHttp
-    , Time.every (60000 * millisecond) PollRegressionsHttp
+      Time.every (10000 * Time.millisecond) PollResultsHttp
+    , Time.every (60000 * Time.millisecond) PollRegressionsHttp
     ]
