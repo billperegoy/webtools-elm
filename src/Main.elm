@@ -54,6 +54,7 @@ type alias Model =
   {
     regressionList : List Regression
 
+  , summaryData : RunSummaryData
   , compileData : List SingleRun
   , lintData : List SingleRun
   , simData : List SingleRun
@@ -87,6 +88,7 @@ init =
   , simResults = ResultsTable.init "Simulations" Initialize.initSimColumns Initialize.initSimulations
   , resultsHttpErrors = ""
   , regressionsHttpErrors = ""
+  , summaryData = initSummaryData
   , lintData = []
   , compileData = []
   , simData = []
@@ -179,7 +181,8 @@ update msg model =
 
     ResultsHttpSucceed results ->
       { model |
-          compileData = List.map (\e -> convertCompileApiDataToSingleResult e) results.compiles
+          summaryData = convertRegressionApiDataToRegressionViewData results.summary
+        , compileData = List.map (\e -> convertCompileApiDataToSingleResult e) results.compiles
         , lintData = List.map (\e -> convertLintApiDataToSingleResult e) results.lints
         , simData = List.map (\e -> convertSimApiDataToSingleResult e) results.simulations
         , resultsHttpErrors = ""
@@ -213,6 +216,19 @@ update msg model =
           | simResults = fst(ResultsTable.update msg model.simResults model.simData)
       } ! []
 
+
+convertRegressionApiDataToRegressionViewData : RegressionApiData -> RunSummaryData
+convertRegressionApiDataToRegressionViewData apiData =
+  {
+    name = apiData.runName
+  , releaseLabel = apiData.gvpLabel
+  , runStatus = "RUN"
+  , elapsedTime = 1234
+  , releaseUrl = "#"
+  , gvpLogUrl = "#"
+  , gatherGroupsUrl = "#"
+  , rtmReportUrl = "#"
+  }
 
 completedRun : SingleRun -> Bool
 completedRun run =
@@ -248,7 +264,7 @@ summaryProps : Model -> AllRunTypeSummaries
 summaryProps model =
   { 
     errors = model.resultsHttpErrors
-  , runSummary = initSummaryData
+  , runSummary = model.summaryData
   , compileSummary = summarizeData "compiles" model.compileData
   , lintSummary = summarizeData "lints" model.lintData
   , simSummary = summarizeData "sims" model.simData

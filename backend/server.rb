@@ -72,6 +72,12 @@ class Application < Sinatra::Base
   end
 
   def regressions_show(regression_name)
+   summary = @@db['regress_data']
+     .find({'name' => regression_name})
+     .projection({'_id' => false})
+     .map { |rec| rec }
+     .first
+
    compiles = @@db['compile_data']
      .find({'regr' => regression_name})
      .projection({'_id' => false})
@@ -88,6 +94,7 @@ class Application < Sinatra::Base
      .map { |rec| rec }
 
    {
+     summary: summary,
      compiles: map_compile_records(compiles),
      lints: lints,
      simulations: map_simulation_records(simulations)

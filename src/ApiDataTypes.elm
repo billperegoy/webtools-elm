@@ -12,7 +12,7 @@ decodeStringList =
 
 type alias RegressionApiData =
   {
-    regerssionToolVersion : String
+    regeressionToolVersion : String
   , runName : String
   , project: String
   , user : String
@@ -26,7 +26,7 @@ type alias RegressionApiData =
   , active : Bool
   , timedOut : Bool
   , gvpMergeError : Bool
-  , elapsedTime : Int
+  , elapsedTime : Float
   , success : Int
   -- , gatherGroups
   -- , gvpMergeGroups
@@ -50,9 +50,9 @@ decodeRegressionApiData =
     ("start_day" := Json.string) `apply`
     ("lsf_job_suffix" := Json.string) `apply`
     ("active" := Json.bool) `apply`
-    ("timedout" := Json.bool) `apply`
-    ("gvpMergeError" := Json.bool) `apply`
-    ("elapsedTime" := Json.int) `apply`
+    ("timed_out" := Json.bool) `apply`
+    ("gvp_merge_error" := Json.bool) `apply`
+    ("elapsed_time" := Json.float) `apply`
     ("success" := Json.int)
 
 type alias LsfApiData =
@@ -210,7 +210,8 @@ decodeLintApiData =
 
 type alias TopApiData =
   {
-    compiles : List CompileApiData
+    summary : RegressionApiData
+  , compiles : List CompileApiData
   , lints : List LintApiData
   , simulations : List SimulationApiData
   }
@@ -218,6 +219,7 @@ type alias TopApiData =
 decodeTopApiData : Json.Decoder TopApiData
 decodeTopApiData =
   Json.map TopApiData
+    ("summary" := decodeRegressionApiData) `apply`
     ("compiles" := decodeCompileApiList) `apply`
     ("lints" := decodeLintApiList) `apply`
     ("simulations" := decodeSimulationApiList)
