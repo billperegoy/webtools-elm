@@ -24,7 +24,16 @@ class Application < Sinatra::Base
                            connect_timeout: 10
                           )
 
-  # Map any bad simulation values from mongoDB to legal values
+  # Map any bad regress_data values from mongoDB to legal values
+  # for the front-end.
+  #
+  def map_summary_records(record)
+    record['end_time'] = record['end_time'] || Time.now
+
+    record
+  end
+
+  # Map any bad sim_data values from mongoDB to legal values
   # for the front-end.
   #
   def map_simulation_records(records)
@@ -36,7 +45,7 @@ class Application < Sinatra::Base
     end
   end
 
-  # Map any bad compile values from mongoDB to legal values
+  # Map any bad compile_data values from mongoDB to legal values
   # for the front-end.
   #
   def map_compile_records(records)
@@ -94,7 +103,7 @@ class Application < Sinatra::Base
      .map { |rec| rec }
 
    {
-     summary: summary,
+     summary: map_summary_records(summary),
      compiles: map_compile_records(compiles),
      lints: lints,
      simulations: map_simulation_records(simulations)

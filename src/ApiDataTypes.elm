@@ -188,7 +188,7 @@ type alias LintApiData =
   , projectName : String
   , lsfLogFile : String
   -- FIXME , executionLogFile : String
-  , runStatus : String
+  , runStatus : Maybe String
   , lsfInfo : LsfApiData
   }
 
@@ -205,7 +205,7 @@ decodeLintApiData =
     ("proj" := Json.string) `apply`
     ("lsf_log" := Json.string) `apply`
     -- FIXME ("verilog_log" := Json.string) `apply`
-    ("status" := Json.string) `apply`
+    (maybe("status" := Json.string)) `apply`
     ("lsf_info" := decodeLsfApiData)
 
 type alias TopApiData =

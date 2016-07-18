@@ -6,6 +6,8 @@ import Html.Attributes exposing (..)
 import TimeUtils exposing (..)
 import RunTypeSummary exposing (..)
 
+-- FIXME - can't properly type this. need to organize types.
+--view : TopApiData 
 view props =
   div
     [ class "regression-summary" ]
@@ -24,6 +26,7 @@ view props =
         [ text "Progress Bar" ]
     , div
         []
+        --[ text ("Elapsed Time: " ++ toString (dateStrDifferenceInSeconds props.runSummary.startDate props.runSummary.endDate)) ]
         [ text ("Elapsed Time: " ++ TimeUtils.durationToString props.runSummary.elapsedTime) ]
     , a
         [ href props.runSummary.releaseUrl]
