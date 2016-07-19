@@ -15,6 +15,7 @@ import RegressionSelect exposing (view)
 import RegressionSummary exposing (view)
 import ResultsTable exposing (view)
 import Api exposing (..)
+import Summary exposing (..)
 
 main : Program Never
 main =
@@ -25,37 +26,11 @@ main =
     , subscriptions = subscriptions
     }
 
-
-type alias RunSummaryData =
-  {
-    name : String
-  , releaseLabel : String
-  , runStatus : String
-  , elapsedTime : Float
-  , releaseUrl : String 
-  , gvpLogUrl : String
-  , gatherGroupsUrl : String
-  , rtmReportUrl :String
-  }
-
-initSummaryData : RunSummaryData
-initSummaryData = 
-  {
-    name = ""
-  , releaseLabel = ""
-  , runStatus = ""
-  , elapsedTime = 0 
-  , releaseUrl = "#"
-  , gvpLogUrl = "#"
-  , gatherGroupsUrl = "#"
-  , rtmReportUrl = "#"
-  }
-
 type alias Model =
   {
     regressionList : List Regression
 
-  , summaryData : RunSummaryData
+  , summaryData : Summary.ViewData
   , compileData : List SingleRun
   , lintData : List SingleRun
   , simData : List SingleRun
@@ -89,7 +64,7 @@ init =
   , simResults = ResultsTable.init "Simulations" Initialize.initSimColumns Initialize.initSimulations
   , resultsHttpErrors = ""
   , regressionsHttpErrors = ""
-  , summaryData = initSummaryData
+  , summaryData = Summary.init
   , lintData = []
   , compileData = []
   , simData = []
@@ -182,7 +157,7 @@ update msg model =
 
     ResultsHttpSucceed results ->
       { model |
-          summaryData = convertRegressionApiDataToRegressionViewData results.summary
+          summaryData = Summary.fromApiData results.summary
         , compileData = List.map (\e -> convertCompileApiDataToSingleResult e) results.compiles
         , lintData = List.map (\e -> convertLintApiDataToSingleResult e) results.lints
         , simData = List.map (\e -> convertSimApiDataToSingleResult e) results.simulations
@@ -228,46 +203,6 @@ convertDateString dateStr =
       Err  _->
         fromTime 0
 
--- FIXME - do date math here. If end date is not defined, use the 
---         current time
-dateDifference : String -> Maybe String -> Float
-dateDifference start end =
-  let 
-    x = 0
-  in
-    Debug.log start
-    --Debug.log (toString (convertDateString start))
-    0.0
-
-elapsedRegressionTime : String -> Maybe String -> Maybe Float -> Float
-elapsedRegressionTime startTime endTime elapsedTime =
-  case elapsedTime of
-    Just a -> a
-    Nothing ->
-      dateDifference startTime endTime
-
--- FIXME - Fill this in
-convertRegressionApiDataToRegressionViewData : Api.Summary -> RunSummaryData
-convertRegressionApiDataToRegressionViewData apiData =
-  let 
-    releaseLabel = Maybe.withDefault "" apiData.gvpLabel
-    elapsedTime = elapsedRegressionTime apiData.startDate apiData.endDate  apiData.elapsedTime
-    runStatus =
-      case apiData.elapsedTime of
-        Nothing -> "Run"
-        Just a -> "Done"
-  in
-    {
-      name = apiData.runName
-    , releaseLabel = releaseLabel
-    , runStatus = runStatus 
-    , elapsedTime = elapsedTime
-    , releaseUrl = "#"
-    , gvpLogUrl = "#"
-    , gatherGroupsUrl = "#"
-    , rtmReportUrl = "#"
-    }
-
 completedRun : SingleRun -> Bool
 completedRun run =
   (String.toLower run.lsfInfo.status == "done") || (String.toLower run.lsfInfo.status == "exit")
@@ -292,7 +227,7 @@ summarizeData label data =
 type alias AllRunTypeSummaries =
   {
     errors : String
-  , runSummary : RunSummaryData
+  , runSummary : Summary.ViewData 
   , compileSummary : RunTypeSummaryData
   , lintSummary : RunTypeSummaryData
   , simSummary : RunTypeSummaryData

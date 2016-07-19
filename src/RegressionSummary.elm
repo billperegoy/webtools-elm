@@ -7,7 +7,7 @@ import TimeUtils exposing (..)
 import RunTypeSummary exposing (..)
 
 -- FIXME - can't properly type this. need to organize types.
---view : TopApiData 
+--view : Summary.ViewData
 view props =
   div
     [ class "regression-summary" ]
