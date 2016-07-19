@@ -2,7 +2,7 @@ module RegressionData exposing (..)
 
 import Json.Decode as Json exposing (..)
 import Dict exposing (..)
-import ApiDataTypes exposing (..)
+import Api exposing (..)
 
 type SortStatus = Unsorted | Ascending | Descending
 

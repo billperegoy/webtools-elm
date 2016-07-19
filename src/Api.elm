@@ -1,4 +1,4 @@
-module ApiDataTypes exposing (..)
+module Api exposing (..)
 
 import Json.Decode as Json exposing (..)
 
@@ -10,9 +10,9 @@ decodeStringList : Json.Decoder (List String)
 decodeStringList =
   list Json.string
 
-type alias RegressionApiData =
+type alias Summary =
   {
-    regeressionToolVersion : String
+    regressionToolVersion : String
   , runName : String
   , project: String
   , user : String
@@ -35,9 +35,9 @@ type alias RegressionApiData =
   -- , simSummary
   }
 
-decodeRegressionApiData : Json.Decoder RegressionApiData
-decodeRegressionApiData =
-  Json.map RegressionApiData
+decodeSummary : Json.Decoder Summary
+decodeSummary =
+  Json.map Summary
     ("version" := Json.string) `apply`
     ("name" := Json.string) `apply`
     ("proj" := Json.string) `apply`
@@ -55,7 +55,7 @@ decodeRegressionApiData =
     (maybe("elapsed_time" := Json.float)) `apply`
     ("success" := Json.int)
 
-type alias LsfApiData =
+type alias LsfInfo =
   {
     jobId : String
   , runName : String
@@ -76,9 +76,9 @@ type alias LsfApiData =
   , elapsedTime : Maybe Int
   }
 
-decodeLsfApiData : Json.Decoder LsfApiData
-decodeLsfApiData =
-  Json.map LsfApiData
+decodeLsfInfo : Json.Decoder LsfInfo
+decodeLsfInfo =
+  Json.map LsfInfo
     ("jid" := Json.string) `apply`
     ("name" := Json.string) `apply`
     ("user" := Json.string) `apply`
@@ -97,7 +97,7 @@ decodeLsfApiData =
     (maybe ("end_time" := Json.string)) `apply`
     (maybe("elapsed_time" := Json.int))
 
-type alias CompileApiData =
+type alias Compile =
   {
     name : String
   , regressionName : String
@@ -109,16 +109,16 @@ type alias CompileApiData =
   , runCommand : String
   , runStatus : String
   , failSignatures : List String
-  , lsfInfo : LsfApiData
+  , lsfInfo : LsfInfo
   }
 
-decodeCompileApiList : Json.Decoder (List CompileApiData)
-decodeCompileApiList =
-  list decodeCompileApiData 
+decodeCompileList : Json.Decoder (List Compile)
+decodeCompileList =
+  list decodeCompile 
 
-decodeCompileApiData : Json.Decoder CompileApiData
-decodeCompileApiData =
-  Json.map CompileApiData
+decodeCompile : Json.Decoder Compile
+decodeCompile =
+  Json.map Compile
     ("name" := Json.string) `apply`
     ("regr" := Json.string) `apply`
     ("proj" := Json.string) `apply`
@@ -129,10 +129,10 @@ decodeCompileApiData =
     ("sim_lsf_cmd" := Json.string) `apply`
     ("status" := Json.string) `apply`
     ("fail_signatures" := decodeStringList) `apply`
-    ("lsf_info" := decodeLsfApiData)
+    ("lsf_info" := decodeLsfInfo)
 
 
-type alias SimulationApiData =
+type alias Simulation =
   {
     name : String
   , baseName : String
@@ -151,16 +151,16 @@ type alias SimulationApiData =
   , wordSize : Int
   , reservedMemory : Maybe Int
   , failSignatures : List String
-  , lsfInfo : LsfApiData
+  , lsfInfo : LsfInfo
   }
 
-decodeSimulationApiList : Json.Decoder (List SimulationApiData)
-decodeSimulationApiList =
-  list decodeSimulationApiData 
+decodeSimulationList : Json.Decoder (List Simulation)
+decodeSimulationList =
+  list decodeSimulation 
 
-decodeSimulationApiData : Json.Decoder SimulationApiData
-decodeSimulationApiData =
-  Json.map SimulationApiData
+decodeSimulation : Json.Decoder Simulation
+decodeSimulation =
+  Json.map Simulation
     ("name" := Json.string) `apply`
     ("test_basename" := Json.string) `apply`
     ("regr" := Json.string) `apply`
@@ -178,9 +178,9 @@ decodeSimulationApiData =
     ("word_size" := Json.int) `apply`
     (maybe("reserved_mem" := Json.int)) `apply`
     ("fail_signatures" := decodeStringList) `apply`
-    ("lsf_info" := decodeLsfApiData)
+    ("lsf_info" := decodeLsfInfo)
 
-type alias LintApiData =
+type alias Lint =
   {
   -- FIXME   name : String
     lintType : String
@@ -189,16 +189,16 @@ type alias LintApiData =
   , lsfLogFile : String
   -- FIXME , executionLogFile : String
   , runStatus : Maybe String
-  , lsfInfo : LsfApiData
+  , lsfInfo : LsfInfo
   }
 
-decodeLintApiList : Json.Decoder (List LintApiData)
-decodeLintApiList =
-  list decodeLintApiData 
+decodeLintList : Json.Decoder (List Lint)
+decodeLintList =
+  list decodeLint 
 
-decodeLintApiData : Json.Decoder LintApiData
-decodeLintApiData =
-  Json.map LintApiData
+decodeLint : Json.Decoder Lint
+decodeLint =
+  Json.map Lint
     -- FIXME ("name" := Json.string) `apply`
     ("type" := Json.string) `apply`
     ("regr" := Json.string) `apply`
@@ -206,21 +206,21 @@ decodeLintApiData =
     ("lsf_log" := Json.string) `apply`
     -- FIXME ("verilog_log" := Json.string) `apply`
     (maybe("status" := Json.string)) `apply`
-    ("lsf_info" := decodeLsfApiData)
+    ("lsf_info" := decodeLsfInfo)
 
-type alias TopApiData =
+type alias Data =
   {
-    summary : RegressionApiData
-  , compiles : List CompileApiData
-  , lints : List LintApiData
-  , simulations : List SimulationApiData
+    summary : Summary
+  , compiles : List Compile
+  , lints : List Lint
+  , simulations : List Simulation
   }
 
-decodeTopApiData : Json.Decoder TopApiData
-decodeTopApiData =
-  Json.map TopApiData
-    ("summary" := decodeRegressionApiData) `apply`
-    ("compiles" := decodeCompileApiList) `apply`
-    ("lints" := decodeLintApiList) `apply`
-    ("simulations" := decodeSimulationApiList)
+decodeData : Json.Decoder Data
+decodeData =
+  Json.map Data
+    ("summary" := decodeSummary) `apply`
+    ("compiles" := decodeCompileList) `apply`
+    ("lints" := decodeLintList) `apply`
+    ("simulations" := decodeSimulationList)
 

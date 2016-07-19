@@ -14,7 +14,7 @@ import RegressionData exposing (..)
 import RegressionSelect exposing (view)
 import RegressionSummary exposing (view)
 import ResultsTable exposing (view)
-import ApiDataTypes exposing (..)
+import Api exposing (..)
 
 main : Program Never
 main =
@@ -100,7 +100,7 @@ getResultsHttpData regressionName =
   let
     url = "http://localhost:9292/api/regressions/" ++ regressionName
   in
-    Task.perform ResultsHttpFail ResultsHttpSucceed (Http.get decodeTopApiData url)
+    Task.perform ResultsHttpFail ResultsHttpSucceed (Http.get Api.decodeData url)
 
 getRegressionsHttpData : Cmd Msg
 getRegressionsHttpData =
@@ -112,7 +112,7 @@ getRegressionsHttpData =
 type Msg
   = RegressionSelect RegressionSelect.Msg
 
-  | ResultsHttpSucceed TopApiData
+  | ResultsHttpSucceed Api.Data
   | ResultsHttpFail Http.Error
   | PollResultsHttp Time
 
@@ -124,7 +124,7 @@ type Msg
   | LintResults ResultsTable.Msg
   | SimResults ResultsTable.Msg
 
-convertApiLsfDataToViewLsfData : LsfApiData -> LsfViewData
+convertApiLsfDataToViewLsfData : Api.LsfInfo -> LsfViewData
 convertApiLsfDataToViewLsfData apiData =
   {
     jobId = apiData.jobId
@@ -133,7 +133,7 @@ convertApiLsfDataToViewLsfData apiData =
   , elapsedTime = Maybe.withDefault 0 apiData.elapsedTime
   }
 
-convertCompileApiDataToSingleResult : CompileApiData -> SingleRun
+convertCompileApiDataToSingleResult : Api.Compile -> SingleRun
 convertCompileApiDataToSingleResult apiData =
   {
     runNum = 0
@@ -143,7 +143,7 @@ convertCompileApiDataToSingleResult apiData =
   , lsfInfo = convertApiLsfDataToViewLsfData apiData.lsfInfo
   }
 
-convertLintApiDataToSingleResult : LintApiData -> SingleRun
+convertLintApiDataToSingleResult : Api.Lint -> SingleRun
 convertLintApiDataToSingleResult apiData =
   {
     runNum = 0 
@@ -153,7 +153,7 @@ convertLintApiDataToSingleResult apiData =
   , lsfInfo = convertApiLsfDataToViewLsfData apiData.lsfInfo
   }
 
-convertSimApiDataToSingleResult : SimulationApiData -> SingleRun
+convertSimApiDataToSingleResult : Api.Simulation -> SingleRun
 convertSimApiDataToSingleResult apiData =
   {
     runNum = apiData.testId
@@ -247,7 +247,7 @@ elapsedRegressionTime startTime endTime elapsedTime =
       dateDifference startTime endTime
 
 -- FIXME - Fill this in
-convertRegressionApiDataToRegressionViewData : RegressionApiData -> RunSummaryData
+convertRegressionApiDataToRegressionViewData : Api.Summary -> RunSummaryData
 convertRegressionApiDataToRegressionViewData apiData =
   let 
     releaseLabel = Maybe.withDefault "" apiData.gvpLabel
