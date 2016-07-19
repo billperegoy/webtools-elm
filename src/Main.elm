@@ -30,7 +30,7 @@ type alias Model =
   {
     regressionList : List Regression
 
-  , summaryData : Summary.ViewData
+  , summaryData : Api.Summary 
   , compileData : List SingleRun
   , lintData : List SingleRun
   , simData : List SingleRun
@@ -64,7 +64,7 @@ init =
   , simResults = ResultsTable.init "Simulations" Initialize.initSimColumns Initialize.initSimulations
   , resultsHttpErrors = ""
   , regressionsHttpErrors = ""
-  , summaryData = Summary.init
+  , summaryData = Initialize.initSummary
   , lintData = []
   , compileData = []
   , simData = []
@@ -157,7 +157,7 @@ update msg model =
 
     ResultsHttpSucceed results ->
       { model |
-          summaryData = Summary.fromApiData results.summary
+          summaryData = results.summary
         , compileData = List.map (\e -> convertCompileApiDataToSingleResult e) results.compiles
         , lintData = List.map (\e -> convertLintApiDataToSingleResult e) results.lints
         , simData = List.map (\e -> convertSimApiDataToSingleResult e) results.simulations
@@ -237,7 +237,7 @@ summaryProps : Model -> AllRunTypeSummaries
 summaryProps model =
   { 
     errors = model.resultsHttpErrors
-  , runSummary = model.summaryData
+  , runSummary = Summary.fromApiData model.summaryData
   , compileSummary = summarizeData "compiles" model.compileData
   , lintSummary = summarizeData "lints" model.lintData
   , simSummary = summarizeData "sims" model.simData

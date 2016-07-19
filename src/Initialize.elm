@@ -2,6 +2,7 @@ module Initialize exposing (..)
 
 import Dict exposing (..)
 
+import Api exposing (..)
 import RegressionData exposing (..)
 
 initRegressions : List Regression
@@ -80,3 +81,24 @@ initLints : List SingleRun
 initLints =
   [  (SingleRun 1 "simple_test" "default" "Pass" initLsfInfo)
   ]
+
+initSummary : Summary
+initSummary = 
+  {
+    regressionToolVersion = ""
+  , runName = ""
+  , project = ""
+  , user = ""
+  , site = ""
+  , runType = ""
+  , gvpLabel = Nothing
+  , startDate = "" 
+  , endDate = Nothing
+  , startDay = ""
+  , lsfJobSuffix = ""
+  , active  = True
+  , timedOut = False
+  , gvpMergeError = False
+  , elapsedTime = Nothing
+  , success = 0
+  }
