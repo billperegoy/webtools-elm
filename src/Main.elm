@@ -31,7 +31,7 @@ type alias Model =
     regressionList : List Regression
 
   , summaryData : Api.Summary 
-  , compileData : List SingleRun
+  , compileData : List Api.Compile
   , lintData : List SingleRun
   , simData : List SingleRun
 
@@ -64,6 +64,7 @@ init =
   , simResults = ResultsTable.init "Simulations" Initialize.initSimColumns Initialize.initSimulations
   , resultsHttpErrors = ""
   , regressionsHttpErrors = ""
+
   , summaryData = Initialize.initSummary
   , lintData = []
   , compileData = []
@@ -158,7 +159,7 @@ update msg model =
     ResultsHttpSucceed results ->
       { model |
           summaryData = results.summary
-        , compileData = List.map (\e -> convertCompileApiDataToSingleResult e) results.compiles
+        , compileData = results.compiles
         , lintData = List.map (\e -> convertLintApiDataToSingleResult e) results.lints
         , simData = List.map (\e -> convertSimApiDataToSingleResult e) results.simulations
         , resultsHttpErrors = ""
@@ -179,7 +180,7 @@ update msg model =
 
     CompileResults msg ->
       { model
-          | compileResults = fst(ResultsTable.update msg model.compileResults model.compileData)
+          | compileResults = fst(ResultsTable.update msg model.compileResults (compileApiDataToViewData model.compileData))
       } ! []
 
     LintResults msg ->
@@ -238,10 +239,13 @@ summaryProps model =
   { 
     errors = model.resultsHttpErrors
   , runSummary = Summary.fromApiData model.summaryData
-  , compileSummary = summarizeData "compiles" model.compileData
+  , compileSummary = summarizeData "compiles" (compileApiDataToViewData model.compileData)
   , lintSummary = summarizeData "lints" model.lintData
   , simSummary = summarizeData "sims" model.simData
   }
+
+compileApiDataToViewData data =
+  List.map (\e -> convertCompileApiDataToSingleResult e) data 
 
 view : Model -> Html Msg
 view model =
@@ -254,7 +258,7 @@ view model =
     , p [] [ text model.regressionsHttpErrors ]
 
     , (RegressionSummary.view (summaryProps model))
-    , App.map CompileResults (ResultsTable.view model.compileResults model.compileData)
+    , App.map CompileResults (ResultsTable.view model.compileResults (compileApiDataToViewData model.compileData))
     , App.map LintResults (ResultsTable.view model.lintResults model.lintData)
     , App.map SimResults (ResultsTable.view model.simResults model.simData)
     ]
