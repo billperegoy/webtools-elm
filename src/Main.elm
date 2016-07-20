@@ -32,8 +32,8 @@ type alias Model =
 
   , summaryData : Api.Summary 
   , compileData : List Api.Compile
-  , lintData : List SingleRun
-  , simData : List SingleRun
+  , lintData : List Api.Lint
+  , simData : List Api.Simulation
 
   -- Sub-components
   , regressionSelect : RegressionSelect.Model
@@ -160,8 +160,8 @@ update msg model =
       { model |
           summaryData = results.summary
         , compileData = results.compiles
-        , lintData = List.map (\e -> convertLintApiDataToSingleResult e) results.lints
-        , simData = List.map (\e -> convertSimApiDataToSingleResult e) results.simulations
+        , lintData = results.lints
+        , simData = results.simulations
         , resultsHttpErrors = ""
        } ! []
 
@@ -185,12 +185,12 @@ update msg model =
 
     LintResults msg ->
       { model
-          | lintResults = fst(ResultsTable.update msg model.lintResults model.lintData)
+          | lintResults = fst(ResultsTable.update msg model.lintResults (lintApiDataToViewData model.lintData))
       } ! []
 
     SimResults msg ->
       { model
-          | simResults = fst(ResultsTable.update msg model.simResults model.simData)
+          | simResults = fst(ResultsTable.update msg model.simResults (simApiDataToViewData model.simData))
       } ! []
 
 
@@ -240,12 +240,18 @@ summaryProps model =
     errors = model.resultsHttpErrors
   , runSummary = Summary.fromApiData model.summaryData
   , compileSummary = summarizeData "compiles" (compileApiDataToViewData model.compileData)
-  , lintSummary = summarizeData "lints" model.lintData
-  , simSummary = summarizeData "sims" model.simData
+  , lintSummary = summarizeData "lints" (lintApiDataToViewData model.lintData)
+  , simSummary = summarizeData "sims" (simApiDataToViewData model.simData)
   }
 
 compileApiDataToViewData data =
   List.map (\e -> convertCompileApiDataToSingleResult e) data 
+
+lintApiDataToViewData data =
+  List.map (\e -> convertLintApiDataToSingleResult e) data
+
+simApiDataToViewData data =
+  List.map (\e -> convertSimApiDataToSingleResult e) data
 
 view : Model -> Html Msg
 view model =
@@ -259,8 +265,8 @@ view model =
 
     , (RegressionSummary.view (summaryProps model))
     , App.map CompileResults (ResultsTable.view model.compileResults (compileApiDataToViewData model.compileData))
-    , App.map LintResults (ResultsTable.view model.lintResults model.lintData)
-    , App.map SimResults (ResultsTable.view model.simResults model.simData)
+    , App.map LintResults (ResultsTable.view model.lintResults (lintApiDataToViewData model.lintData))
+    , App.map SimResults (ResultsTable.view model.simResults (simApiDataToViewData model.simData))
     ]
 
 
