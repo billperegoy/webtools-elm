@@ -30,10 +30,7 @@ type alias Model =
   {
     regressionList : List Regression
 
-  , summaryData : Api.Summary 
-  , compileData : List Api.Compile
-  , lintData : List Api.Lint
-  , simData : List Api.Simulation
+  , runData : Api.Data
 
   -- Sub-components
   , regressionSelect : RegressionSelect.Model
@@ -65,10 +62,7 @@ init =
   , resultsHttpErrors = ""
   , regressionsHttpErrors = ""
 
-  , summaryData = Initialize.initSummary
-  , lintData = []
-  , compileData = []
-  , simData = []
+  , runData = Api.Data Initialize.initSummary [] [] []
   } ! []
 
 getResultsHttpData : String -> Cmd Msg
@@ -139,6 +133,15 @@ convertSimApiDataToSingleResult apiData =
   , lsfInfo = convertApiLsfDataToViewLsfData apiData.lsfInfo
   }
 
+compileApiDataToViewData data =
+  List.map (\e -> convertCompileApiDataToSingleResult e) data 
+
+lintApiDataToViewData data =
+  List.map (\e -> convertLintApiDataToSingleResult e) data
+
+simApiDataToViewData data =
+  List.map (\e -> convertSimApiDataToSingleResult e) data
+
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
@@ -158,10 +161,7 @@ update msg model =
 
     ResultsHttpSucceed results ->
       { model |
-          summaryData = results.summary
-        , compileData = results.compiles
-        , lintData = results.lints
-        , simData = results.simulations
+          runData = results
         , resultsHttpErrors = ""
        } ! []
 
@@ -180,17 +180,17 @@ update msg model =
 
     CompileResults msg ->
       { model
-          | compileResults = fst(ResultsTable.update msg model.compileResults (compileApiDataToViewData model.compileData))
+          | compileResults = fst(ResultsTable.update msg model.compileResults (compileApiDataToViewData model.runData.compiles))
       } ! []
 
     LintResults msg ->
       { model
-          | lintResults = fst(ResultsTable.update msg model.lintResults (lintApiDataToViewData model.lintData))
+          | lintResults = fst(ResultsTable.update msg model.lintResults (lintApiDataToViewData model.runData.lints))
       } ! []
 
     SimResults msg ->
       { model
-          | simResults = fst(ResultsTable.update msg model.simResults (simApiDataToViewData model.simData))
+          | simResults = fst(ResultsTable.update msg model.simResults (simApiDataToViewData model.runData.simulations))
       } ! []
 
 
@@ -238,20 +238,11 @@ summaryProps : Model -> AllRunTypeSummaries
 summaryProps model =
   { 
     errors = model.resultsHttpErrors
-  , runSummary = Summary.fromApiData model.summaryData
-  , compileSummary = summarizeData "compiles" (compileApiDataToViewData model.compileData)
-  , lintSummary = summarizeData "lints" (lintApiDataToViewData model.lintData)
-  , simSummary = summarizeData "sims" (simApiDataToViewData model.simData)
+  , runSummary = Summary.fromApiData model.runData.summary
+  , compileSummary = summarizeData "compiles" (compileApiDataToViewData model.runData.compiles)
+  , lintSummary = summarizeData "lints" (lintApiDataToViewData model.runData.lints)
+  , simSummary = summarizeData "sims" (simApiDataToViewData model.runData.simulations)
   }
-
-compileApiDataToViewData data =
-  List.map (\e -> convertCompileApiDataToSingleResult e) data 
-
-lintApiDataToViewData data =
-  List.map (\e -> convertLintApiDataToSingleResult e) data
-
-simApiDataToViewData data =
-  List.map (\e -> convertSimApiDataToSingleResult e) data
 
 view : Model -> Html Msg
 view model =
@@ -264,9 +255,9 @@ view model =
     , p [] [ text model.regressionsHttpErrors ]
 
     , (RegressionSummary.view (summaryProps model))
-    , App.map CompileResults (ResultsTable.view model.compileResults (compileApiDataToViewData model.compileData))
-    , App.map LintResults (ResultsTable.view model.lintResults (lintApiDataToViewData model.lintData))
-    , App.map SimResults (ResultsTable.view model.simResults (simApiDataToViewData model.simData))
+    , App.map CompileResults (ResultsTable.view model.compileResults (compileApiDataToViewData model.runData.compiles))
+    , App.map LintResults (ResultsTable.view model.lintResults (lintApiDataToViewData model.runData.lints))
+    , App.map SimResults (ResultsTable.view model.simResults (simApiDataToViewData model.runData.simulations))
     ]
 
 
