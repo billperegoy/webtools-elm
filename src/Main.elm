@@ -264,6 +264,6 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
   Sub.batch
     [ 
-      Time.every (10000 * Time.millisecond) PollResultsHttp
+      Time.every (5000 * Time.millisecond) PollResultsHttp
     , Time.every (60000 * Time.millisecond) PollRegressionsHttp
     ]

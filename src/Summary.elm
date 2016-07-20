@@ -9,6 +9,8 @@ type alias ViewData =
   , releaseLabel : String
   , runStatus : String
   , elapsedTime : Float
+  , startDate : String
+  , endDate : String
   , releaseUrl : String
   , gvpLogUrl : String
   , gatherGroupsUrl : String
@@ -22,6 +24,8 @@ init =
   , releaseLabel = ""
   , runStatus = ""
   , elapsedTime = 0
+  , startDate = ""
+  , endDate = ""
   , releaseUrl = "#"
   , gvpLogUrl = "#"
   , gatherGroupsUrl = "#"
@@ -43,6 +47,8 @@ fromApiData apiData =
       name = apiData.runName
     , releaseLabel = releaseLabel
     , runStatus = runStatus
+    , startDate = apiData.startDate
+    , endDate = apiData.endDate
     , elapsedTime = elapsedTime
     , releaseUrl = "#"
     , gvpLogUrl = "#"
@@ -51,9 +57,9 @@ fromApiData apiData =
     }
 
 
-elapsedRegressionTime : String -> Maybe String -> Maybe Float -> Float
+elapsedRegressionTime : String -> String -> Maybe Float -> Float
 elapsedRegressionTime startTime endTime elapsedTime =
   case elapsedTime of
     Just a -> a
     Nothing ->
-      dateDifference startTime endTime
+      dateStrDifferenceInSeconds startTime endTime

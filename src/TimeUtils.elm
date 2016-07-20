@@ -1,5 +1,4 @@
-module TimeUtils exposing (..)
-
+module TimeUtils exposing (..) 
 import Date exposing (..)
 import String exposing (length)
 
@@ -47,12 +46,3 @@ durationToString duration =
     seconds = grossMinutes `rem` secondsInOneMinute
   in
     zeroPad hours ++ ":" ++ zeroPad minutes ++ ":" ++ zeroPad seconds
-
-dateDifference : String -> Maybe String -> Float
-dateDifference start end =
-  let 
-    x = 0
-  in
-    Debug.log start
-    --Debug.log (toString (convertDateString start))
-    0.0

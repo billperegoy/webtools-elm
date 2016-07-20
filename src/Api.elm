@@ -20,7 +20,7 @@ type alias Summary =
   , runType : String
   , gvpLabel : Maybe String
   , startDate : String
-  , endDate : Maybe String
+  , endDate : String
   , startDay : String
   , lsfJobSuffix : String
   , active : Bool
@@ -46,7 +46,7 @@ decodeSummary =
     ("run_type" := Json.string) `apply`
     (maybe("gvp_label" := Json.string)) `apply`
     ("start_date" := Json.string) `apply`
-    (maybe("end_date" := Json.string)) `apply`
+    ("end_date" := Json.string) `apply`
     ("start_day" := Json.string) `apply`
     ("lsf_job_suffix" := Json.string) `apply`
     ("active" := Json.bool) `apply`

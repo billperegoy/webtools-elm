@@ -26,8 +26,8 @@ view props =
         [ text "Progress Bar" ]
     , div
         []
-        --[ text ("Elapsed Time: " ++ toString (dateStrDifferenceInSeconds props.runSummary.startDate props.runSummary.endDate)) ]
-        [ text ("Elapsed Time: " ++ TimeUtils.durationToString props.runSummary.elapsedTime) ]
+        [ text ("Elapsed Time: " ++ TimeUtils.durationToString((dateStrDifferenceInSeconds props.runSummary.startDate props.runSummary.endDate))) ]
+        --[ text ("Elapsed Time: " ++ TimeUtils.durationToString props.runSummary.elapsedTime) ]
     , a
         [ href props.runSummary.releaseUrl]
         [ text "Release Link" ]

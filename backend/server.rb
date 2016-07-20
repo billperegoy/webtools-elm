@@ -28,7 +28,7 @@ class Application < Sinatra::Base
   # for the front-end.
   #
   def map_summary_records(record)
-    record['end_time'] = record['end_time'] || Time.now
+    record['end_date'] = record['end_date'] || Time.now
 
     record
   end
