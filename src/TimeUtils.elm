@@ -46,3 +46,10 @@ durationToString duration =
     seconds = grossMinutes `rem` secondsInOneMinute
   in
     zeroPad hours ++ ":" ++ zeroPad minutes ++ ":" ++ zeroPad seconds
+
+elapsedRegressionTime : String -> String -> Maybe Float -> Float
+elapsedRegressionTime startTime endTime elapsedTime =
+  case elapsedTime of
+    Just a -> a
+    Nothing ->
+      dateStrDifferenceInSeconds startTime endTime

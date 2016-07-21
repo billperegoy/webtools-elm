@@ -11,7 +11,7 @@ import Date exposing (..)
 
 import Initialize exposing (..)
 import RegressionData exposing (..)
-import RegressionSelect exposing (view)
+import RegressionSelect exposing (view, Regression)
 import RegressionSummary exposing (view)
 import ResultsTable exposing (view)
 import Api exposing (..)
@@ -44,7 +44,7 @@ type alias Model =
 init : (Model, Cmd Msg)
 init =
   {
-    regressionList = Initialize.initRegressions
+    regressionList = []
   , regressionSelect = RegressionSelect.init
   , compileResults = ResultsTable.init "Compiles" Initialize.initCompileColumns Initialize.initCompiles
   , lintResults = ResultsTable.init "Lints" Initialize.initLintColumns Initialize.initLints
@@ -135,7 +135,7 @@ getRegressionsHttpData =
   let
     url = "http://localhost:9292/api/regressions"
   in
-    Task.perform RegressionsHttpFail RegressionsHttpSucceed (Http.get decodeRegressionList url)
+    Task.perform RegressionsHttpFail RegressionsHttpSucceed (Http.get RegressionSelect.decodeRegressionList url)
 
 regressionSelectView : Model ->  Html Msg
 regressionSelectView model = 

@@ -5,6 +5,15 @@ import TimeUtils exposing (..)
 import String exposing (..)
 
 
+type alias SingleRun =
+  {
+    runNum : Int
+  , name : String
+  , config : String
+  , status : String
+  , lsfInfo : LsfViewData
+  }
+
 type alias SingleResult =
   {
     total : Int
@@ -17,16 +26,6 @@ type alias RunTypeSummaryData =
   , result : SingleResult
   }
 
-
-type alias SingleRun =
-  {
-    runNum : Int 
-  , name : String
-  , config : String
-  , status : String
-  , lsfInfo : LsfViewData
-  }
-
 type alias LsfViewData =
   {
     jobId : String
@@ -35,30 +34,14 @@ type alias LsfViewData =
   , elapsedTime : Int
   }
 
-
 type alias AllRunTypeSummaries =
   {
     errors : String
-  , runSummary : ViewData 
+  , runSummary : ViewData
   , compileSummary : RunTypeSummaryData
   , lintSummary : RunTypeSummaryData
   , simSummary : RunTypeSummaryData
   }
-
-summaryProps : Api.Data -> String -> AllRunTypeSummaries
-summaryProps runData errors  =
-  { 
-    errors = errors
-  , runSummary = fromApiData runData.summary
-  , compileSummary = summarizeData "compiles" (compileApiDataToViewData runData.compiles)
-  , lintSummary = summarizeData "lints" (lintApiDataToViewData runData.lints)
-  , simSummary = summarizeData "sims" (simApiDataToViewData runData.simulations)
-  }
-
-
-
-
-
 
 type alias ViewData =
   {
@@ -93,7 +76,7 @@ fromApiData : Api.Summary -> ViewData
 fromApiData apiData =
   let
     releaseLabel = Maybe.withDefault "" apiData.gvpLabel
-    elapsedTime = elapsedRegressionTime apiData.startDate apiData.endDate
+    elapsedTime = TimeUtils.elapsedRegressionTime apiData.startDate apiData.endDate
                                         apiData.elapsedTime
     runStatus =
       case apiData.elapsedTime of
@@ -112,16 +95,6 @@ fromApiData apiData =
     , gatherGroupsUrl = "#"
     , rtmReportUrl = "#"
     }
-
-
-elapsedRegressionTime : String -> String -> Maybe Float -> Float
-elapsedRegressionTime startTime endTime elapsedTime =
-  case elapsedTime of
-    Just a -> a
-    Nothing ->
-      dateStrDifferenceInSeconds startTime endTime
-
-
 
 completedRun : SingleRun -> Bool
 completedRun run =
@@ -143,12 +116,6 @@ summarizeData label data =
       |> List.filter failedRun |> List.length
   in
     RunTypeSummaryData label (SingleResult total complete failed)
-
-
-
-
-
-
 
 convertApiLsfDataToViewLsfData : Api.LsfInfo -> LsfViewData
 convertApiLsfDataToViewLsfData apiData =
@@ -172,10 +139,10 @@ convertCompileApiDataToSingleResult apiData =
 convertLintApiDataToSingleResult : Api.Lint -> SingleRun
 convertLintApiDataToSingleResult apiData =
   {
-    runNum = 0 
-  , name = "x" 
-  , config = "" 
-  , status = "" 
+    runNum = 0
+  , name = "x"
+  , config = ""
+  , status = ""
   , lsfInfo = convertApiLsfDataToViewLsfData apiData.lsfInfo
   }
 
@@ -190,10 +157,20 @@ convertSimApiDataToSingleResult apiData =
   }
 
 compileApiDataToViewData data =
-  List.map (\e -> convertCompileApiDataToSingleResult e) data 
+  List.map (\e -> convertCompileApiDataToSingleResult e) data
 
 lintApiDataToViewData data =
   List.map (\e -> convertLintApiDataToSingleResult e) data
 
 simApiDataToViewData data =
   List.map (\e -> convertSimApiDataToSingleResult e) data
+
+summaryProps : Api.Data -> String -> AllRunTypeSummaries
+summaryProps runData errors  =
+  {
+    errors = errors
+  , runSummary = fromApiData runData.summary
+  , compileSummary = summarizeData "compiles" (compileApiDataToViewData runData.compiles)
+  , lintSummary = summarizeData "lints" (lintApiDataToViewData runData.lints)
+  , simSummary = summarizeData "sims" (simApiDataToViewData runData.simulations)
+  }
