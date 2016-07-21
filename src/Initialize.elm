@@ -3,7 +3,7 @@ module Initialize exposing (..)
 import Dict exposing (..)
 
 import Api exposing (..)
-import Summary exposing (..)
+import SummaryData exposing (..)
 import ResultsTableData exposing (..)
 
 initCompileColumns : List Column

@@ -1,4 +1,4 @@
-module Summary exposing (..)
+module SummaryData exposing (..)
 
 import Api exposing (..)
 import TimeUtils exposing (..)

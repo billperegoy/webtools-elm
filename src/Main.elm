@@ -13,7 +13,7 @@ import RegressionSelectData exposing (..)
 import RegressionSummary exposing (view)
 import ResultsTable exposing (view)
 import Api exposing (..)
-import Summary exposing (..)
+import SummaryData exposing (..)
 
 --
 -- App
@@ -158,7 +158,7 @@ view model =
     []
     [
       regressionSelectView model
-    , (RegressionSummary.view (Summary.summaryProps model.runData model.regressionsHttpErrors))
+    , (RegressionSummary.view (SummaryData.summaryProps model.runData model.regressionsHttpErrors))
     , App.map CompileResults (ResultsTable.view model.compileResults
         (compileApiDataToViewData model.runData.compiles))
     , App.map LintResults (ResultsTable.view model.lintResults

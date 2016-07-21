@@ -13,13 +13,13 @@ import DictUtils exposing (getWithDefault)
 import StringUtils exposing (uniquify)
 import FormUtils as Form exposing (..)
 import Initialize exposing (..)
-import Summary exposing (..)
+import SummaryData exposing (..)
 import ResultsTableData exposing (..)
 
 type alias Model =
   {
     resultsType : String
-  , data : List Summary.SingleRun
+  , data : List SummaryData.SingleRun
   , columns : List Column
   , showEditColumnsPane : Bool
   , showFilterPane : Bool
