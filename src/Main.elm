@@ -1,13 +1,12 @@
-import Html exposing (..)
+import Html exposing (Html, div)
 import Html.App as App
-import Html.Attributes exposing (..)
-import Html.Events exposing (..)
-import Http exposing (..)
-import Task exposing (..)
-import Json.Decode as Json exposing (..)
-import Time exposing (..)
+import Html.Attributes exposing (class)
+import Http exposing (Error)
+import Task exposing (perform)
+import Time exposing (Time)
 
 import Initialize exposing (..)
+import Config exposing (..)
 import RegressionSelect exposing (view)
 import RegressionSelectData exposing (..)
 import RegressionSummary exposing (view)
@@ -33,9 +32,10 @@ main =
 type alias Model =
   {
     regressionList : List Regression
+  , regressionsHttpErrors : String
+
   , runData : Api.Data
   , resultsHttpErrors : String
-  , regressionsHttpErrors : String
 
   -- Sub-components
   , regressionSelect : RegressionSelect.Model
@@ -52,14 +52,15 @@ init : (Model, Cmd Msg)
 init =
   {
     regressionList = []
-  , regressionSelect = RegressionSelect.init
-  , compileResults = ResultsTable.init "Compiles" Initialize.initCompileColumns []
-  , lintResults = ResultsTable.init "Lints" Initialize.initLintColumns []
-  , simResults = ResultsTable.init "Simulations" Initialize.initSimColumns []
-  , resultsHttpErrors = ""
   , regressionsHttpErrors = ""
 
   , runData = Api.Data Initialize.initSummary [] [] []
+  , resultsHttpErrors = ""
+
+  , regressionSelect = RegressionSelect.init
+  , compileResults = ResultsTable.init "Compiles" Config.initCompileColumns []
+  , lintResults = ResultsTable.init "Lints" Config.initLintColumns []
+  , simResults = ResultsTable.init "Simulations" Config.initSimColumns []
   } ! []
 type Msg
   = RegressionSelect RegressionSelect.Msg
