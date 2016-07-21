@@ -107,17 +107,20 @@ update msg model =
 
     CompileResults msg ->
       { model
-          | compileResults = fst(ResultsTable.update msg model.compileResults (compileApiDataToViewData model.runData.compiles))
+          | compileResults = fst(ResultsTable.update msg model.compileResults 
+                                   (compileApiDataToViewData model.runData.compiles))
       } ! []
 
     LintResults msg ->
       { model
-          | lintResults = fst(ResultsTable.update msg model.lintResults (lintApiDataToViewData model.runData.lints))
+          | lintResults = fst(ResultsTable.update msg model.lintResults 
+                                (lintApiDataToViewData model.runData.lints))
       } ! []
 
     SimResults msg ->
       { model
-          | simResults = fst(ResultsTable.update msg model.simResults (simApiDataToViewData model.runData.simulations))
+          | simResults = fst(ResultsTable.update msg model.simResults
+                               (simApiDataToViewData model.runData.simulations))
       } ! []
 
 getResultsHttpData : String -> Cmd Msg
@@ -134,49 +137,25 @@ getRegressionsHttpData =
   in
     Task.perform RegressionsHttpFail RegressionsHttpSucceed (Http.get decodeRegressionList url)
 
-convertDateString dateStr =
-  let
-    date = Date.fromString dateStr
-  in
-    case date of
-      Ok a ->
-        a
-      Err  _->
-        fromTime 0
-
-type alias AllRunTypeSummaries =
-  {
-    errors : String
-  , runSummary : Summary.ViewData 
-  , compileSummary : Summary.RunTypeSummaryData
-  , lintSummary : Summary.RunTypeSummaryData
-  , simSummary : Summary.RunTypeSummaryData
-  }
-
-summaryProps : Model -> AllRunTypeSummaries
-summaryProps model =
-  { 
-    errors = model.resultsHttpErrors
-  , runSummary = Summary.fromApiData model.runData.summary
-  , compileSummary = summarizeData "compiles" (compileApiDataToViewData model.runData.compiles)
-  , lintSummary = summarizeData "lints" (lintApiDataToViewData model.runData.lints)
-  , simSummary = summarizeData "sims" (simApiDataToViewData model.runData.simulations)
-  }
+regressionSelectView : Model ->  Html Msg
+regressionSelectView model = 
+  div
+    [ class "regression-select_container" ]
+    [ App.map RegressionSelect (RegressionSelect.view model.regressionSelect model.regressionList) ]
 
 view : Model -> Html Msg
 view model =
   div
     []
     [
-      div
-        [ class "regression-select_container" ]
-        [ App.map RegressionSelect (RegressionSelect.view model.regressionSelect model.regressionList) ]
-    , p [] [ text model.regressionsHttpErrors ]
-
-    , (RegressionSummary.view (summaryProps model))
-    , App.map CompileResults (ResultsTable.view model.compileResults (compileApiDataToViewData model.runData.compiles))
-    , App.map LintResults (ResultsTable.view model.lintResults (lintApiDataToViewData model.runData.lints))
-    , App.map SimResults (ResultsTable.view model.simResults (simApiDataToViewData model.runData.simulations))
+      regressionSelectView model
+    , (RegressionSummary.view (Summary.summaryProps model.runData model.regressionsHttpErrors))
+    , App.map CompileResults (ResultsTable.view model.compileResults
+                                (compileApiDataToViewData model.runData.compiles))
+    , App.map LintResults (ResultsTable.view model.lintResults
+                             (lintApiDataToViewData model.runData.lints))
+    , App.map SimResults (ResultsTable.view model.simResults
+                             (simApiDataToViewData model.runData.simulations))
     ]
 
 

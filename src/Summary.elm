@@ -36,6 +36,25 @@ type alias LsfViewData =
   }
 
 
+type alias AllRunTypeSummaries =
+  {
+    errors : String
+  , runSummary : ViewData 
+  , compileSummary : RunTypeSummaryData
+  , lintSummary : RunTypeSummaryData
+  , simSummary : RunTypeSummaryData
+  }
+
+summaryProps : Api.Data -> String -> AllRunTypeSummaries
+summaryProps runData errors  =
+  { 
+    errors = errors
+  , runSummary = fromApiData runData.summary
+  , compileSummary = summarizeData "compiles" (compileApiDataToViewData runData.compiles)
+  , lintSummary = summarizeData "lints" (lintApiDataToViewData runData.lints)
+  , simSummary = summarizeData "sims" (simApiDataToViewData runData.simulations)
+  }
+
 
 
 
