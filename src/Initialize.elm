@@ -3,6 +3,7 @@ module Initialize exposing (..)
 import Dict exposing (..)
 
 import Api exposing (..)
+import Summary exposing (..)
 import RegressionData exposing (..)
 
 initRegressions : List Regression

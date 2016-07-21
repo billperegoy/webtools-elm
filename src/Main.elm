@@ -29,8 +29,9 @@ main =
 type alias Model =
   {
     regressionList : List Regression
-
   , runData : Api.Data
+  , resultsHttpErrors : String
+  , regressionsHttpErrors : String
 
   -- Sub-components
   , regressionSelect : RegressionSelect.Model
@@ -38,19 +39,8 @@ type alias Model =
   , lintResults : ResultsTable.Model
   , simResults : ResultsTable.Model
 
-  , resultsHttpErrors : String
-  , regressionsHttpErrors : String
   }
 
-emptySummaryData : String -> RunTypeSummaryData
-emptySummaryData label =
-  RunTypeSummaryData label (SingleResult 0 0 0)
-
-{-
-   We return a tuple consisting of an initailized model and a Cmd
-   In this case the Cmd is empty.
-   Note that ({...}, Cmd.none) is the same as {...} ! []
--}
 init : (Model, Cmd Msg)
 init =
   {
@@ -64,21 +54,6 @@ init =
 
   , runData = Api.Data Initialize.initSummary [] [] []
   } ! []
-
-getResultsHttpData : String -> Cmd Msg
-getResultsHttpData regressionName =
-  let
-    url = "http://localhost:9292/api/regressions/" ++ regressionName
-  in
-    Task.perform ResultsHttpFail ResultsHttpSucceed (Http.get Api.decodeData url)
-
-getRegressionsHttpData : Cmd Msg
-getRegressionsHttpData =
-  let
-    url = "http://localhost:9292/api/regressions"
-  in
-    Task.perform RegressionsHttpFail RegressionsHttpSucceed (Http.get decodeRegressionList url)
-
 type Msg
   = RegressionSelect RegressionSelect.Msg
 
@@ -93,54 +68,6 @@ type Msg
   | CompileResults ResultsTable.Msg
   | LintResults ResultsTable.Msg
   | SimResults ResultsTable.Msg
-
-convertApiLsfDataToViewLsfData : Api.LsfInfo -> LsfViewData
-convertApiLsfDataToViewLsfData apiData =
-  {
-    jobId = apiData.jobId
-  , status = apiData.status
-  , execHost = apiData.execHost
-  , elapsedTime = Maybe.withDefault 0 apiData.elapsedTime
-  }
-
-convertCompileApiDataToSingleResult : Api.Compile -> SingleRun
-convertCompileApiDataToSingleResult apiData =
-  {
-    runNum = 0
-  , name = apiData.name
-  , config = apiData.config
-  , status = apiData.runStatus
-  , lsfInfo = convertApiLsfDataToViewLsfData apiData.lsfInfo
-  }
-
-convertLintApiDataToSingleResult : Api.Lint -> SingleRun
-convertLintApiDataToSingleResult apiData =
-  {
-    runNum = 0 
-  , name = "x" 
-  , config = "" 
-  , status = "" 
-  , lsfInfo = convertApiLsfDataToViewLsfData apiData.lsfInfo
-  }
-
-convertSimApiDataToSingleResult : Api.Simulation -> SingleRun
-convertSimApiDataToSingleResult apiData =
-  {
-    runNum = apiData.testId
-  , name = apiData.name
-  , config = apiData.config
-  , status = apiData.runStatus
-  , lsfInfo = convertApiLsfDataToViewLsfData apiData.lsfInfo
-  }
-
-compileApiDataToViewData data =
-  List.map (\e -> convertCompileApiDataToSingleResult e) data 
-
-lintApiDataToViewData data =
-  List.map (\e -> convertLintApiDataToSingleResult e) data
-
-simApiDataToViewData data =
-  List.map (\e -> convertSimApiDataToSingleResult e) data
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -193,6 +120,19 @@ update msg model =
           | simResults = fst(ResultsTable.update msg model.simResults (simApiDataToViewData model.runData.simulations))
       } ! []
 
+getResultsHttpData : String -> Cmd Msg
+getResultsHttpData regressionName =
+  let
+    url = "http://localhost:9292/api/regressions/" ++ regressionName
+  in
+    Task.perform ResultsHttpFail ResultsHttpSucceed (Http.get Api.decodeData url)
+
+getRegressionsHttpData : Cmd Msg
+getRegressionsHttpData =
+  let
+    url = "http://localhost:9292/api/regressions"
+  in
+    Task.perform RegressionsHttpFail RegressionsHttpSucceed (Http.get decodeRegressionList url)
 
 convertDateString dateStr =
   let
@@ -204,34 +144,13 @@ convertDateString dateStr =
       Err  _->
         fromTime 0
 
-completedRun : SingleRun -> Bool
-completedRun run =
-  (String.toLower run.lsfInfo.status == "done") || (String.toLower run.lsfInfo.status == "exit")
-
-failedRun : SingleRun -> Bool
-failedRun run =
-  (String.toLower run.status == "fail") || (String.toLower run.status == "error")
-
-summarizeData : String -> List SingleRun -> RunTypeSummaryData
-summarizeData label data =
-  let
-    total = List.length data
-
-    complete = data
-      |> List.filter completedRun |> List.length
-
-    failed = data
-      |> List.filter failedRun |> List.length
-  in
-    RunTypeSummaryData label (SingleResult total complete failed)
-
 type alias AllRunTypeSummaries =
   {
     errors : String
   , runSummary : Summary.ViewData 
-  , compileSummary : RunTypeSummaryData
-  , lintSummary : RunTypeSummaryData
-  , simSummary : RunTypeSummaryData
+  , compileSummary : Summary.RunTypeSummaryData
+  , lintSummary : Summary.RunTypeSummaryData
+  , simSummary : Summary.RunTypeSummaryData
   }
 
 summaryProps : Model -> AllRunTypeSummaries

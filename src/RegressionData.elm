@@ -3,25 +3,9 @@ module RegressionData exposing (..)
 import Json.Decode as Json exposing (..)
 import Dict exposing (..)
 import Api exposing (..)
+import Summary exposing (..)
 
 type SortStatus = Unsorted | Ascending | Descending
-
-type alias LsfViewData =
-  {
-    jobId : String
-  , status : String
-  , execHost : String
-  , elapsedTime : Int
-  }
-
-type alias SingleRun =
-  {
-    runNum : Int 
-  , name : String
-  , config : String
-  , status : String
-  , lsfInfo : LsfViewData
-  }
 
 type alias AllResults =
   {
@@ -29,18 +13,6 @@ type alias AllResults =
   , compiles : List SingleRun
   , lints : List SingleRun
   , simulations : List SingleRun
-  }
-
-type alias SingleResult =
-  {
-    total : Int
-  , complete : Int
-  , failed : Int
-  }
-
-type alias RunTypeSummaryData =
-  { label : String
-  , result : SingleResult
   }
 
 type alias ResultsTriad =

@@ -14,12 +14,13 @@ import StringUtils exposing (uniquify)
 import FormUtils as Form exposing (..)
 import RegressionData exposing (..)
 import Initialize exposing (..)
+import Summary exposing (..)
 
 
 type alias Model =
   {
     resultsType : String
-  , data : List SingleRun
+  , data : List Summary.SingleRun
   , columns : List Column
   , showEditColumnsPane : Bool
   , showFilterPane : Bool
