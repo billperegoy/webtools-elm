@@ -6,16 +6,18 @@ import Http exposing (..)
 import Task exposing (..)
 import Json.Decode as Json exposing (..)
 import Time exposing (..)
-import String exposing (..)
-import Date exposing (..)
 
 import Initialize exposing (..)
-import RegressionSelect exposing (view, Regression)
+import RegressionSelect exposing (view)
+import RegressionSelectData exposing (..)
 import RegressionSummary exposing (view)
 import ResultsTable exposing (view)
 import Api exposing (..)
 import Summary exposing (..)
 
+--
+-- App
+--
 main : Program Never
 main =
   App.program
@@ -25,6 +27,9 @@ main =
     , subscriptions = subscriptions
     }
 
+--
+-- Model
+--
 type alias Model =
   {
     regressionList : List Regression
@@ -40,6 +45,9 @@ type alias Model =
 
   }
 
+--
+-- Init
+--
 init : (Model, Cmd Msg)
 init =
   {
@@ -68,6 +76,9 @@ type Msg
   | LintResults ResultsTable.Msg
   | SimResults ResultsTable.Msg
 
+--
+-- Update 
+--
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
@@ -127,21 +138,20 @@ getResultsHttpData regressionName =
   let
     url = "http://localhost:9292/api/regressions/" ++ regressionName
   in
-    Task.perform ResultsHttpFail ResultsHttpSucceed (Http.get Api.decodeData url)
+    Task.perform ResultsHttpFail ResultsHttpSucceed
+      (Http.get Api.decodeData url)
 
 getRegressionsHttpData : Cmd Msg
 getRegressionsHttpData =
   let
     url = "http://localhost:9292/api/regressions"
   in
-    Task.perform RegressionsHttpFail RegressionsHttpSucceed (Http.get RegressionSelect.decodeRegressionList url)
+    Task.perform RegressionsHttpFail RegressionsHttpSucceed
+      (Http.get RegressionSelectData.decodeRegressionList url)
 
-regressionSelectView : Model ->  Html Msg
-regressionSelectView model = 
-  div
-    [ class "regression-select_container" ]
-    [ App.map RegressionSelect (RegressionSelect.view model.regressionSelect model.regressionList) ]
-
+--
+-- View 
+--
 view : Model -> Html Msg
 view model =
   div
@@ -150,14 +160,23 @@ view model =
       regressionSelectView model
     , (RegressionSummary.view (Summary.summaryProps model.runData model.regressionsHttpErrors))
     , App.map CompileResults (ResultsTable.view model.compileResults
-                                (compileApiDataToViewData model.runData.compiles))
+        (compileApiDataToViewData model.runData.compiles))
     , App.map LintResults (ResultsTable.view model.lintResults
-                             (lintApiDataToViewData model.runData.lints))
+        (lintApiDataToViewData model.runData.lints))
     , App.map SimResults (ResultsTable.view model.simResults
-                             (simApiDataToViewData model.runData.simulations))
+        (simApiDataToViewData model.runData.simulations))
     ]
 
+regressionSelectView : Model ->  Html Msg
+regressionSelectView model = 
+  div
+    [ class "regression-select_container" ]
+    [ App.map RegressionSelect (RegressionSelect.view model.regressionSelect model.regressionList) ]
 
+
+--
+-- Subscriptions
+--
 subscriptions : Model -> Sub Msg
 subscriptions model =
   Sub.batch
