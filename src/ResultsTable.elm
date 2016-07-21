@@ -12,10 +12,9 @@ import String exposing (..)
 import DictUtils exposing (getWithDefault)
 import StringUtils exposing (uniquify)
 import FormUtils as Form exposing (..)
-import RegressionData exposing (..)
 import Initialize exposing (..)
 import Summary exposing (..)
-
+import ResultsTableData exposing (..)
 
 type alias Model =
   {

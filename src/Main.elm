@@ -10,7 +10,6 @@ import String exposing (..)
 import Date exposing (..)
 
 import Initialize exposing (..)
-import RegressionData exposing (..)
 import RegressionSelect exposing (view, Regression)
 import RegressionSummary exposing (view)
 import ResultsTable exposing (view)
@@ -46,9 +45,9 @@ init =
   {
     regressionList = []
   , regressionSelect = RegressionSelect.init
-  , compileResults = ResultsTable.init "Compiles" Initialize.initCompileColumns Initialize.initCompiles
-  , lintResults = ResultsTable.init "Lints" Initialize.initLintColumns Initialize.initLints
-  , simResults = ResultsTable.init "Simulations" Initialize.initSimColumns Initialize.initSimulations
+  , compileResults = ResultsTable.init "Compiles" Initialize.initCompileColumns []
+  , lintResults = ResultsTable.init "Lints" Initialize.initLintColumns []
+  , simResults = ResultsTable.init "Simulations" Initialize.initSimColumns []
   , resultsHttpErrors = ""
   , regressionsHttpErrors = ""
 
