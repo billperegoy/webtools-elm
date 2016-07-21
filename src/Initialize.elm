@@ -3,7 +3,7 @@ module Initialize exposing (..)
 import Dict exposing (..)
 
 import Api exposing (..)
-import SummaryData exposing (..)
+import ViewData exposing (..)
 import ResultsTableData exposing (..)
 
 initLsfInfo : LsfViewData

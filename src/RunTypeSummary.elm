@@ -3,7 +3,7 @@ module RunTypeSummary exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 
-import SummaryData exposing (..)
+import ViewData exposing (..)
 
 totalClass : SingleResult -> List (Html.Attribute a) 
 totalClass result =

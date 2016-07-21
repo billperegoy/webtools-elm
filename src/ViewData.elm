@@ -1,4 +1,4 @@
-module SummaryData exposing (..)
+module ViewData exposing (..)
 
 import Api exposing (..)
 import TimeUtils exposing (..)
@@ -126,8 +126,8 @@ convertApiLsfDataToViewLsfData apiData =
   , elapsedTime = Maybe.withDefault 0 apiData.elapsedTime
   }
 
-convertCompileApiDataToSingleResult : Api.Compile -> SingleRun
-convertCompileApiDataToSingleResult apiData =
+compileApiDataToSingleRun : Api.Compile -> SingleRun
+compileApiDataToSingleRun apiData =
   {
     runNum = 0
   , name = apiData.name
@@ -136,8 +136,8 @@ convertCompileApiDataToSingleResult apiData =
   , lsfInfo = convertApiLsfDataToViewLsfData apiData.lsfInfo
   }
 
-convertLintApiDataToSingleResult : Api.Lint -> SingleRun
-convertLintApiDataToSingleResult apiData =
+lintApiDataToSingleRun : Api.Lint -> SingleRun
+lintApiDataToSingleRun apiData =
   {
     runNum = 0
   , name = "x"
@@ -146,8 +146,8 @@ convertLintApiDataToSingleResult apiData =
   , lsfInfo = convertApiLsfDataToViewLsfData apiData.lsfInfo
   }
 
-convertSimApiDataToSingleResult : Api.Simulation -> SingleRun
-convertSimApiDataToSingleResult apiData =
+simApiDataToSingleRun : Api.Simulation -> SingleRun
+simApiDataToSingleRun apiData =
   {
     runNum = apiData.testId
   , name = apiData.name
@@ -156,21 +156,21 @@ convertSimApiDataToSingleResult apiData =
   , lsfInfo = convertApiLsfDataToViewLsfData apiData.lsfInfo
   }
 
-compileApiDataToViewData data =
-  List.map (\e -> convertCompileApiDataToSingleResult e) data
+fromCompileApiData data =
+  List.map (\e -> compileApiDataToSingleRun e) data
 
-lintApiDataToViewData data =
-  List.map (\e -> convertLintApiDataToSingleResult e) data
+fromLintApiData data =
+  List.map (\e -> lintApiDataToSingleRun e) data
 
-simApiDataToViewData data =
-  List.map (\e -> convertSimApiDataToSingleResult e) data
+fromSimApiData data =
+  List.map (\e -> simApiDataToSingleRun e) data
 
 summaryProps : Api.Data -> String -> AllRunTypeSummaries
 summaryProps runData errors  =
   {
     errors = errors
   , runSummary = fromApiData runData.summary
-  , compileSummary = summarizeData "compiles" (compileApiDataToViewData runData.compiles)
-  , lintSummary = summarizeData "lints" (lintApiDataToViewData runData.lints)
-  , simSummary = summarizeData "sims" (simApiDataToViewData runData.simulations)
+  , compileSummary = summarizeData "compiles" (fromCompileApiData runData.compiles)
+  , lintSummary = summarizeData "lints" (fromLintApiData runData.lints)
+  , simSummary = summarizeData "sims" (fromSimApiData runData.simulations)
   }

@@ -12,7 +12,7 @@ import RegressionSelectData exposing (..)
 import RegressionSummary exposing (view)
 import ResultsTable exposing (view)
 import Api exposing (..)
-import SummaryData exposing (..)
+import ViewData exposing (..)
 
 --
 -- App
@@ -62,6 +62,11 @@ init =
   , lintResults = ResultsTable.init "Lints" Config.initLintColumns []
   , simResults = ResultsTable.init "Simulations" Config.initSimColumns []
   } ! []
+
+
+--
+-- Update 
+--
 type Msg
   = RegressionSelect RegressionSelect.Msg
 
@@ -77,9 +82,6 @@ type Msg
   | LintResults ResultsTable.Msg
   | SimResults ResultsTable.Msg
 
---
--- Update 
---
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
@@ -119,19 +121,19 @@ update msg model =
     CompileResults msg ->
       { model
           | compileResults = fst(ResultsTable.update msg model.compileResults 
-                                   (compileApiDataToViewData model.runData.compiles))
+                                   (ViewData.fromCompileApiData model.runData.compiles))
       } ! []
 
     LintResults msg ->
       { model
           | lintResults = fst(ResultsTable.update msg model.lintResults 
-                                (lintApiDataToViewData model.runData.lints))
+                                (ViewData.fromLintApiData model.runData.lints))
       } ! []
 
     SimResults msg ->
       { model
           | simResults = fst(ResultsTable.update msg model.simResults
-                               (simApiDataToViewData model.runData.simulations))
+                               (ViewData.fromSimApiData model.runData.simulations))
       } ! []
 
 getResultsHttpData : String -> Cmd Msg
@@ -159,13 +161,13 @@ view model =
     []
     [
       regressionSelectView model
-    , (RegressionSummary.view (SummaryData.summaryProps model.runData model.regressionsHttpErrors))
+    , (RegressionSummary.view (ViewData.summaryProps model.runData model.regressionsHttpErrors))
     , App.map CompileResults (ResultsTable.view model.compileResults
-        (compileApiDataToViewData model.runData.compiles))
+        (ViewData.fromCompileApiData model.runData.compiles))
     , App.map LintResults (ResultsTable.view model.lintResults
-        (lintApiDataToViewData model.runData.lints))
+        (ViewData.fromLintApiData model.runData.lints))
     , App.map SimResults (ResultsTable.view model.simResults
-        (simApiDataToViewData model.runData.simulations))
+        (ViewData.fromSimApiData model.runData.simulations))
     ]
 
 regressionSelectView : Model ->  Html Msg
