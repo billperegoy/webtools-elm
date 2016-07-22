@@ -61,7 +61,7 @@ init =
   , compileResults = ResultsTable.init "Compiles" Config.initCompileColumns []
   , lintResults = ResultsTable.init "Lints" Config.initLintColumns []
   , simResults = ResultsTable.init "Simulations" Config.initSimColumns []
-  } ! []
+  } ! [ getRegressionsHttpData ]
 
 
 --
