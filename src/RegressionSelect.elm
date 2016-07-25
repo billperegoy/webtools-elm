@@ -31,41 +31,37 @@ init  =
 -- Update
 --
 type Msg
-  = NoOp
-  | UpdateUserFilter String
+  = UpdateUserFilter String
   | UpdateProjectFilter String
   | UpdateRunTypeFilter String
   | UpdateSelectedElement String
 
-update : Msg -> Model -> (Model, Cmd Msg)
+update : Msg -> Model -> (Model, Cmd Msg, Maybe String)
 update msg model =
   case msg of
-    NoOp ->
-      (model, Cmd.none)
-
     UpdateUserFilter data ->
       let
         newModel = { model | userFilter = data }
       in
-        (newModel, Cmd.none)
+        (newModel, Cmd.none, Nothing)
 
     UpdateProjectFilter data ->
       let
         newModel = { model | projectFilter = data }
       in
-        (newModel, Cmd.none)
+        (newModel, Cmd.none, Nothing)
 
     UpdateRunTypeFilter data ->
       let
         newModel = { model | runTypeFilter = data }
       in
-        (newModel, Cmd.none)
+        (newModel, Cmd.none, Nothing)
 
     UpdateSelectedElement data ->
       let
         newModel = { model | selectedElement = data }
       in
-        (newModel, Cmd.none)
+        (newModel, Cmd.none, Just data)
 
 --
 -- View Utilities
@@ -94,11 +90,12 @@ filterSelect filterType name unfilteredList =
 
 filteredRegressionList : Model -> List Regression -> List (Html Msg)
 filteredRegressionList model regressions =
-  regressions
+  "" :: 
+    (regressions
     |> filterSelect "project" model.projectFilter
     |> filterSelect "user" model.userFilter
     |> filterSelect "runType" model.runTypeFilter
-    |> List.map .name
+    |> List.map .name)
     |> HtmlUtils.listToHtmlSelectOptions
 
 allElementsByType : Model -> List Regression -> String -> List String

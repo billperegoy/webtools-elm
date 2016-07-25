@@ -68,9 +68,7 @@ init =
 -- Update 
 --
 type Msg
-  = NoOp
-  | LoadNewPage
-  | RegressionSelect RegressionSelect.Msg
+  = RegressionSelect RegressionSelect.Msg
 
   | ResultsHttpSucceed Api.Data
   | ResultsHttpFail Http.Error
@@ -87,9 +85,6 @@ type Msg
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    NoOp -> 
-      model ! []
-
     RegressionsHttpSucceed results ->
       { model |
           regressionList = results
@@ -115,21 +110,19 @@ update msg model =
          | resultsHttpErrors = "HTTP error detected: " ++ toString error
       } ! []
 
-    LoadNewPage ->
-      (model, getResultsHttpData model.regressionSelect.selectedElement)
-
     PollResultsHttp time ->
       (model, getResultsHttpData model.regressionSelect.selectedElement)
 
     RegressionSelect msg ->
       let 
-        (result, effect) = RegressionSelect.update msg model.regressionSelect
+        (result, effect, newSelection) = RegressionSelect.update msg model.regressionSelect
         newModel = { model | regressionSelect = result }
       in
-        --(newModel, Cmd.none)
-        --(newModel, effect)
-        Debug.log "Here we are..."
-        (newModel, Cmd.map (\e -> LoadNewPage) effect)
+        case newSelection of
+          Nothing ->
+            (newModel, Cmd.none)
+          Just a ->
+            (newModel, getResultsHttpData a)
 
     CompileResults msg ->
       { model
