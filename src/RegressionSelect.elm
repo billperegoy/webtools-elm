@@ -31,7 +31,8 @@ init  =
 -- Update
 --
 type Msg
-  = UpdateUserFilter String
+  = NoOp
+  | UpdateUserFilter String
   | UpdateProjectFilter String
   | UpdateRunTypeFilter String
   | UpdateSelectedElement String
@@ -39,6 +40,9 @@ type Msg
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
+    NoOp ->
+      model ! []
+
     UpdateUserFilter data ->
       { model | userFilter = data } ! []
 

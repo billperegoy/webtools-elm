@@ -68,7 +68,9 @@ init =
 -- Update 
 --
 type Msg
-  = RegressionSelect RegressionSelect.Msg
+  = NoOp
+  | LoadNewPage
+  | RegressionSelect RegressionSelect.Msg
 
   | ResultsHttpSucceed Api.Data
   | ResultsHttpFail Http.Error
@@ -85,6 +87,9 @@ type Msg
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
+    NoOp -> 
+      model ! []
+
     RegressionsHttpSucceed results ->
       { model |
           regressionList = results
@@ -110,36 +115,44 @@ update msg model =
          | resultsHttpErrors = "HTTP error detected: " ++ toString error
       } ! []
 
+    LoadNewPage ->
+      (model, getResultsHttpData model.regressionSelect.selectedElement)
+
     PollResultsHttp time ->
       (model, getResultsHttpData model.regressionSelect.selectedElement)
 
     RegressionSelect msg ->
-      { model
-          | regressionSelect = fst(RegressionSelect.update msg model.regressionSelect)
-      } ! []
+      let 
+        (result, effect) = RegressionSelect.update msg model.regressionSelect
+        newModel = { model | regressionSelect = result }
+      in
+        --(newModel, Cmd.none)
+        --(newModel, effect)
+        Debug.log "Here we are..."
+        (newModel, Cmd.map (\e -> LoadNewPage) effect)
 
     CompileResults msg ->
       { model
-          | compileResults = fst(ResultsTable.update msg model.compileResults 
+          | compileResults = fst (ResultsTable.update msg model.compileResults 
                                    (ViewData.fromCompileApiData model.runData.compiles))
       } ! []
 
     LintResults msg ->
       { model
-          | lintResults = fst(ResultsTable.update msg model.lintResults 
+          | lintResults = fst (ResultsTable.update msg model.lintResults 
                                 (ViewData.fromLintApiData model.runData.lints))
       } ! []
 
     SimResults msg ->
       { model
-          | simResults = fst(ResultsTable.update msg model.simResults
+          | simResults = fst (ResultsTable.update msg model.simResults
                                (ViewData.fromSimApiData model.runData.simulations))
       } ! []
 
 getResultsHttpData : String -> Cmd Msg
 getResultsHttpData regressionName =
   let
-    url = "http://localhost:9292/api/regressions/" ++ regressionName
+    url = Config.apiBase ++ "regressions" ++ "/" ++ regressionName
   in
     Task.perform ResultsHttpFail ResultsHttpSucceed
       (Http.get Api.decodeData url)
@@ -147,7 +160,7 @@ getResultsHttpData regressionName =
 getRegressionsHttpData : Cmd Msg
 getRegressionsHttpData =
   let
-    url = "http://localhost:9292/api/regressions"
+    url = Config.apiBase ++ "regressions"
   in
     Task.perform RegressionsHttpFail RegressionsHttpSucceed
       (Http.get RegressionSelectData.decodeRegressionList url)
@@ -184,6 +197,6 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
   Sub.batch
     [ 
-      Time.every (5000 * Time.millisecond) PollResultsHttp
+      Time.every (60000 * Time.millisecond) PollResultsHttp
     , Time.every (60000 * Time.millisecond) PollRegressionsHttp
     ]

@@ -3,6 +3,9 @@ module Config exposing (..)
 import Dict exposing (..)
 import ResultsTableData exposing (..)
 
+apiBase : String
+apiBase = "http://localhost:9292/api/"
+
 initCompileColumns : List Column
 initCompileColumns =
   [
