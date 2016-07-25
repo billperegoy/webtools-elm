@@ -41,19 +41,31 @@ update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
     NoOp ->
-      model ! []
+      (model, Cmd.none)
 
     UpdateUserFilter data ->
-      { model | userFilter = data } ! []
+      let
+        newModel = { model | userFilter = data }
+      in
+        (newModel, Cmd.none)
 
     UpdateProjectFilter data ->
-      { model | projectFilter = data } ! []
+      let
+        newModel = { model | projectFilter = data }
+      in
+        (newModel, Cmd.none)
 
     UpdateRunTypeFilter data ->
-      { model | runTypeFilter = data } ! []
+      let
+        newModel = { model | runTypeFilter = data }
+      in
+        (newModel, Cmd.none)
 
     UpdateSelectedElement data ->
-      { model | selectedElement = data } ! []
+      let
+        newModel = { model | selectedElement = data }
+      in
+        (newModel, Cmd.none)
 
 --
 -- View Utilities
