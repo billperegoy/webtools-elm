@@ -4,6 +4,8 @@ import Html.Attributes exposing (class)
 import Http exposing (Error)
 import Task exposing (perform)
 import Time exposing (Time)
+import Navigation exposing (..)
+import String exposing (..)
 
 import Initialize exposing (..)
 import Config exposing (..)
@@ -19,10 +21,11 @@ import ViewData exposing (..)
 --
 main : Program Never
 main =
-  App.program
+  Navigation.program urlParser
     { init = init
     , view = view
     , update = update
+    , urlUpdate = urlUpdate
     , subscriptions = subscriptions
     }
 
@@ -48,8 +51,8 @@ type alias Model =
 --
 -- Init
 --
-init : (Model, Cmd Msg)
-init =
+init : Result String Int -> (Model, Cmd Msg)
+init result =
   {
     regressionList = []
   , regressionsHttpErrors = ""
@@ -122,7 +125,7 @@ update msg model =
           Nothing ->
             (newModel, Cmd.none)
           Just a ->
-            (newModel, getResultsHttpData a)
+            (newModel, Cmd.batch [getResultsHttpData a, Navigation.modifyUrl (toUrl model a)])
 
     CompileResults msg ->
       let
@@ -199,3 +202,34 @@ subscriptions model =
       Time.every (5000 * Time.millisecond) PollResultsHttp
     , Time.every (60000 * Time.millisecond) PollRegressionsHttp
     ]
+
+
+
+
+--
+-- URL Update
+--
+-- URL PARSERS - check out evancz/url-parser for fancier URL parsing
+toUrl : Model -> String -> String
+toUrl model name =
+  "#/regressions/" ++ name
+
+
+fromUrl : String -> Result String Int
+fromUrl url =
+  String.toInt (String.dropLeft 2 url)
+
+
+urlParser : Navigation.Parser (Result String Int)
+urlParser =
+  Navigation.makeParser (fromUrl << .hash)
+
+urlUpdate : Result String Int -> Model -> (Model, Cmd Msg)
+urlUpdate result model =
+  case result of
+    Ok _ ->
+      Debug.log "changing url Ok"
+      (model, Cmd.none)
+    Err error ->
+      --Debug.log "changing url Error"
+      (model, Cmd.none)
