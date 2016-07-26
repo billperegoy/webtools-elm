@@ -125,22 +125,28 @@ update msg model =
             (newModel, getResultsHttpData a)
 
     CompileResults msg ->
-      { model
-          | compileResults = fst (ResultsTable.update msg model.compileResults 
-                                   (ViewData.fromCompileApiData model.runData.compiles))
-      } ! []
+      let
+        viewProps = ViewData.fromCompileApiData model.runData.compiles
+        (result, _) = ResultsTable.update msg model.compileResults viewProps
+        newModel = { model | compileResults = result }
+      in
+        newModel ! []
 
     LintResults msg ->
-      { model
-          | lintResults = fst (ResultsTable.update msg model.lintResults 
-                                (ViewData.fromLintApiData model.runData.lints))
-      } ! []
+      let
+        viewProps = ViewData.fromLintApiData model.runData.lints
+        (result, _) = ResultsTable.update msg model.lintResults viewProps
+        newModel = { model | lintResults = result }
+      in
+        newModel ! []
 
     SimResults msg ->
-      { model
-          | simResults = fst (ResultsTable.update msg model.simResults
-                               (ViewData.fromSimApiData model.runData.simulations))
-      } ! []
+      let
+        viewProps = ViewData.fromSimApiData model.runData.simulations
+        (result, _) = ResultsTable.update msg model.simResults viewProps
+        newModel = { model | simResults = result }
+      in
+        newModel ! []
 
 getResultsHttpData : String -> Cmd Msg
 getResultsHttpData regressionName =
@@ -190,6 +196,6 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
   Sub.batch
     [ 
-      Time.every (60000 * Time.millisecond) PollResultsHttp
+      Time.every (5000 * Time.millisecond) PollResultsHttp
     , Time.every (60000 * Time.millisecond) PollRegressionsHttp
     ]
