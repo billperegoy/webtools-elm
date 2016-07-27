@@ -10,8 +10,9 @@ import Json.Decode as Json exposing (..)
 import String exposing (..)
 
 import DictUtils exposing (getWithDefault)
-import StringUtils exposing (uniquify)
 import FormUtils as Form exposing (..)
+import TimeUtils exposing (..)
+import StringUtils exposing (..)
 import Initialize exposing (..)
 import ViewData exposing (..)
 import ResultsTableData exposing (..)
@@ -262,7 +263,7 @@ lookupDataValue job name =
     "Config" -> job.config
     "Status" -> job.status
     "Lsf Status" -> job.lsfInfo.status
-    "Run Time" -> toString job.lsfInfo.elapsedTime
+    "Run Time" -> durationToString (Basics.toFloat job.lsfInfo.elapsedTime)
     _ -> "-"
 
 singleDataRowColumns : List Column -> SingleRun -> List (Html Msg)
