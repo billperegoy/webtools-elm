@@ -209,7 +209,6 @@ subscriptions model =
 --
 -- URL Update
 --
--- URL PARSERS - check out evancz/url-parser for fancier URL parsing
 toUrl : Model -> String -> String
 toUrl model name =
   "#/regressions/" ++ name
@@ -231,7 +230,7 @@ urlUpdate result model =
     Ok url ->
       let
         urlComponents = String.split "/" url
-        command =
+        resource =
           case List.head urlComponents of
             Nothing -> "noOp"
             Just a -> a
@@ -243,14 +242,14 @@ urlUpdate result model =
                 Nothing -> "empty"
                 Just a -> a
 
-        -- Need to send command to regressionSeelect to choose passed
-        -- in value
+        -- Need to handle errors and resources other than 'regressions'
         msg = RegressionSelect.UpdateSelectedElement target
         (result, effect, newSelection) = RegressionSelect.update msg model.regressionSelect
         newModel = { model | regressionSelect = result }
       in
-        Debug.log ("changing url Ok - " ++ command ++ " / " ++ target)
-        (newModel, Cmd.none)
+        if resource == "regressions" then
+          (newModel, getResultsHttpData target)
+        else
+          (model, Cmd.none)
     Err error ->
-      Debug.log "changing url Error"
       (model, Cmd.none)
