@@ -51,7 +51,7 @@ type alias Model =
 --
 -- Init
 --
-init : Result String Int -> (Model, Cmd Msg)
+init : Result String String -> (Model, Cmd Msg)
 init result =
   {
     regressionList = []
@@ -68,7 +68,7 @@ init result =
 
 
 --
--- Update 
+-- Update
 --
 type Msg
   = RegressionSelect RegressionSelect.Msg
@@ -77,7 +77,7 @@ type Msg
   | ResultsHttpFail Http.Error
   | PollResultsHttp Time
 
-  | RegressionsHttpSucceed (List Regression) 
+  | RegressionsHttpSucceed (List Regression)
   | RegressionsHttpFail Http.Error
   | PollRegressionsHttp Time
 
@@ -96,7 +96,7 @@ update msg model =
 
     RegressionsHttpFail error ->
       { model |
-          regressionsHttpErrors = "Http errors: " ++ toString error 
+          regressionsHttpErrors = "Http errors: " ++ toString error
       } ! []
 
     PollRegressionsHttp time ->
@@ -117,7 +117,7 @@ update msg model =
       (model, getResultsHttpData model.regressionSelect.selectedElement)
 
     RegressionSelect msg ->
-      let 
+      let
         (result, effect, newSelection) = RegressionSelect.update msg model.regressionSelect
         newModel = { model | regressionSelect = result }
       in
@@ -168,7 +168,7 @@ getRegressionsHttpData =
       (Http.get RegressionSelectData.decodeRegressionList url)
 
 --
--- View 
+-- View
 --
 view : Model -> Html Msg
 view model =
@@ -186,7 +186,7 @@ view model =
     ]
 
 regressionSelectView : Model ->  Html Msg
-regressionSelectView model = 
+regressionSelectView model =
   div
     [ class "regression-select_container" ]
     [ App.map RegressionSelect (RegressionSelect.view model.regressionSelect model.regressionList) ]
@@ -198,7 +198,7 @@ regressionSelectView model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
   Sub.batch
-    [ 
+    [
       Time.every (5000 * Time.millisecond) PollResultsHttp
     , Time.every (60000 * Time.millisecond) PollRegressionsHttp
     ]
@@ -215,21 +215,42 @@ toUrl model name =
   "#/regressions/" ++ name
 
 
-fromUrl : String -> Result String Int
+fromUrl : String -> Result String String
 fromUrl url =
-  String.toInt (String.dropLeft 2 url)
+  -- Just throw away the '#/'
+  Ok (String.dropLeft 2 url)
 
 
-urlParser : Navigation.Parser (Result String Int)
+urlParser : Navigation.Parser (Result String String)
 urlParser =
   Navigation.makeParser (fromUrl << .hash)
 
-urlUpdate : Result String Int -> Model -> (Model, Cmd Msg)
+urlUpdate : Result String String -> Model -> (Model, Cmd Msg)
 urlUpdate result model =
   case result of
-    Ok _ ->
-      Debug.log "changing url Ok"
-      (model, Cmd.none)
+    Ok url ->
+      let
+        urlComponents = String.split "/" url
+        command =
+          case List.head urlComponents of
+            Nothing -> "noOp"
+            Just a -> a
+        target =
+          case List.tail urlComponents of
+            Nothing -> "empty"
+            Just a ->
+              case List.head a of
+                Nothing -> "empty"
+                Just a -> a
+
+        -- Need to send command to regressionSeelect to choose passed
+        -- in value
+        msg = RegressionSelect.UpdateSelectedElement target
+        (result, effect, newSelection) = RegressionSelect.update msg model.regressionSelect
+        newModel = { model | regressionSelect = result }
+      in
+        Debug.log ("changing url Ok - " ++ command ++ " / " ++ target)
+        (newModel, Cmd.none)
     Err error ->
-      --Debug.log "changing url Error"
+      Debug.log "changing url Error"
       (model, Cmd.none)
