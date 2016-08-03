@@ -34,4 +34,5 @@ initSimColumns =
   , Column "Status" True True True Unsorted Dict.empty
   , Column "Lsf Status" True True True Unsorted Dict.empty
   , Column "Run Time" True True False Unsorted Dict.empty
+  , Column "Host" True True True Unsorted Dict.empty
   ]

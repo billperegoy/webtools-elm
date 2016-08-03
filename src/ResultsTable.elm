@@ -159,6 +159,12 @@ sortByField data field columns =
           Descending -> List.reverse (List.sortBy (\e -> e.lsfInfo.elapsedTime) data)
           Unsorted -> List.sortBy (\e -> e.lsfInfo.elapsedTime) data
 
+      "Host" ->
+        case direction of
+          Ascending -> List.sortBy (\e -> e.lsfInfo.execHost) data
+          Descending -> List.reverse (List.sortBy (\e -> e.lsfInfo.execHost) data)
+          Unsorted -> List.sortBy (\e -> e.lsfInfo.execHost) data
+
       _ ->
         data
 
@@ -201,6 +207,7 @@ filterListElems data filterColumnName =
     "Config" -> (List.map .config data) |> listToDict
     "Status" -> (List.map .status data) |> listToDict
     "Lsf Status" -> (List.map .lsfInfo data) |> (List.map .status) |> listToDict
+    "Host" -> (List.map .lsfInfo data) |> (List.map .execHost) |> listToDict
     _ -> Dict.empty
 
 tableIconAttributes : Msg -> String -> List (Attribute Msg)
@@ -264,6 +271,7 @@ lookupDataValue job name =
     "Status" -> job.status
     "Lsf Status" -> job.lsfInfo.status
     "Run Time" -> durationToString (Basics.toFloat job.lsfInfo.elapsedTime)
+    "Host" -> job.lsfInfo.execHost
     _ -> "-"
 
 singleDataRowColumns : List Column -> SingleRun -> List (Html Msg)

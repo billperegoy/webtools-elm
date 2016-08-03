@@ -103,14 +103,12 @@ update msg model =
       (model, getRegressionsHttpData)
 
     ResultsHttpSucceed results ->
-      Debug.log "Results HTTP good"
       { model |
           runData = results
         , resultsHttpErrors = ""
        } ! []
 
     ResultsHttpFail error ->
-      Debug.log ("Results HTTP bad: " ++ toString error)
       { model
          | resultsHttpErrors = "HTTP error detected: " ++ toString error
       } ! []
