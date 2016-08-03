@@ -27,7 +27,7 @@ class Application < Sinatra::Base
   # Map any bad regress_data values from mongoDB to legal values
   # for the front-end.
   #
-  def map_summary_records(record)
+  def map_illegal_summary_records(record)
     record['end_date'] = record['end_date'] || Time.now
 
     record
@@ -36,7 +36,7 @@ class Application < Sinatra::Base
   # Map any bad sim_data values from mongoDB to legal values
   # for the front-end.
   #
-  def map_simulation_records(records)
+  def map_illegal_simulation_records(records)
     records.map do |rec|
       rec['seed'] = rec['seed'].to_s
       rec['status'] = rec['status'] || '-'
@@ -48,10 +48,24 @@ class Application < Sinatra::Base
   # Map any bad compile_data values from mongoDB to legal values
   # for the front-end.
   #
-  def map_compile_records(records)
+  def map_illegal_compile_records(records)
     records.map do |rec|
       rec['status'] = rec['status'] || '-'
 
+      unless rec['lsf_info']['cpu'].class == Float
+        rec['lsf_info']['cpu'] = 0.0
+      end
+
+      unless rec['lsf_info']['swap'].class == Fixnum
+        rec['lsf_info']['swap'] = 0
+      end
+
+      rec
+    end
+  end
+
+  def map_illegal_lint_records(records)
+    records.map do |rec|
       unless rec['lsf_info']['cpu'].class == Float
         rec['lsf_info']['cpu'] = 0.0
       end
@@ -103,10 +117,10 @@ class Application < Sinatra::Base
      .map { |rec| rec }
 
    {
-     summary: map_summary_records(summary),
-     compiles: map_compile_records(compiles),
-     lints: lints,
-     simulations: map_simulation_records(simulations)
+     summary: map_illegal_summary_records(summary),
+     compiles: map_illegal_compile_records(compiles),
+     lints: map_illegal_lint_records(lints),
+     simulations: map_illegal_simulation_records(simulations)
    }
   end
 

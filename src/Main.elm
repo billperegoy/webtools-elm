@@ -103,12 +103,14 @@ update msg model =
       (model, getRegressionsHttpData)
 
     ResultsHttpSucceed results ->
+      Debug.log "Results HTTP good"
       { model |
           runData = results
         , resultsHttpErrors = ""
        } ! []
 
     ResultsHttpFail error ->
+      Debug.log ("Results HTTP bad: " ++ toString error)
       { model
          | resultsHttpErrors = "HTTP error detected: " ++ toString error
       } ! []
@@ -189,8 +191,11 @@ regressionSelectView : Model ->  Html Msg
 regressionSelectView model =
   div
     [ class "regression-select_container" ]
-    [ App.map RegressionSelect (RegressionSelect.view model.regressionSelect model.regressionList) ]
-
+    [
+      App.map RegressionSelect (RegressionSelect.view model.regressionSelect
+                                 model.regressionList)
+    , div [] [Html.text model.resultsHttpErrors]
+    ]
 
 --
 -- Subscriptions
