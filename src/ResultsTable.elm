@@ -127,49 +127,49 @@ sortByField data field columns =
         case direction of
           Ascending -> List.sortBy .status data
           Descending -> List.reverse (List.sortBy .status data)
-          Unsorted -> List.sortBy .status data
+          Unsorted -> data
 
       "Lsf Status" ->
         case direction of
           Ascending -> List.sortBy (\e -> e.lsfInfo.status) data
           Descending -> List.reverse (List.sortBy (\e -> e.lsfInfo.status) data)
-          Unsorted -> List.sortBy (\e -> e.lsfInfo.status) data
+          Unsorted -> data
 
       "LSF ID" ->
         case direction of
           Ascending -> List.sortBy (\e -> e.lsfInfo.jobId) data
           Descending -> List.reverse (List.sortBy (\e -> e.lsfInfo.jobId) data)
-          Unsorted -> List.sortBy (\e -> e.lsfInfo.jobId) data
+          Unsorted -> data
 
       "#" ->
         case direction of
           Ascending -> List.sortBy .runNum data
           Descending -> List.reverse (List.sortBy .runNum data)
-          Unsorted -> List.sortBy .runNum data
+          Unsorted -> data
 
       "Config" ->
         case direction of
           Ascending -> List.sortBy .config data
           Descending -> List.reverse (List.sortBy .config data)
-          Unsorted -> List.sortBy .config data
+          Unsorted -> data
 
       "Name" ->
         case direction of
           Ascending -> List.sortBy .name data
           Descending -> List.reverse (List.sortBy .name data)
-          Unsorted -> List.sortBy .name data
+          Unsorted -> data
 
       "Run Time" ->
         case direction of
           Ascending -> List.sortBy (\e -> e.lsfInfo.elapsedTime) data
           Descending -> List.reverse (List.sortBy (\e -> e.lsfInfo.elapsedTime) data)
-          Unsorted -> List.sortBy (\e -> e.lsfInfo.elapsedTime) data
+          Unsorted -> data
 
       "Host" ->
         case direction of
           Ascending -> List.sortBy (\e -> e.lsfInfo.execHost) data
           Descending -> List.reverse (List.sortBy (\e -> e.lsfInfo.execHost) data)
-          Unsorted -> List.sortBy (\e -> e.lsfInfo.execHost) data
+          Unsorted -> data
 
       _ ->
         data
