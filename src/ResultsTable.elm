@@ -201,14 +201,26 @@ columnSortStatusFor columns columnName =
       _ -> Unsorted
 
 
+-- This returns a function that knows how to extract a string field
+-- from a SingleRun record.
+--
+columnValueFunction : String -> (SingleRun -> String)
+columnValueFunction columnName =
+  case columnName of 
+  "#"          -> (\col -> toString col.runNum)
+  "Name"       -> (\col -> col.name)
+  "Config"     -> (\col -> col.config)
+  "Status"     -> (\col -> col.status)
+  "Lsf Status" -> (\col -> col.lsfInfo |> \col -> col.status)
+  "Host"       -> (\col -> col.lsfInfo |> \col -> col.execHost)
+  "Run Time"   -> (\col -> col.lsfInfo |> \col -> col.elapsedTime
+                      |> Basics.toFloat
+                      |> durationToString)
+  _            -> (\col -> "_")
+
 filterListElems : List SingleRun -> String -> Dict String Bool
 filterListElems data filterColumnName =
-  case filterColumnName of
-    "Config" -> (List.map .config data) |> listToDict
-    "Status" -> (List.map .status data) |> listToDict
-    "Lsf Status" -> (List.map .lsfInfo data) |> (List.map .status) |> listToDict
-    "Host" -> (List.map .lsfInfo data) |> (List.map .execHost) |> listToDict
-    _ -> Dict.empty
+  (List.map (columnValueFunction filterColumnName) data) |> listToDict
 
 tableIconAttributes : Msg -> String -> List (Attribute Msg)
 tableIconAttributes msg file =
@@ -260,19 +272,9 @@ tableHeader model =
     []
     (columnsToTableHeader model.columns)
 
--- FIXME - can we do this in a less brute force way?
---
 lookupDataValue : SingleRun -> String -> String
-lookupDataValue job name =
-  case name of
-    "#" -> toString job.runNum
-    "Name" -> job.name
-    "Config" -> job.config
-    "Status" -> job.status
-    "Lsf Status" -> job.lsfInfo.status
-    "Run Time" -> durationToString (Basics.toFloat job.lsfInfo.elapsedTime)
-    "Host" -> job.lsfInfo.execHost
-    _ -> "-"
+lookupDataValue job columnName =
+  job |> columnValueFunction columnName 
 
 singleDataRowColumns : List Column -> SingleRun -> List (Html Msg)
 singleDataRowColumns columns job =
