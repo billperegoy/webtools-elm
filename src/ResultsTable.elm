@@ -135,6 +135,12 @@ sortByField data field columns =
           Descending -> List.reverse (List.sortBy (\e -> e.lsfInfo.status) data)
           Unsorted -> List.sortBy (\e -> e.lsfInfo.status) data
 
+      "LSF ID" ->
+        case direction of
+          Ascending -> List.sortBy (\e -> e.lsfInfo.jobId) data
+          Descending -> List.reverse (List.sortBy (\e -> e.lsfInfo.jobId) data)
+          Unsorted -> List.sortBy (\e -> e.lsfInfo.jobId) data
+
       "#" ->
         case direction of
           Ascending -> List.sortBy .runNum data
@@ -213,6 +219,7 @@ columnValueFunction columnName =
   "Status"     -> (\col -> col.status)
   "Lsf Status" -> (\col -> col.lsfInfo |> \col -> col.status)
   "Host"       -> (\col -> col.lsfInfo |> \col -> col.execHost)
+  "LSF ID"     -> (\col -> col.lsfInfo |> \col -> col.jobId)
   "Run Time"   -> (\col -> col.lsfInfo |> \col -> col.elapsedTime
                       |> Basics.toFloat
                       |> durationToString)
