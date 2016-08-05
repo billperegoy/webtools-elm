@@ -120,11 +120,17 @@ updateColumnFilterItems columnFilterItems item =
 sortByField : List SingleRun -> String -> List Column -> List SingleRun
 sortByField data field columns =
   let
-    direction = columnSortStatusFor columns field
+    columnReference = matchingColumn columns field
+    sortFunction = case columnReference of
+      Just a -> a.sortFunction
+      Nothing -> (\list -> list)
+    direction = case columnReference of
+      Just a -> a.sortStatus
+      Nothing -> Unsorted 
   in
     case direction of
-      Ascending -> (sortFunction field) data
-      Descending -> (sortFunction field) data |> List.reverse
+      Ascending -> sortFunction data
+      Descending -> sortFunction data |> List.reverse
       Unsorted -> data
 
 listToDict : List String -> Dict String Bool
@@ -146,18 +152,14 @@ columnFiltersFor columns columnName =
           Nothing -> Dict.empty
       _ -> Dict.empty
 
-columnSortStatusFor : List Column -> String -> SortStatus
-columnSortStatusFor columns columnName =
+matchingColumn : List Column -> String -> Maybe Column
+matchingColumn columns columnName =
   let
     filteredColumns = List.filter (\column -> (column.name == columnName)) columns
   in
     case List.length filteredColumns of
-      1 ->
-        case head filteredColumns of
-          Just a -> a.sortStatus
-          Nothing -> Unsorted
-      _ -> Unsorted
-
+      1 -> head filteredColumns
+      _ -> Nothing 
 
 -- This returns a function that knows how to extract a string field
 -- from a SingleRun record.
@@ -177,19 +179,6 @@ columnValueFunction columnName =
                       |> durationToString)
   _            -> (\col -> "_")
 
-
-sortFunction : String -> (List SingleRun -> List SingleRun)
-sortFunction columnName =
-  case columnName of
-    "Status"     -> List.sortBy (\col -> col.status)
-    "Lsf Status" -> List.sortBy (\col -> col.lsfInfo.status)
-    "LSF ID"     -> List.sortBy (\col -> col.lsfInfo.jobId)
-    "#"          -> List.sortBy (\col -> col.runNum)
-    "Config"     -> List.sortBy (\col -> col.config)
-    "Name"       -> List.sortBy (\col -> col.name)
-    "Run Time"   -> List.sortBy (\col -> col.lsfInfo.elapsedTime)
-    "Host"       -> List.sortBy (\col -> col.lsfInfo.execHost)
-    _            -> List.sortBy (\col -> "_")
 
 filterListElems : List SingleRun -> String -> Dict String Bool
 filterListElems data filterColumnName =
