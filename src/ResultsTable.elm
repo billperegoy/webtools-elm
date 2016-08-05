@@ -165,14 +165,14 @@ columnSortStatusFor columns columnName =
 columnValueFunction : String -> (SingleRun -> String)
 columnValueFunction columnName =
   case columnName of
-  "#"          -> (\col -> toString col.runNum)
+  "#"          -> (\col -> col.runNum |> toString)
   "Name"       -> (\col -> col.name)
   "Config"     -> (\col -> col.config)
   "Status"     -> (\col -> col.status)
-  "Lsf Status" -> (\col -> col.lsfInfo |> \col -> col.status)
-  "Host"       -> (\col -> col.lsfInfo |> \col -> col.execHost)
-  "LSF ID"     -> (\col -> col.lsfInfo |> \col -> col.jobId)
-  "Run Time"   -> (\col -> col.lsfInfo |> \col -> col.elapsedTime
+  "Lsf Status" -> (\col -> col.lsfInfo.status)
+  "Host"       -> (\col -> col.lsfInfo.execHost)
+  "LSF ID"     -> (\col -> col.lsfInfo.jobId)
+  "Run Time"   -> (\col -> col.lsfInfo.elapsedTime
                       |> Basics.toFloat
                       |> durationToString)
   _            -> (\col -> "_")
