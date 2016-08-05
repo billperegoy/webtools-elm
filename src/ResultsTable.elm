@@ -117,69 +117,28 @@ updateColumnFilterItems columnFilterItems item =
     (Dict.insert item.target.name item.target.checked Dict.empty)
     columnFilterItems
 
--- 
--- This is hard to simplify. I'd like to just pass a function to select the
--- sort field but it's sometimes String, sometimes Int and sometimes Float.
--- I can't write a generic function to sort by any of them so I end up
--- with a lot of replicated code.
---
+sortFunction : String -> (List SingleRun -> List SingleRun)
+sortFunction columnName =
+  case columnName of
+    "Status" -> List.sortBy (\e -> e.status)
+    "Lsf Status" -> List.sortBy (\e -> e.lsfInfo.status)
+    "LSF ID" -> List.sortBy (\e -> e.lsfInfo.jobId)
+    "#" -> List.sortBy (\e -> e.runNum)
+    "Config" -> List.sortBy (\e -> e.config)
+    "Name" -> List.sortBy (\e -> e.name)
+    "Run Time" -> List.sortBy (\e -> e.lsfInfo.elapsedTime)
+    "Host" -> List.sortBy (\e -> e.lsfInfo.execHost)
+    _ -> List.sortBy (\e -> "_")
+
 sortByField : List SingleRun -> String -> List Column -> List SingleRun
 sortByField data field columns =
   let
     direction = columnSortStatusFor columns field
   in
-    case field of
-      "Status" ->
-        case direction of
-          Ascending -> List.sortBy .status data
-          Descending -> List.reverse (List.sortBy (\e -> e.status) data)
-          Unsorted -> data
-
-      "Lsf Status" ->
-        case direction of
-          Ascending -> List.sortBy (\e -> e.lsfInfo.status) data
-          Descending -> List.reverse (List.sortBy (\e -> e.lsfInfo.status) data)
-          Unsorted -> data
-
-      "LSF ID" ->
-        case direction of
-          Ascending -> List.sortBy (\e -> e.lsfInfo.jobId) data
-          Descending -> List.reverse (List.sortBy (\e -> e.lsfInfo.jobId) data)
-          Unsorted -> data
-
-      "#" ->
-        case direction of
-          Ascending -> List.sortBy .runNum data
-          Descending -> List.reverse (List.sortBy (\e -> e.runNum) data)
-          Unsorted -> data
-
-      "Config" ->
-        case direction of
-          Ascending -> List.sortBy .config data
-          Descending -> List.reverse (List.sortBy (\e -> e.config) data)
-          Unsorted -> data
-
-      "Name" ->
-        case direction of
-          Ascending -> List.sortBy .name data
-          Descending -> List.reverse (List.sortBy (\e -> e.name) data)
-          Unsorted -> data
-
-      "Run Time" ->
-        case direction of
-          Ascending -> List.sortBy (\e -> e.lsfInfo.elapsedTime) data
-          Descending -> List.reverse (List.sortBy (\e -> e.lsfInfo.elapsedTime) data)
-          Unsorted -> data
-
-      "Host" ->
-        case direction of
-          Ascending -> List.sortBy (\e -> e.lsfInfo.execHost) data
-          Descending -> List.reverse (List.sortBy (\e -> e.lsfInfo.execHost) data)
-          Unsorted -> data
-
-      _ ->
-        data
-
+    case direction of
+      Ascending -> (sortFunction field) data
+      Descending -> (sortFunction field) data |> List.reverse 
+      Unsorted -> data
 
 listToDict : List String -> Dict String Bool
 listToDict items =
