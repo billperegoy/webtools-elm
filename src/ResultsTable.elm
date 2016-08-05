@@ -117,19 +117,6 @@ updateColumnFilterItems columnFilterItems item =
     (Dict.insert item.target.name item.target.checked Dict.empty)
     columnFilterItems
 
-sortFunction : String -> (List SingleRun -> List SingleRun)
-sortFunction columnName =
-  case columnName of
-    "Status" -> List.sortBy (\e -> e.status)
-    "Lsf Status" -> List.sortBy (\e -> e.lsfInfo.status)
-    "LSF ID" -> List.sortBy (\e -> e.lsfInfo.jobId)
-    "#" -> List.sortBy (\e -> e.runNum)
-    "Config" -> List.sortBy (\e -> e.config)
-    "Name" -> List.sortBy (\e -> e.name)
-    "Run Time" -> List.sortBy (\e -> e.lsfInfo.elapsedTime)
-    "Host" -> List.sortBy (\e -> e.lsfInfo.execHost)
-    _ -> List.sortBy (\e -> "_")
-
 sortByField : List SingleRun -> String -> List Column -> List SingleRun
 sortByField data field columns =
   let
@@ -137,7 +124,7 @@ sortByField data field columns =
   in
     case direction of
       Ascending -> (sortFunction field) data
-      Descending -> (sortFunction field) data |> List.reverse 
+      Descending -> (sortFunction field) data |> List.reverse
       Unsorted -> data
 
 listToDict : List String -> Dict String Bool
@@ -177,7 +164,7 @@ columnSortStatusFor columns columnName =
 --
 columnValueFunction : String -> (SingleRun -> String)
 columnValueFunction columnName =
-  case columnName of 
+  case columnName of
   "#"          -> (\col -> toString col.runNum)
   "Name"       -> (\col -> col.name)
   "Config"     -> (\col -> col.config)
@@ -189,6 +176,20 @@ columnValueFunction columnName =
                       |> Basics.toFloat
                       |> durationToString)
   _            -> (\col -> "_")
+
+
+sortFunction : String -> (List SingleRun -> List SingleRun)
+sortFunction columnName =
+  case columnName of
+    "Status"     -> List.sortBy (\col -> col.status)
+    "Lsf Status" -> List.sortBy (\col -> col.lsfInfo.status)
+    "LSF ID"     -> List.sortBy (\col -> col.lsfInfo.jobId)
+    "#"          -> List.sortBy (\col -> col.runNum)
+    "Config"     -> List.sortBy (\col -> col.config)
+    "Name"       -> List.sortBy (\col -> col.name)
+    "Run Time"   -> List.sortBy (\col -> col.lsfInfo.elapsedTime)
+    "Host"       -> List.sortBy (\col -> col.lsfInfo.execHost)
+    _            -> List.sortBy (\col -> "_")
 
 filterListElems : List SingleRun -> String -> Dict String Bool
 filterListElems data filterColumnName =
@@ -246,7 +247,7 @@ tableHeader model =
 
 lookupDataValue : SingleRun -> String -> String
 lookupDataValue job columnName =
-  job |> columnValueFunction columnName 
+  job |> columnValueFunction columnName
 
 singleDataRowColumns : List Column -> SingleRun -> List (Html Msg)
 singleDataRowColumns columns job =
