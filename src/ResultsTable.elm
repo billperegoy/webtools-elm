@@ -143,13 +143,9 @@ columnFiltersFor : List Column -> String -> Dict String Bool
 columnFiltersFor columns columnName =
   let
     filteredColumns = List.filter (\column -> (column.name == columnName)) columns
+    column = Maybe.withDefault dummyColumn (head filteredColumns)
   in
-    case List.length filteredColumns of
-      1 ->
-        case head filteredColumns of
-          Just a -> a.filters
-          Nothing -> Dict.empty
-      _ -> Dict.empty
+   column.filters
 
 dummyColumn : Column
 dummyColumn = 
@@ -235,7 +231,7 @@ singleTableRowAttributes data columns =
     status = lookupDataValue data statusColumn
     lsfStatus = lookupDataValue data lsfStatusColumn
   in
-    if ((String.toLower status) == "Fail") || ((String.toLower status) == "Error")  then
+    if ((String.toLower status) == "fail") || ((String.toLower status) == "error")  then
       [ class "job-fail" ]
     else if (String.toLower lsfStatus) == "run" then
       [ class "job-run" ]
