@@ -117,6 +117,12 @@ updateColumnFilterItems columnFilterItems item =
     (Dict.insert item.target.name item.target.checked Dict.empty)
     columnFilterItems
 
+-- 
+-- This is hard to simplify. I'd like to just pass a function to select the
+-- sort field but it's sometimes String, sometimes Int and sometimes Float.
+-- I can't write a generic function to sort by any of them so I end up
+-- with a lot of replicated code.
+--
 sortByField : List SingleRun -> String -> List Column -> List SingleRun
 sortByField data field columns =
   let
@@ -126,7 +132,7 @@ sortByField data field columns =
       "Status" ->
         case direction of
           Ascending -> List.sortBy .status data
-          Descending -> List.reverse (List.sortBy .status data)
+          Descending -> List.reverse (List.sortBy (\e -> e.status) data)
           Unsorted -> data
 
       "Lsf Status" ->
@@ -144,19 +150,19 @@ sortByField data field columns =
       "#" ->
         case direction of
           Ascending -> List.sortBy .runNum data
-          Descending -> List.reverse (List.sortBy .runNum data)
+          Descending -> List.reverse (List.sortBy (\e -> e.runNum) data)
           Unsorted -> data
 
       "Config" ->
         case direction of
           Ascending -> List.sortBy .config data
-          Descending -> List.reverse (List.sortBy .config data)
+          Descending -> List.reverse (List.sortBy (\e -> e.config) data)
           Unsorted -> data
 
       "Name" ->
         case direction of
           Ascending -> List.sortBy .name data
-          Descending -> List.reverse (List.sortBy .name data)
+          Descending -> List.reverse (List.sortBy (\e -> e.name) data)
           Unsorted -> data
 
       "Run Time" ->
