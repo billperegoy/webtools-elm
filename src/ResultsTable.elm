@@ -107,9 +107,12 @@ update msg model data =
 
 mergeFormCheckBoxItems : List Column -> List SingleRun -> String -> Dict String Bool
 mergeFormCheckBoxItems columns data field =
-  Dict.union
-    (columnFiltersFor columns field)
-    (filterListElems data field)
+  let
+    column = matchingColumn columns field
+  in
+    Dict.union
+      (columnFiltersFor columns field)
+      (filterListElems data column)
 
 updateColumnFilterItems : Dict String Bool -> Form.CheckBoxData -> Dict String Bool
 updateColumnFilterItems columnFilterItems item =
@@ -121,12 +124,8 @@ sortByField : List SingleRun -> String -> List Column -> List SingleRun
 sortByField data field columns =
   let
     columnReference = matchingColumn columns field
-    sortFunction = case columnReference of
-      Just a -> a.sortFunction
-      Nothing -> (\list -> list)
-    direction = case columnReference of
-      Just a -> a.sortStatus
-      Nothing -> Unsorted 
+    sortFunction = columnReference.sortFunction
+    direction = columnReference.sortStatus
   in
     case direction of
       Ascending -> sortFunction data
@@ -152,37 +151,22 @@ columnFiltersFor columns columnName =
           Nothing -> Dict.empty
       _ -> Dict.empty
 
-matchingColumn : List Column -> String -> Maybe Column
+dummyColumn : Column
+dummyColumn = 
+  Column "Name" True True False Ascending Dict.empty 
+         (\col -> col.name) 
+         (List.sortBy (\col -> col.name))
+
+matchingColumn : List Column -> String -> Column
 matchingColumn columns columnName =
   let
     filteredColumns = List.filter (\column -> (column.name == columnName)) columns
   in
-    case List.length filteredColumns of
-      1 -> head filteredColumns
-      _ -> Nothing 
+    Maybe.withDefault dummyColumn (head filteredColumns)
 
--- This returns a function that knows how to extract a string field
--- from a SingleRun record.
---
-columnValueFunction : String -> (SingleRun -> String)
-columnValueFunction columnName =
-  case columnName of
-  "#"          -> (\col -> col.runNum |> toString)
-  "Name"       -> (\col -> col.name)
-  "Config"     -> (\col -> col.config)
-  "Status"     -> (\col -> col.status)
-  "Lsf Status" -> (\col -> col.lsfInfo.status)
-  "Host"       -> (\col -> col.lsfInfo.execHost)
-  "LSF ID"     -> (\col -> col.lsfInfo.jobId)
-  "Run Time"   -> (\col -> col.lsfInfo.elapsedTime
-                      |> Basics.toFloat
-                      |> durationToString)
-  _            -> (\col -> "_")
-
-
-filterListElems : List SingleRun -> String -> Dict String Bool
-filterListElems data filterColumnName =
-  (List.map (columnValueFunction filterColumnName) data) |> listToDict
+filterListElems : List SingleRun -> Column -> Dict String Bool
+filterListElems data filterColumn =
+  data |> List.map (filterColumn.displayFunction) |> listToDict
 
 tableIconAttributes : Msg -> String -> List (Attribute Msg)
 tableIconAttributes msg file =
@@ -234,19 +218,22 @@ tableHeader model =
     []
     (columnsToTableHeader model.columns)
 
-lookupDataValue : SingleRun -> String -> String
-lookupDataValue job columnName =
-  job |> columnValueFunction columnName
+lookupDataValue : SingleRun -> Column -> String
+lookupDataValue job column =
+  job |> column.displayFunction
 
 singleDataRowColumns : List Column -> SingleRun -> List (Html Msg)
 singleDataRowColumns columns job =
   List.filter (\c -> c.visible) columns
-  |> List.map (\c -> td [] [ text (lookupDataValue job c.name) ])
+  |> List.map (\c -> td [] [ text (lookupDataValue job c) ])
 
-singleTableRowAttributes data =
+singleTableRowAttributes data columns =
   let
-    status = lookupDataValue data "Status"
-    lsfStatus = lookupDataValue data "Lsf Status"
+    statusColumn = matchingColumn columns "Status"
+    lsfStatusColumn = matchingColumn columns "Lsf Status"
+
+    status = lookupDataValue data statusColumn
+    lsfStatus = lookupDataValue data lsfStatusColumn
   in
     if ((String.toLower status) == "Fail") || ((String.toLower status) == "Error")  then
       [ class "job-fail" ]
@@ -262,7 +249,7 @@ singleTableRowAttributes data =
 singleDataTableRow : List Column -> SingleRun -> Html Msg
 singleDataTableRow columns job =
   tr
-    (singleTableRowAttributes job)
+    (singleTableRowAttributes job columns)
     (singleDataRowColumns columns job)
 
 
@@ -276,7 +263,7 @@ findFilterBoolean filters value =
 columnFilterContainsValue : Column -> SingleRun -> Bool
 columnFilterContainsValue column job =
   let value =
-    lookupDataValue job column.name
+    lookupDataValue job column
   in
     findFilterBoolean column.filters value
 
