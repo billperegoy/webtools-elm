@@ -136,7 +136,6 @@ listToDict : List String -> Dict String Bool
 listToDict items =
   items
    |> StringUtils.uniquify
-   -- FIXME - This looks to be the broken thing. This always sets things to True?
    |> List.foldl (\item -> Dict.insert item True) Dict.empty
 
 columnFiltersFor : List Column -> String -> Dict String Bool
