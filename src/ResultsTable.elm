@@ -148,7 +148,7 @@ columnFiltersFor columns columnName =
 
 dummyColumn : Column
 dummyColumn = 
-  Column "Name" True True False Ascending Dict.empty 
+  Column "Name" True True False Ascending Dict.empty 100
          (\col -> col.name) 
          (List.sortBy (\col -> col.name))
 
@@ -189,13 +189,16 @@ filterIcon column =
 
 singleTableHeader : Column -> Html Msg
 singleTableHeader column =
-  th
-    []
-    [
-      text column.name
-    , (sortIcon column)
-    , (filterIcon column)
-    ]
+  let 
+    width = (toString column.width) ++ "px"
+  in
+    div
+      [ class "table-header-element", style [("width", width)] ]
+      [
+        text column.name
+      , (sortIcon column)
+      , (filterIcon column)
+      ]
 
 columnsToTableHeader : List Column -> List (Html Msg)
 columnsToTableHeader columns =
@@ -209,18 +212,25 @@ tableRows model data =
 
 tableHeader : Model -> Html Msg
 tableHeader model =
-  tr
-    []
+  div
+    [ class "table-header" ]
     (columnsToTableHeader model.columns)
 
 lookupDataValue : SingleRun -> Column -> String
 lookupDataValue job column =
   job |> column.displayFunction
 
+columnDivAttributes : Column -> List (Attribute a)
+columnDivAttributes column = 
+  let 
+    width = (toString column.width) ++ "px"
+  in
+    [ class "table-data-row-element", style [("width", width)] ]
+
 singleDataRowColumns : List Column -> SingleRun -> List (Html Msg)
 singleDataRowColumns columns job =
   List.filter (\c -> c.visible) columns
-  |> List.map (\c -> td [] [ text (lookupDataValue job c) ])
+  |> List.map (\c -> div (columnDivAttributes c) [ text (lookupDataValue job c) ])
 
 singleTableRowAttributes data columns =
   let
@@ -231,19 +241,19 @@ singleTableRowAttributes data columns =
     lsfStatus = lookupDataValue data lsfStatusColumn
   in
     if ((String.toLower status) == "fail") || ((String.toLower status) == "error")  then
-      [ class "job-fail" ]
+      [ class "table-data-row job-fail" ]
     else if (String.toLower lsfStatus) == "run" then
-      [ class "job-run" ]
+      [ class "table-data-row job-run" ]
     else if (String.toLower status) == "pass" then
-      [ class "job-pass" ]
+      [ class "table-data-row job-pass" ]
     else if (String.toLower lsfStatus) == "pend" then
-      [ class "job-pend" ]
+      [ class "table-data-row job-pend" ]
     else
-      []
+      [ class "table-data-row" ]
 
 singleDataTableRow : List Column -> SingleRun -> Html Msg
 singleDataTableRow columns job =
-  tr
+  div
     (singleTableRowAttributes job columns)
     (singleDataRowColumns columns job)
 
@@ -446,14 +456,14 @@ editColumnsButton =
 view : Model -> List SingleRun -> Html Msg
 view model data =
   div
-    [ class "results-table" ]
+    [ class "results-section" ]
     [
       h1 [] [ text model.resultsType ]
     , (filterPane model)
     , (editColumnsPane model)
     , clearFiltersButton
     , editColumnsButton
-    , table
-        []
+    , div
+        [ class "results-table" ]
         (tableRows model data)
     ]

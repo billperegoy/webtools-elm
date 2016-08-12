@@ -13,6 +13,7 @@ type alias Column =
   , filterable : Bool
   , sortStatus : SortStatus
   , filters : Dict String Bool
+  , width : Int
   , displayFunction : (SingleRun -> String)
   , sortFunction : (List SingleRun -> List SingleRun)
   

@@ -11,6 +11,7 @@ type alias SingleRun =
   , name : String
   , config : String
   , status : String
+  , lsfLogFile : String
   , lsfInfo : LsfViewData
   }
 
@@ -133,6 +134,7 @@ compileApiDataToSingleRun apiData =
   , name = apiData.name
   , config = apiData.config
   , status = apiData.runStatus
+  , lsfLogFile = apiData.lsfLogFile
   , lsfInfo = convertApiLsfDataToViewLsfData apiData.lsfInfo
   }
 
@@ -143,6 +145,7 @@ lintApiDataToSingleRun apiData =
   , name = "x"
   , config = ""
   , status = ""
+  , lsfLogFile = apiData.lsfLogFile
   , lsfInfo = convertApiLsfDataToViewLsfData apiData.lsfInfo
   }
 
@@ -153,6 +156,7 @@ simApiDataToSingleRun apiData =
   , name = apiData.name
   , config = apiData.config
   , status = apiData.runStatus
+  , lsfLogFile = apiData.lsfLogFile
   , lsfInfo = convertApiLsfDataToViewLsfData apiData.lsfInfo
   }
 

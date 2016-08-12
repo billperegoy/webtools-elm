@@ -20,14 +20,34 @@ td {
   width: 2000px;
 }
 
-table {
-  table-layout: fixed;
-}
-
-.results-table {
+.results-section {
   margin-top: 50px;
   padding: 10px 10px 0px 10px;
   border: 1px solid;
+}
+
+.results-table {
+}
+
+.table-header {
+  @include display(flex);
+  @include flex-direction(row);
+}
+
+.table-header-element {
+  @include flex-grow(1);
+  //mnargin: 0 10px 0 10px;
+}
+
+.table-data-row {
+  @include display(flex);
+  @include flex-direction(row);
+}
+
+.table-data-row-element {
+  @include flex-grow(1);
+  text-align: left;
+  //mnargin: 0 10px 0 10px;
 }
 
 // Styles for RegressionSelect
